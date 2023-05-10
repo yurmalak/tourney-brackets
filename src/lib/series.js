@@ -1,14 +1,14 @@
+/** @typedef {import('../types.ts').Game} Game */
+/** @typedef {import('../types.ts').Series} Series */
+/** @typedef {import('../types.ts').Participant} Participant */
 
-import type { Series, Game, Participant } from '../types';
 
-
-export function createSeries(round: number, index: number): {
-    round: number,
-    index: number,
-    score: number[],
-    players: Participant[],
-    games: Game[]
-} {
+/**
+ * @param {number} round
+ * @param {number} index
+ * @returns {{ round: number, index: number, score: number[], players: Participant[], games: Game[]}}
+ */
+export function createSeries(round, index) {
     return {
         round,
         index,
@@ -20,13 +20,17 @@ export function createSeries(round: number, index: number): {
     };
 }
 
-export function populateSeries(
-    series: Series,
-    gamesByRound: Array<Array<Game>>,
-    seriesByRound: Array<Array<Series>>,
-    roundsTotal: number,
-    bestOf: (round: number) => number
-) {
+/**
+ * 
+ * @param {Series} series 
+ * @param {Array<Array<Game>>} gamesByRound 
+ * @param {Array<Array<Series>>} seriesByRound 
+ * @param {number} roundsTotal 
+ * @param {(round: number) => number} bestOf 
+ * @returns 
+ */
+export function populateSeries(series, gamesByRound, seriesByRound, roundsTotal, bestOf) {
+
     // skip understaffed series
     if (!series.players[0] || !series.players[1]) {
         series.games = [];
@@ -68,20 +72,20 @@ export function populateSeries(
 }
 
 
-export function bundleSeries(args: {
-    roundsTotal: number,
-    playersTotal: number,
-    tourneyPlayers: Array<Participant>,
-    tourneyGames: Array<Game>
-}) {
+/**
+ * @param {{ roundsTotal: number, playersTotal: number, tourneyPlayers: Array<Participant>, tourneyGames: Array<Game>}} args 
+ */
+export function bundleSeries(args) {
 
     const { roundsTotal, playersTotal, tourneyPlayers, tourneyGames } = args
 
-    const gamesByRound: Array<Array<Game>> = Array(roundsTotal)
+    /** @type {Array<Array<Game>>} */
+    const gamesByRound = Array(roundsTotal)
         .fill(1)
         .map(() => []);
 
-    const seriesByRound: Array<Array<Series>> = Array(roundsTotal)
+    /** @type {Array<Array<Series>>} */
+    const seriesByRound = Array(roundsTotal)
         .fill(1)
         .map(() => []);
 

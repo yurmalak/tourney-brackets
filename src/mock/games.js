@@ -1,14 +1,17 @@
-import type { Game } from "../types"
 import playerList from "./players"
 
+/** @typedef {import('../types.ts').Game} Game */
 
-const games: Array<Game> = []
+/** @type {Array<Game>} */
+const games = []
 
-const createGame = (
-    round: number,
-    index: number,
-    players: string[],
-) => ({
+/**
+ * 
+ * @param {number} round 
+ * @param {number} index 
+ * @param {string[]} players 
+ */
+const createGame = (round, index, players) => ({
     id: Math.random().toString().slice(2),
     round,
     index,

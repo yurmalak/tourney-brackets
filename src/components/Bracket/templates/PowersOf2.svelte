@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import Node from '../Node.svelte';
 	import Joiner from '../Joiner.svelte';
 	import { tourneyStore } from '../../../stores';
@@ -16,7 +16,7 @@
 
 	// recursively populate series with games and players
 	// Finals and semi-finals are bo3, others bo1
-	const bo = (round: number) => (round < roundsTotal - 2 ? 1 : 2);
+	const bo = (round) => (round < roundsTotal - 2 ? 1 : 2);
 	seriesByRound[0].forEach((series) =>
 		populateSeries(series, gamesByRound, seriesByRound, roundsTotal, bo)
 	);

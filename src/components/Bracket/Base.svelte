@@ -7,8 +7,6 @@
 
 	/** @type {string} */
 	export let templateCode;
-
-	// @ts-ignore
 	const Bracket = templates[templateCode];
 
 	if (!Bracket) {

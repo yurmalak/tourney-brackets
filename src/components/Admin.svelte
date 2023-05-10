@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { onMount } from 'svelte';
 	import { tourneyStore, tourneyList } from '../stores';
 	import Bracket from './Bracket/Base.svelte';
@@ -12,14 +12,13 @@
 		const data = await mockedFetchData();
 		const { tourneys, currentTourneyId } = data;
 
-		// @ts-ignore
 		tourneyStore.set(tourneys[currentTourneyId]);
 		tourneyList.set(tourneys);
 
 		ready = true;
 	});
 
-	function handleClick(ev: CustomEvent) {
+	function handleClick(ev) {
 		console.log('Node has been clicked!', ev);
 	}
 </script>

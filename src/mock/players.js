@@ -1,6 +1,7 @@
-import type { Player } from "../types"
+/** @typedef {import('../types.ts').Player} Player */
 
-const playerList: Player[] = []
+/** @type {Player[]}  */
+const playerList = []
 const adjectives = [
     "smelly",
     "clean",
@@ -28,9 +29,11 @@ const nouns = [
 
 const al = adjectives.length
 const nl = nouns.length
-const names: Set<string> = new Set([])
 
-const pick = (arr: Array<string>) => {
+/** @type {Set<string>} */
+const names = new Set([])
+
+const pick = (arr) => {
 
     const r = Math.round(Math.random() * ((arr === nouns ? nl : al) - 1))
 
@@ -44,7 +47,10 @@ for (let i = 0; i < 24; i++) {
     while (names.has(name)) name = [pick(adjectives), pick(nouns)].join(" ")
 
     names.add(name)
-    playerList.push({ name, media: {} })
+
+    /** @type {Player} */
+    const player = { name, media: {} }
+    playerList.push(player)
 }
 
 export default playerList

@@ -5,8 +5,7 @@ import { tourneyStore } from '../../../src/stores';
 
 describe('Bracket PowersOf2', () => {
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function setStore(options: any) {
+    function setStore(options) {
 
         tourneyStore.set({
             withTop3: false,
@@ -81,7 +80,7 @@ describe('Bracket PowersOf2', () => {
         }))
 
 
-        const t = (a: number, b: number) => [names[a], names[b]]
+        const t = (a, b) => [names[a], names[b]]
         const games = [
             { players: t(0, 1), round: 0, winner: 1 },  // will be missing at second render
             { players: t(2, 3), round: 0, winner: 0 },
@@ -135,12 +134,17 @@ describe('Bracket PowersOf2', () => {
         })
         rerender({})
 
-        /** Empty strings are omnipresent so values can;t start with it. */
-        function findSeries(...values: string[]) {
+        /** 
+         * Empty strings are omnipresent so values can;t start with it.
+         * @param {string[]} values
+         */
+        function findSeries(...values) {
 
             const { length } = values
             let i = 0, current = values[i]
-            return function (content: string) {
+
+            /** @param {string} content */
+            return function (content) {
 
                 if (content === current) {
                     if (++i >= length) return true

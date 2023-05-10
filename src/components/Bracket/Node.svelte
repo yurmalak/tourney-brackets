@@ -1,12 +1,16 @@
-<script lang="ts">
+<script>
 	import { createEventDispatcher } from 'svelte';
-	import type { Series } from '../../types';
 
-	export let series: Series;
-	export let style: string;
+	/** @typedef {import('../../types.ts').Series} Series */
+
+	/** @type {Series} */
+	export let series;
+
+	/** @type {string} */
+	export let style;
 
 	const dispatch = createEventDispatcher();
-	const handleClick = ({ ctrlKey, shiftKey, altKey }: MouseEvent) => {
+	const handleClick = ({ ctrlKey, shiftKey, altKey }) => {
 		dispatch('nodeClick', { ctrlKey, shiftKey, altKey, series });
 	};
 </script>
