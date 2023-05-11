@@ -3,48 +3,44 @@
 /** @typedef {import('../types.ts').Participant} Participant */
 
 
+
 /**
  * @param {number} round
  * @param {number} index
- * @returns {{ round: number, index: number, score: number[], players: Participant[], games: Game[]}}
+ * @returns {Series}
  */
 export function createSeries(round, index) {
+
+    /** @type {Series} */
     return {
         round,
         index,
         score: [0, 0],
-        /** @type {Participant[]} */
-        players: [],
-        /** @type {Game[]} */
+        players: [null, null],
         games: []
     };
 }
 
 /**
- * 
- * @param {Series} series 
- * @param {Array<Array<Game>>} gamesByRound 
- * @param {Array<Array<Series>>} seriesByRound 
- * @param {number} roundsTotal 
- * @param {(round: number) => number} bestOf 
- * @returns 
+ * @param {{
+ *  series: Series, 
+ *  seriesByRound: Array<Array<Series>>,
+ *  roundsTotal: number, g
+ *  getGames: (round: number, playerKeys: string[]) => Game[], 
+ *  bestOf: (round: number) => number
+ * }} args
  */
-export function populateSeries(series, gamesByRound, seriesByRound, roundsTotal, bestOf) {
+export function populateSeries(args) {
+
+    const { series, seriesByRound, roundsTotal, getGames, bestOf } = args
 
     // skip understaffed series
-    if (!series.players[0] || !series.players[1]) {
-        series.games = [];
-        return;
-    }
+    if (!series.players.every(Boolean)) return;
 
-    for (const game of gamesByRound[series.round]) {
-        // skip games with different players
-        const samePlayers = series.players.every((p) => game.players.includes(p.name));
-        if (!samePlayers) continue;
+    const games = getGames(series.round, series.players.map(p => p.name))
+    for (const game of games) {
 
-        series.games.push(game);
         if (game.winner !== undefined) {
-            // players can be in different order
             const winnerName = game.players[game.winner];
             const winnerIndex = series.players.findIndex((p) => p.name === winnerName);
             series.score[winnerIndex]++;
@@ -68,29 +64,20 @@ export function populateSeries(series, gamesByRound, seriesByRound, roundsTotal,
     const nextPIndex = series.index % 2;
     nextSeries.players[nextPIndex] = winner;
 
-    populateSeries(nextSeries, gamesByRound, seriesByRound, roundsTotal, bestOf);
+    populateSeries({ ...args, series: nextSeries });
 }
 
-
 /**
- * @param {{ roundsTotal: number, playersTotal: number, tourneyPlayers: Array<Participant>, tourneyGames: Array<Game>}} args 
+ * @param {{ roundsTotal: number, playersTotal: number, tourneyPlayers: Array<Participant>}} args 
  */
 export function bundleSeries(args) {
 
-    const { roundsTotal, playersTotal, tourneyPlayers, tourneyGames } = args
-
-    /** @type {Array<Array<Game>>} */
-    const gamesByRound = Array(roundsTotal)
-        .fill(1)
-        .map(() => []);
+    const { roundsTotal, playersTotal, participants } = args
 
     /** @type {Array<Array<Series>>} */
     const seriesByRound = Array(roundsTotal)
         .fill(1)
         .map(() => []);
-
-    const idlePlayers = new Map(tourneyPlayers.map((p) => [p.name, p]));
-    const finals = seriesByRound[roundsTotal - 1];
 
     let seriesInRound = playersTotal;
     for (let round = 0; round < roundsTotal; round++) {
@@ -104,7 +91,7 @@ export function bundleSeries(args) {
 
     // assign players to first round
     const firstRound = seriesByRound[0];
-    for (const player of idlePlayers.values()) {
+    for (const player of participants) {
         const { name, sIndex, pIndex } = player;
         const series = firstRound[sIndex];
         if (!series) continue;
@@ -112,14 +99,13 @@ export function bundleSeries(args) {
         const anotherOne = series.players[pIndex];
         if (anotherOne) {
             console.warn(`2 players aim for same slot (${name} and ${anotherOne.name}).`);
+            player.sIndex = null
+            player.pIndex = null
             continue;
         }
 
         series.players[pIndex] = player;
-        idlePlayers.delete(name);
     }
 
-    for (const game of tourneyGames) gamesByRound[game.round].push(game);
-
-    return { gamesByRound, seriesByRound, finals, idlePlayers }
+    return seriesByRound
 }

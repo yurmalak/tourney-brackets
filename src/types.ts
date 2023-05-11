@@ -8,8 +8,8 @@ export interface Player {
 
 export interface Participant {
     name: string
-    sIndex: number
-    pIndex: number
+    sIndex: number | null
+    pIndex: number | null
 }
 
 export interface Game {
@@ -26,7 +26,18 @@ export interface Series {
     round: number
     index: number
     score: number[]
-    players: Participant[]
+    players: (Participant | null)[]
     games: Game[]
     winner?: number
+    description?: string
+}
+
+export interface Tournament {
+    id: string
+    name: string
+    templateCode: string
+    withTop3: boolean
+    players: Participant[]
+    games: Game[]
+    playersTotal: number
 }

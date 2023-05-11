@@ -6,45 +6,46 @@
 
 	const { playersTotal, withTop3 } = $tourneyStore;
 	const roundsTotal = Math.log(playersTotal) / Math.log(2);
+	const cols = 2 * (roundsTotal - 1);
+	const rows = playersTotal / 4;
 
-	const { seriesByRound, gamesByRound, finals, idlePlayers } = bundleSeries({
-		roundsTotal,
-		playersTotal,
-		tourneyPlayers: $tourneyStore.players,
-		tourneyGames: $tourneyStore.games
-	});
+	let seriesByRound, finals;
+	$: {
+		seriesByRound = bundleSeries({
+			roundsTotal,
+			playersTotal,
+			participants: $tourneyStore.players
+		});
 
-	// recursively populate series with games and players
-	// Finals and semi-finals are bo3, others bo1
-	const bo = (round) => (round < roundsTotal - 2 ? 1 : 2);
-	seriesByRound[0].forEach((series) =>
-		populateSeries(series, gamesByRound, seriesByRound, roundsTotal, bo)
-	);
+		// recursively populate series with games and players
+		const bestOf = (round) => (round < roundsTotal - 2 ? 1 : 2); // last 2 rounds are bo3, others bo1
+		const getGames = (...args) => $tourneyStore.getGames(...args);
+		const popArgs = { seriesByRound, roundsTotal, getGames, bestOf };
 
-	// add series to last round (3rd place)
-	if (withTop3) {
-		const losersFinals = createSeries(roundsTotal - 1, 1);
-		const semiFinals = seriesByRound[roundsTotal - 2];
+		seriesByRound[0].forEach((series) => populateSeries({ series, ...popArgs }));
 
-		for (const { winner, players, index } of semiFinals) {
-			if (winner === undefined) continue;
-			const loser = players[1 - winner];
-			const pIndex = index % 2;
-			losersFinals.players[pIndex] = loser;
+		// add series to last round (3rd place)
+		if (withTop3) {
+			const losersFinals = createSeries(roundsTotal - 1, 1);
+			const semiFinals = seriesByRound[roundsTotal - 2];
+
+			for (const { winner, players, index } of semiFinals) {
+				if (winner === undefined) continue;
+				const loser = players[1 - winner];
+				const pIndex = index % 2;
+				losersFinals.players[pIndex] = loser;
+			}
+
+			populateSeries({ series: losersFinals, ...popArgs });
+			seriesByRound[roundsTotal - 1].push(losersFinals);
 		}
 
-		populateSeries(losersFinals, gamesByRound, seriesByRound, roundsTotal, bo);
-		finals.push(losersFinals);
+		// finals won't fit general schema
+		finals = seriesByRound.pop();
 	}
-
-	// finals won't fit general schema
-	seriesByRound.pop();
-
-	// css value
-	const cols = 2 * (roundsTotal - 1);
 </script>
 
-<bracket-32 style:--cols={cols} role="tree">
+<bracket-32 style:--cols={cols} style:--rows={rows} role="tree">
 	{#each seriesByRound as roundGames, round}
 		{@const span = 2 ** round}
 		{@const limit = roundGames.length / 2}
@@ -68,6 +69,7 @@
 
 	<!-- place finals by hand -->
 	{#if withTop3}
+		<!-- 2 finals in same column -->
 		<Joiner span={playersTotal / 2} style="transform:rotateY(180deg)" />
 		{#each finals as series}
 			<Node
@@ -92,6 +94,7 @@
 	bracket-32 {
 		display: grid;
 		grid-template-columns: repeat(var(--cols), 1fr min(1rem)) 1fr;
+		grid-template-rows: repeat(var(--rows), 1fr);
 		grid-auto-flow: column;
 		align-items: center;
 		padding: var(--space-m);
