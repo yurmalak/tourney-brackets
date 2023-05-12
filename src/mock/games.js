@@ -1,32 +1,24 @@
-import playerList from "./players"
-
 /** @typedef {import('../types.ts').Game} Game */
+
+import playerList from "./players"
+import { createGame } from "../lib/utils"
+
 
 /** @type {Array<Game>} */
 const games = []
 
-/**
- * 
- * @param {number} round 
- * @param {number} index 
- * @param {string[]} players 
- */
-const createGame = (round, index, players) => ({
-    id: Math.random().toString().slice(2),
-    round,
-    index,
-    players,
-    winner: Math.round(Math.random()),
-})
 
 for (let i = 0; i < playerList.length; i += 2) {
-    games.push(
-        createGame(
-            0,
-            i / 2,
-            playerList.slice(i, i + 2).map(p => p.name)
-        )
-    )
+
+    const game = createGame({
+        round: 0,
+        index: i / 2,
+        players: playerList.slice(i, i + 2).map(p => p.name)
+    })
+
+    game.winner = Math.round(Math.random())
+    games.push(game)
+
 }
 
 export default games

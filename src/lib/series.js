@@ -2,6 +2,8 @@
 /** @typedef {import('../types.ts').Series} Series */
 /** @typedef {import('../types.ts').Participant} Participant */
 
+import { calculateScore } from './utils.js';
+
 
 
 /**
@@ -38,14 +40,7 @@ export function populateSeries(args) {
     if (!series.players.every(Boolean)) return;
 
     const games = getGames(series.round, series.players.map(p => p.name))
-    for (const game of games) {
-
-        if (game.winner !== undefined) {
-            const winnerName = game.players[game.winner];
-            const winnerIndex = series.players.findIndex((p) => p.name === winnerName);
-            series.score[winnerIndex]++;
-        }
-    }
+    series.score = calculateScore(games)
 
     // check if series finished
     const [a, b] = series.score;

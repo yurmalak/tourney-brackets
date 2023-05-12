@@ -18,8 +18,7 @@ export interface Game {
     index: number
     players: string[]
     winner?: number
-    tourney?: string
-    url?: string
+    data: object
 }
 
 export interface Series {
@@ -32,7 +31,7 @@ export interface Series {
     description?: string
 }
 
-export interface Tournament {
+export interface TourneyData {
     id: string
     name: string
     templateCode: string

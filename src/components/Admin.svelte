@@ -2,6 +2,9 @@
 	import { onMount } from 'svelte';
 	import { tourneyStore, tourneyList } from '../stores';
 	import Bracket from './Bracket/Base.svelte';
+	import Editor from './Editor/Editor.svelte';
+
+	/** @typedef {import('../../types.ts').Series} Series */
 
 	// mock
 	import { mockedFetchData } from '../mock';
@@ -9,7 +12,11 @@
 	// fetch list of tourneys and data for ongoing or latest one
 	let ready = false;
 	onMount(async () => {
-		const data = await mockedFetchData();
+		let data = JSON.parse(localStorage.getItem('mockedData'));
+		if (!data) {
+			data = await mockedFetchData();
+			localStorage.setItem('mockedData', JSON.stringify(data));
+		}
 		const { tourneys, currentTourneyId } = data;
 
 		tourneyStore.set(tourneys[currentTourneyId]);
@@ -18,16 +25,20 @@
 		ready = true;
 	});
 
-	function handleClick(ev) {
-		console.log('Node has been clicked!', ev);
+	function handleEditor(ev) {
+		editableSeries = ev?.detail?.series;
 	}
+
+	/** @type {Series | undefined}*/
+	let editableSeries;
 </script>
 
 <div>
 	{#if !ready}
 		Hold on...
 	{:else}
-		<Bracket templateCode={$tourneyStore?.templateCode} on:nodeClick={handleClick} />
+		<Bracket templateCode={$tourneyStore?.templateCode} on:nodeClick={handleEditor} />
+		{#if editableSeries}<Editor series={editableSeries} on:toggleEditor={handleEditor} />{/if}
 	{/if}
 </div>
 
@@ -38,9 +49,16 @@
 		}
 
 		input,
-		select {
-			padding: 0 var(--space-s);
+		select,
+		fake-input {
+			padding: var(--space-m) var(--space-s);
 			min-height: 1.6rem;
+			border-radius: 3px;
+			margin: 0;
+			border: 1px solid gray;
+		}
+		fake-input {
+			padding: var(--space-m);
 		}
 
 		button {
