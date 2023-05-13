@@ -5,13 +5,12 @@
 
 	import equal from 'fast-deep-equal';
 	import clone from 'rfdc/default';
-	import { onDestroy } from 'svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onDestroy } from 'svelte';
 	import { tourneyStore } from '../../stores';
 	import { calculateScore, createGame } from '../../lib/utils';
 	import PlayerSelector from './PlayerSelector.svelte';
-	import Game from './Game.svelte';
 	import Switcher from './Switcher.svelte';
+	import Game from './Game.svelte';
 
 	/** @type {Series}*/
 	export let series;
@@ -219,7 +218,7 @@
 		// it's last so, combined with Tab listener next tab will put focus on first element
 		// also allows to close immediately
 		const tags = ['a', 'button', 'input', 'select', '[contenteditable]'];
-		const tabbableSelector = tags.join(':enabled, ') + ':enabled';
+		const tabbableSelector = tags.join(':not(:disabled), ') + ':not(:disabled)';
 		const list = editor.querySelectorAll(tabbableSelector);
 		const closeButton = list[0];
 		closeButton?.focus();
@@ -255,45 +254,54 @@
 			{/each}
 		</editor-head>
 		{#if selectedPlayers[0] && selectedPlayers[1]}
-			<editor-games>
-				<ul aria-label="games">
-					{#each tempGames as { id, data, winner: value }, i (id)}
-						<li aria-label="game">
-							<Game {data} on:save={(gameData) => save(gameData, i)}>
-								<Switcher
-									let:style
-									let:class={className}
-									on:click={() => updateScore(i)}
-									{value}
-									{style}
-									{className}
-									label="Winner"
-									aria-label="Winner switcher. Current is {series.players[value]?.name}"
-									slot="score-switcher"
-								/>
-								<button
-									let:style
-									let:class={className}
-									on:click={() => deleteGame(i)}
-									type="button"
-									slot="delete-game"
-									aria-label="delete game"
-								>
-									Delete
-								</button>
-							</Game>
-						</li>
-					{/each}
-				</ul>
-				<button type="button" on:click={addGame}> Add game </button>
-			</editor-games>
+			{#if tempGames.length > 0}
+				<editor-games>
+					<ul aria-label="games">
+						{#each tempGames as { id, data, winner }, i (id)}
+							<li aria-label="game">
+								<Game {data}>
+									<Switcher
+										let:style
+										let:class={className}
+										on:click={() => updateScore(i)}
+										{style}
+										{className}
+										value={winner}
+										label="Winner"
+										aria-label="Winner switcher. Current is {series.players[winner]?.name}"
+										slot="score-switcher"
+									/>
+									<button
+										let:style
+										let:class={className}
+										let:text
+										on:click={() => deleteGame(i)}
+										class={className}
+										aria-label="Delete game {i + 1}"
+										slot="delete-game"
+										type="button"
+										{style}
+									>
+										{text ?? 'Delete game'}
+									</button>
+								</Game>
+							</li>
+						{/each}
+					</ul>
+				</editor-games>
+			{/if}
+			<button type="button" class="button add-game" on:click={addGame}>Add game</button>
+		{:else}
+			<editor-games style:width="unset">Select 2 players to be able to add games.</editor-games>
 		{/if}
 		<editor-buttons>
 			{#if changed.games || changed.players}
-				<button type="button" class="discard" on:click={discard} class:animated>Discard</button>
-				<button type="button" class="save" on:click={save} class:animated>Save</button>
+				<button type="button" class="discard button" on:click={discard} class:animated
+					>Discard</button
+				>
+				<button type="button" class="save button" on:click={save} class:animated>Save</button>
 			{:else}
-				<button type="button" on:click={close}>Close</button>
+				<button type="button" class="button" on:click={close}>Close</button>
 			{/if}
 		</editor-buttons>
 	</editor-inner>
@@ -306,7 +314,7 @@
 		left: 0;
 		height: 100%;
 		width: 100%;
-		background-color: #c1c1c799;
+		background-color: #c8c8c88f;
 	}
 
 	editor-inner {
@@ -319,19 +327,23 @@
 		transform: translate(-50%, -50%);
 
 		display: flex;
-		flex-direction: column;
+		flex-wrap: wrap;
 		width: 600px;
 		max-width: 98vw;
 
 		border: 1px solid gray;
-		background-color: var(--color-bg-dark);
+		background-color: var(--color-bg-medium);
 		box-shadow: -1px 1px 5px #0003;
+		overflow: hidden;
 	}
 
 	editor-head {
 		display: flex;
 		padding: var(--padding);
 		border-bottom: var(--border-inner);
+		width: 100%;
+		background-color: var(--color-bg-dark);
+		box-shadow: 1px 1px 3px gray;
 	}
 
 	score-counter {
@@ -340,11 +352,17 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		font-size: 1.25em;
 	}
 
 	editor-games {
 		padding: var(--padding);
+		padding-bottom: 0;
 		border-bottom: var(--border-inner);
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		width: 100%;
 	}
 
 	ul {
@@ -353,9 +371,25 @@
 		list-style-type: none;
 	}
 
+	li {
+		border: 1px solid lightgray;
+		box-shadow: 1px 1px 3px #878da0;
+		background-color: var(--color-bg-light);
+	}
+	li:not(:last-of-type) {
+		margin-bottom: var(--space-m);
+	}
+
+	.add-game {
+		align-self: flex-start;
+		margin: var(--padding);
+	}
+
 	editor-buttons {
 		padding: var(--padding);
-		align-self: flex-end;
+		flex-grow: 1;
+		display: flex;
+		justify-content: end;
 	}
 
 	editor-buttons > button {
@@ -372,8 +406,11 @@
 		animation-iteration-count: infinite;
 		animation-timing-function: ease-out;
 		animation-direction: normal;
+
+		background-color: hsl(120, 50%, 65%);
 	}
 	.discard.animated {
+		background-color: hsl(0, 62%, 64%);
 		animation-timing-function: ease-in-out;
 		animation-direction: alternate-reverse;
 	}

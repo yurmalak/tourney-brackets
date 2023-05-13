@@ -13,46 +13,63 @@
 <style>
 	label {
 		display: inline-flex;
+		justify-content: center;
 		align-items: center;
 		flex-direction: column;
-		gap: 0.3rem;
-		padding: 2px;
-		margin-bottom: -0.2rem;
+		gap: 0.3em;
+		padding: 0.1em;
+		margin-bottom: -0.2em;
 		user-select: none;
-		font-size: 0.8em;
+		font-size: 0.85em;
 	}
 
 	button {
+		--color: hsl(0, 0%, 94%);
+		background-color: var(--color);
 		position: relative;
-		padding: 0 0.25rem;
-		border-radius: 1rem;
-		height: 1rem;
-		width: 2rem;
-		min-width: 2rem;
+		border-radius: 1em;
+		height: 1.3em;
+		width: 2.6em;
+		min-width: 2.6em;
 		line-height: inherit;
-		border: 1px solid gray;
-		background-color: hsl(0, 0%, 94%);
+		border: 0.1em solid gray;
+		cursor: pointer;
+	}
+
+	button:active:active {
+		background-color: var(--color);
 	}
 
 	button:before {
 		position: absolute;
 		content: '';
-		top: 0;
-		bottom: 0;
-		left: 0.125rem;
-		margin: auto;
-		height: 0.75rem;
-		width: 0.75rem;
+		top: 0.1em;
+		left: 0.15em;
+		height: 0.9em;
+		width: 0.9em;
 		border-radius: 50%;
-		background-color: hsl(100, 50%, 55%);
+		background-color: hsl(225, 50%, 55%);
 		transition: transform 150ms ease-out;
 	}
-
-	button.state-undefined:before {
-		background-color: hsl(0, 0%, 65%);
-		transform: translateX(0.45rem);
+	button:active:active:before {
+		background-color: hsl(220, 75%, 60%);
 	}
-	button.state-1:before {
-		transform: translateX(0.9rem);
+
+	.state-undefined.state-undefined:before {
+		background-color: hsl(0, 0%, 65%);
+		transform: translateX(0.6em);
+	}
+	.state-1:before {
+		transform: translateX(1.2em);
+	}
+
+	@media (hover: hover) {
+		button:hover {
+			background-color: var(--color);
+			box-shadow: 0 0 2px #5d6883d3;
+		}
+		button:hover:before {
+			background-color: hsl(210, 80%, 60%);
+		}
 	}
 </style>

@@ -51,14 +51,14 @@
 	}
 
 	bracket-node > button:active {
-		background-color: hsl(240, 100%, 98%);
-		box-shadow: 0 0 1px hsl(0, 0%, 75%);
+		background-color: hsl(240, 40%, 97%);
+		box-shadow: none;
 	}
 
 	@media (hover: hover) {
 		bracket-node:hover {
-			background-color: hsl(240, 80%, 99%);
-			box-shadow: 0 0 3px hsl(0, 0%, 75%);
+			background-color: hsl(240, 60%, 99%);
+			box-shadow: 0 0 3px hsl(0, 0%, 70%);
 		}
 	}
 	.score,

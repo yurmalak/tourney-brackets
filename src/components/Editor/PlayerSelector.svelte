@@ -43,9 +43,9 @@
 	select {
 		width: 40%;
 		flex-grow: 1;
-		background-color: var(--color-bg-light);
+		background-color: var(--color-input);
 	}
 	option:not(.idle) {
-		background-color: lightgray;
+		background-color: var(--color-bg-light);
 	}
 </style>

@@ -49,16 +49,51 @@
 		}
 
 		input,
-		select {
-			padding: var(--space-m) var(--space-s);
-			min-height: 1.6rem;
-			border-radius: 3px;
+		select,
+		[contenteditable] {
+			padding: var(--space-m);
+			border-radius: var(--border-radius);
 			margin: 0;
 			border: 1px solid gray;
 		}
 
-		button {
-			padding: var(--space-m);
+		.button,
+		.button-no-bg {
+			margin: 0;
+			padding: var(--space-l);
+			border-radius: var(--border-radius);
+			user-select: none;
+			font-size: 0.9em;
+			cursor: pointer;
+		}
+
+		.button {
+			border: 1px solid gray;
+			background-color: var(--color-bg-dark);
+		}
+		.button:active:active {
+			background-color: hsl(223, 15%, 95%);
+			box-shadow: none;
+		}
+
+		.button-no-bg {
+			border: 2px solid var(--color-bg-dark);
+			background-color: transparent;
+		}
+
+		.button-no-bg:active:active {
+			background-color: transparent;
+		}
+
+		@media (hover: hover) {
+			.button:hover {
+				background-color: hsl(223, 15%, 90%);
+				box-shadow: 0 0 2px hsl(233, 20%, 67%);
+			}
+			.button-no-bg:hover {
+				border: 2px solid hsl(237, 69%, 69%);
+				background-color: var(--color-bg-medium);
+			}
 		}
 
 		.visually-hidden {
@@ -75,11 +110,14 @@
 
 <style>
 	:root {
-		--color-bg-dark: hsl(223, 35%, 77%);
-		--color-bg-light: hsl(230, 20%, 94%);
+		--color-bg-dark: hsl(230, 40%, 78%);
+		--color-bg-medium: hsl(223, 46%, 85%);
+		--color-bg-light: hsl(230, 30%, 93%);
+		--color-input: white;
 		--space-s: 0.2rem;
 		--space-m: 0.5rem;
 		--space-l: 0.8rem;
+		--border-radius: 3px;
 
 		font-family: sans-serif;
 		font-size: 14px;
