@@ -1,20 +1,11 @@
 import PowersOf2 from '../../../src/components/Bracket/templates/PowersOf2.svelte';
 import { render, screen } from '@testing-library/svelte';
-import { tourneyStore } from '../../../src/stores';
+import { setStore } from '../../testUtils';
+
 
 
 describe('Bracket PowersOf2', () => {
 
-    function setStore(options) {
-
-        tourneyStore.set({
-            withTop3: false,
-            playersTotal: 8,
-            players: [],
-            games: [],
-            ...options
-        })
-    }
 
     /** Setup for test #4 */
     function setupDwarfTournament() {

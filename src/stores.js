@@ -111,7 +111,7 @@ class Tourney {
         }
 
 
-        console.log("Updating tourneyStore.", arguments)
+        console.log("[log] Updating tourneyStore.", arguments)
         return this
     }
 }

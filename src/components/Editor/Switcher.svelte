@@ -5,7 +5,7 @@
 	export let className = null;
 </script>
 
-<label {style} class={className}>
+<label {style} class={className} {...$$restProps}>
 	<button type="button" on:click class="state-{value}" />
 	{label}
 </label>

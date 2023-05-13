@@ -5,6 +5,7 @@
 
 	import equal from 'fast-deep-equal';
 	import clone from 'rfdc/default';
+	import { onDestroy } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { tourneyStore } from '../../stores';
 	import { calculateScore, createGame } from '../../lib/utils';
@@ -16,7 +17,7 @@
 	export let series;
 
 	/** @type {string[] | null} */
-	const selectedPlayers = series.players.map((p) => p?.name);
+	let selectedPlayers = series.players.map((p) => p?.name);
 
 	/*
 	 *
@@ -92,14 +93,15 @@
 	 * @param {Event} ev
 	 * @param {0|1} i - player's index within series
 	 */
-	function selectPlayer(ev, i) {
-		const { value } = ev.target;
+	function selectPlayer(ev) {
+		const { value, dataset } = ev.target;
+		const i = Number(dataset.playerIndex);
 
 		// swap if selected second player
 		if (value === selectedPlayers[1 - i]) {
 			selectedPlayers[1 - i] = selectedPlayers[i];
 		}
-		selectedPlayers[i] = value;
+		selectedPlayers[i] = value || undefined;
 	}
 
 	/**
@@ -110,15 +112,6 @@
 		const game = tempGames[gameIndex];
 		game.winner = 1 - game.winner || 0;
 		tempGames[gameIndex] = { ...game };
-
-		// to make switcher move like 0 => undefined => 1 => undefined => 0
-		// place `memory` outside of the function and clear when `tempGames` change
-		// if (current === undefined) {
-		// 	game.winner = 1 - (memory[game.id] ?? 1);
-		// } else {
-		// 	game.winner = undefined;
-		// 	memory[game.id] = current;
-		// }
 	}
 
 	/**
@@ -157,6 +150,14 @@
 		close();
 	}
 
+	/**
+	 * Revert changes to match {@link tourneyStore}
+	 */
+	function discard() {
+		// tempPlayers and tempGames depend on this
+		selectedPlayers = series.players.map((p) => p?.name);
+	}
+
 	const dispatch = createEventDispatcher();
 	function close() {
 		dispatch('toggleEditor');
@@ -165,31 +166,42 @@
 	/**
 	 * @param {HTMLElement} editor
 	 */
-	function useHandler(editor) {
-		/** Closes window if nothing changed or after confirmation */
+	function eventHandler(editor) {
+		/**
+		 * Closes window if nothing changed, suggests to save or discard otherwise.
+		 */
 		function maybeClose() {
-			if ((!changed.games && !changed.players) || confirm("Series won't be saved. Still close?")) {
-				close();
+			if (!changed.games && !changed.players) close();
+			else {
+				// animate buttons and focus discard button
+				editor.querySelector('.discard').focus();
+				animated = true;
 			}
 		}
+
+		/** @type {Event} */
 		function handleClickOutside(ev) {
 			if (editor.contains(ev.target)) return;
 			maybeClose();
 		}
 
+		/** @type {Event} */
 		function keyboardHandler(ev) {
 			switch (ev.code) {
 				case 'Escape':
 					maybeClose();
 					break;
 
+				// lock focus inside
 				case 'Tab':
 					const tabbables = Array.from(editor.querySelectorAll(tabbableSelector));
-					const index = tabbables.indexOf(ev.target) + (ev.shiftKey ? -1 : 1);
+					const index = tabbables.indexOf(ev.target);
+					const nextIndex = index + (ev.shiftKey ? -1 : 1);
+					const { length } = tabbables;
 
 					let ignore = false;
-					if (index >= tabbables.length) tabbables[0].focus();
-					else if (index === -1) tabbables[tabbables.length - 1].focus();
+					if (nextIndex === length) tabbables[0].focus();
+					else if (index === -1) tabbables[length - 1].focus();
 					else ignore = true;
 
 					if (!ignore) {
@@ -203,7 +215,14 @@
 			}
 		}
 
-		const tabbableSelector = 'a, button, input, select, [contenteditable]';
+		// focus on close button after opening
+		// it's last so, combined with Tab listener next tab will put focus on first element
+		// also allows to close immediately
+		const tags = ['a', 'button', 'input', 'select', '[contenteditable]'];
+		const tabbableSelector = tags.join(':enabled, ') + ':enabled';
+		const list = editor.querySelectorAll(tabbableSelector);
+		const closeButton = list[0];
+		closeButton?.focus();
 
 		document.addEventListener('keydown', keyboardHandler, true);
 		document.addEventListener('click', handleClickOutside, true);
@@ -214,21 +233,32 @@
 			}
 		};
 	}
+
+	// shake save and discard buttons if forbidden to exit
+	let animated = false,
+		timeoutHandler;
+	$: if (animated) {
+		timeoutHandler = setTimeout(() => {
+			clearTimeout(timeoutHandler);
+			animated = false;
+		}, 400);
+	}
+	onDestroy(() => clearTimeout(timeoutHandler));
 </script>
 
 <editor-outer>
-	<editor-inner use:useHandler>
+	<editor-inner use:eventHandler>
 		<editor-head>
 			{#each selectedPlayers as value, i}
-				<PlayerSelector players={tempPlayers} {value} on:change={(ev) => selectPlayer(ev, i)} />
-				{#if i === 0}<score-counter>{score}</score-counter>{/if}
+				<PlayerSelector players={tempPlayers} {value} playerIndex={i} on:change={selectPlayer} />
+				{#if i === 0}<score-counter aria-label="Score">{score}</score-counter>{/if}
 			{/each}
 		</editor-head>
 		{#if selectedPlayers[0] && selectedPlayers[1]}
 			<editor-games>
-				<ul>
+				<ul aria-label="games">
 					{#each tempGames as { id, data, winner: value }, i (id)}
-						<li>
+						<li aria-label="game">
 							<Game {data} on:save={(gameData) => save(gameData, i)}>
 								<Switcher
 									let:style
@@ -238,6 +268,7 @@
 									{style}
 									{className}
 									label="Winner"
+									aria-label="Winner switcher. Current is {series.players[value]?.name}"
 									slot="score-switcher"
 								/>
 								<button
@@ -246,6 +277,7 @@
 									on:click={() => deleteGame(i)}
 									type="button"
 									slot="delete-game"
+									aria-label="delete game"
 								>
 									Delete
 								</button>
@@ -257,10 +289,12 @@
 			</editor-games>
 		{/if}
 		<editor-buttons>
-			<button type="button" on:click={save} disabled={!changed.games && !changed.players}>
-				Save
-			</button>
-			<button type="button" on:click={close}>Close</button>
+			{#if changed.games || changed.players}
+				<button type="button" class="discard" on:click={discard} class:animated>Discard</button>
+				<button type="button" class="save" on:click={save} class:animated>Save</button>
+			{:else}
+				<button type="button" on:click={close}>Close</button>
+			{/if}
 		</editor-buttons>
 	</editor-inner>
 </editor-outer>
@@ -308,8 +342,54 @@
 		justify-content: center;
 	}
 
+	editor-games {
+		padding: var(--padding);
+		border-bottom: var(--border-inner);
+	}
+
+	ul {
+		margin: 0;
+		padding: 0;
+		list-style-type: none;
+	}
+
 	editor-buttons {
 		padding: var(--padding);
-		border-top: var(--border-inner);
+		align-self: flex-end;
+	}
+
+	editor-buttons > button {
+		width: 6rem;
+	}
+
+	.save {
+		margin-left: 1rem;
+	}
+
+	.animated {
+		animation-duration: 200ms;
+		animation-name: attention-shake;
+		animation-iteration-count: infinite;
+		animation-timing-function: ease-out;
+		animation-direction: normal;
+	}
+	.discard.animated {
+		animation-timing-function: ease-in-out;
+		animation-direction: alternate-reverse;
+	}
+
+	@keyframes attention-shake {
+		0% {
+			transform: rotate(0deg);
+		}
+		25% {
+			transform: rotate(3deg);
+		}
+		75% {
+			transform: rotate(-3deg);
+		}
+		100% {
+			transform: rotate(0deg);
+		}
 	}
 </style>

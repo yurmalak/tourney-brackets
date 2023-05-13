@@ -49,20 +49,26 @@
 		}
 
 		input,
-		select,
-		fake-input {
+		select {
 			padding: var(--space-m) var(--space-s);
 			min-height: 1.6rem;
 			border-radius: 3px;
 			margin: 0;
 			border: 1px solid gray;
 		}
-		fake-input {
+
+		button {
 			padding: var(--space-m);
 		}
 
-		button {
-			padding: var(--space-s) var(--space-m);
+		.visually-hidden {
+			clip: rect(0 0 0 0);
+			clip-path: inset(50%);
+			height: 1px;
+			overflow: hidden;
+			position: absolute;
+			white-space: nowrap;
+			width: 1px;
 		}
 	</style>
 </svelte:head>
