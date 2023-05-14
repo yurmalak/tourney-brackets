@@ -59,6 +59,32 @@ class Tourney {
     }
 
     /**
+     * Fills `.players` array of each series with players
+     * according to data stored in `players`.
+     * @param {Series[]} firstRound 
+     */
+    assignPlayers(firstRound) {
+
+        for (const player of this.players) {
+            const { name, sIndex, pIndex } = player;
+
+            // idle player
+            if (sIndex === null) continue
+            const series = firstRound[sIndex];
+            const anotherPlayer = series.players[pIndex];
+
+            if (anotherPlayer) {
+                console.warn(`2 players aim for same slot (${name} and ${anotherPlayer.name}).`, this);
+                player.sIndex = null
+                player.pIndex = null
+                continue;
+            }
+
+            series.players[pIndex] = player;
+        }
+    }
+
+    /**
      * Returns all games this pair of players played in specified round.
      * @param {number} round 
      * @param {string[]} playerKeys 

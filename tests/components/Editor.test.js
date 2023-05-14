@@ -4,8 +4,7 @@ import { afterEach, vi } from "vitest"
 
 import Editor from '../../src/components/Editor/Editor.svelte';
 import { setStore } from '../testUtils';
-import { createSeries } from '../../src/lib/series';
-import { createGame } from '../../src/lib/utils';
+import { createGame, createSeries } from '../../src/lib/utils';
 import { tourneyStore } from '../../src/stores';
 
 

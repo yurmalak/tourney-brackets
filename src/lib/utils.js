@@ -18,7 +18,7 @@ export function createGame({ round, index, players }) {
         round,
         index,
         players,
-        data: {}
+        data: []
     }
 }
 
@@ -35,4 +35,22 @@ export function calculateScore(games) {
         },
         [0, 0]
     )
+}
+
+/**
+ * @param {number} round
+ * @param {number} index
+ * @returns {Series}
+ */
+export function createSeries(round, index) {
+
+    /** @type {Series} */
+    return {
+        round,
+        index,
+        score: [0, 0],
+        players: [null, null],
+        games: [],
+        data: []
+    };
 }
