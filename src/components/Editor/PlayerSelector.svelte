@@ -1,3 +1,5 @@
+<svelte:options immutable />
+
 <script>
 	/** @typedef {import('../../types.ts').Participant} Participant */
 

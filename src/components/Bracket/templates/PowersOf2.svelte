@@ -67,7 +67,7 @@
 				if (!series.players.every(Boolean)) continue;
 
 				const names = series.players.map((p) => p.name);
-				series.games = $tourneyStore.getGames(round, names);
+				series.games = $tourneyStore.getSeries(round, names).games;
 				series.score = calculateScore(series.games);
 				const maxScore = Math.max(...series.score);
 				const seriesFinished = maxScore >= bestOf;

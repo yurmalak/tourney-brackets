@@ -6,86 +6,63 @@
 	import equal from 'fast-deep-equal';
 	import clone from 'rfdc/default';
 	import { createEventDispatcher, onDestroy } from 'svelte';
+	import { calculateScore } from '../../lib/utils';
 	import { tourneyStore } from '../../stores';
-	import { calculateScore, createGame } from '../../lib/utils';
 	import PlayerSelector from './PlayerSelector.svelte';
-	import Switcher from './Switcher.svelte';
-	import Game from './Game.svelte';
+	import GameManager from './GameManager.svelte';
+	import eventHandler from './eventHandler';
+	import buildPlayerList from './buildPlayerList';
 
 	/** @type {Series}*/
 	export let series;
 
-	/** @type {string[] | null} */
+	/**
+	 * List of all players participating in the tourney.
+	 * Idle ones (not assigned to any series) are on top.
+	 * Others sorted by name.
+	 * @type {Participant[]}
+	 */
+	let tempPlayers;
+
+	/**
+	 * Games and additional data of series with this round and selected players.
+	 * @type {{ games: Game[], data: [string, string[]][] }}
+	 */
+	let seriesData;
+
+	/**
+	 * Currently selected but not yet saved players.
+	 * @type {[ string?, string? ]}
+	 **/
 	let selectedPlayers = series.players.map((p) => p?.name);
 
-	/*
-	 *
-	 * REACTIVITY
-	 *
-	 */
+	/** @type {{ players: boolean, games: boolean }} */
+	let changed = { players: false, games: false };
 
-	/** @type {Participant[]}*/
-	let tempPlayers;
+	// check if games changed if not first render
+	let firstRender = true;
 	$: {
-		if (series.round > 0) {
-			// tempPlayers are only used for selecting players
-			// and player can only be selected in first round
-			tempPlayers = null;
-		} else {
-			const adjustments = selectedPlayers.map((p) => !p);
-
-			// temporarily edit de-selected players
-			// until either saved or discarded
-			tempPlayers = $tourneyStore.players.map((p) => {
-				const currentIndex = selectedPlayers.indexOf(p.name);
-				if (currentIndex === -1 && p.sIndex === series.index) {
-					adjustments[currentIndex] = true;
-					return { ...p, sIndex: null };
-				}
-				return p;
-			});
-
-			// temporarily edit newly selected players
-			adjustments.forEach((done, i) => {
-				if (done) return;
-
-				const name = selectedPlayers[i];
-				if (!name) return;
-
-				const playerIndex = tempPlayers.findIndex((p) => p.name === name);
-				tempPlayers[playerIndex] = { ...tempPlayers[playerIndex], sIndex: series.index };
-			});
-
-			// put idle players at the start of the list
-			tempPlayers.sort((a, b) =>
-				a.sIndex === null && b.sIndex === null
-					? 0
-					: a.sIndex === null
-					? -1
-					: b.sIndex === null
-					? 1
-					: a.name.localeCompare(b.name)
+		if (firstRender) firstRender = false;
+		else {
+			changed.games = !equal(
+				seriesData.games,
+				$tourneyStore.getSeries(series.round, selectedPlayers).games
 			);
 		}
 	}
 
-	/** @type {Game[]}*/
-	$: tempGames = clone($tourneyStore.getGames(series.round, selectedPlayers));
-
 	/** @type {string} */
-	$: score = calculateScore(tempGames).join(' - ');
+	$: score = calculateScore(seriesData.games).join(' - ');
 
-	/** @type {{ players: boolean, games: boolean }} */
-	$: changed = {
-		players: series.players.map((p) => p?.name).some((v, i) => selectedPlayers[i] !== v),
-		games: !equal(tempGames, $tourneyStore.getGames(series.round, selectedPlayers))
-	};
-
-	/*
-	 *
-	 *  HANDLERS
-	 *
-	 */
+	/** Sets fills editor with data from {@link tourneyStore} */
+	function setData() {
+		// tempPlayers are only used for selecting players
+		// and player can only be selected in first round
+		tempPlayers =
+			series.round > 0 ? null : buildPlayerList(series, selectedPlayers, $tourneyStore.players);
+		seriesData = clone($tourneyStore.getSeries(series.round, selectedPlayers));
+		changed.players = series.players.map((p) => p?.name).some((v, i) => selectedPlayers[i] !== v);
+	}
 
 	/**
 	 * Updates {@link selectedPlayers}
@@ -97,211 +74,82 @@
 		const i = Number(dataset.playerIndex);
 
 		// swap if selected second player
+		let swapped = false;
 		if (value === selectedPlayers[1 - i]) {
 			selectedPlayers[1 - i] = selectedPlayers[i];
+			swapped = false;
 		}
+
+		selectedPlayers = [...selectedPlayers];
 		selectedPlayers[i] = value || undefined;
+
+		if (!swapped) setData();
 	}
 
 	/**
-	 * Updates {@link tempGames}
-	 * @param {number} gameIndex
-	 */
-	function updateScore(gameIndex) {
-		const game = tempGames[gameIndex];
-		game.winner = 1 - game.winner || 0;
-		tempGames[gameIndex] = { ...game };
-	}
-
-	/**
-	 * Adds game to {@link tempGames}
-	 */
-	function addGame() {
-		const game = createGame({
-			round: series.round,
-			index: tempGames.length,
-			players: [...selectedPlayers]
-		});
-		tempGames = [...tempGames, game];
-	}
-
-	/**
-	 * Deletes game from {@link tempGames}
-	 * @param {number} gameIndex
-	 */
-	function deleteGame(gameIndex) {
-		tempGames.splice(gameIndex, 1);
-		tempGames.sort((a, b) => a.index - b.index);
-		tempGames = tempGames.map((game, index) => ({ ...game, index }));
-	}
-
-	/**
-	 * Saves {@link selectedPlayers} and {@link tempGames} to {@link tourneyStore}.
+	 * Saves {@link selectedPlayers} and {@link seriesData}.
 	 */
 	function save() {
 		tourneyStore.update({
 			changed,
 			selectedPlayers,
 			series,
-			seriesGames: tempGames.map((g) => clone(g)) // deep clone just to be safe
+			seriesGames: seriesData.games.map((g) => clone(g)) // deep clone just to be safe
+			// data
 		});
 
-		close();
+		closeEditor();
 	}
 
-	/**
-	 * Revert changes to match {@link tourneyStore}
-	 */
+	/** Discards changes made to {@link selectedPlayers} and {@link seriesData}. */
 	function discard() {
-		// tempPlayers and tempGames depend on this
 		selectedPlayers = series.players.map((p) => p?.name);
+		setData();
+	}
+
+	let timeoutHandler;
+	onDestroy(() => clearTimeout(timeoutHandler));
+
+	let animated = false;
+	const animation = { active: false };
+	$: {
+		animated = animation.active;
+		timeoutHandler = setTimeout(() => {
+			clearTimeout(timeoutHandler);
+			animation.active = false;
+		}, 400);
 	}
 
 	const dispatch = createEventDispatcher();
-	function close() {
-		dispatch('toggleEditor');
-	}
+	const closeEditor = () => dispatch('toggleEditor');
+	const createEventHandler = (el) => eventHandler(el, closeEditor, changed, animation);
 
-	/**
-	 * @param {HTMLElement} editor
-	 */
-	function eventHandler(editor) {
-		/**
-		 * Closes window if nothing changed, suggests to save or discard otherwise.
-		 */
-		function maybeClose() {
-			if (!changed.games && !changed.players) close();
-			else {
-				// animate buttons and focus discard button
-				editor.querySelector('.discard').focus();
-				animated = true;
-			}
-		}
-
-		/** @type {Event} */
-		function handleClickOutside(ev) {
-			if (editor.contains(ev.target)) return;
-			maybeClose();
-		}
-
-		/** @type {Event} */
-		function keyboardHandler(ev) {
-			switch (ev.code) {
-				case 'Escape':
-					maybeClose();
-					break;
-
-				// lock focus inside
-				case 'Tab':
-					const tabbables = Array.from(editor.querySelectorAll(tabbableSelector));
-					const index = tabbables.indexOf(ev.target);
-					const nextIndex = index + (ev.shiftKey ? -1 : 1);
-					const { length } = tabbables;
-
-					let ignore = false;
-					if (nextIndex === length) tabbables[0].focus();
-					else if (index === -1) tabbables[length - 1].focus();
-					else ignore = true;
-
-					if (!ignore) {
-						ev.preventDefault();
-						ev.stopPropagation();
-					}
-					break;
-
-				default:
-					return;
-			}
-		}
-
-		// focus on close button after opening
-		// it's last so, combined with Tab listener next tab will put focus on first element
-		// also allows to close immediately
-		const tags = ['a', 'button', 'input', 'select', '[contenteditable]'];
-		const tabbableSelector = tags.join(':not(:disabled), ') + ':not(:disabled)';
-		const list = editor.querySelectorAll(tabbableSelector);
-		const closeButton = list[0];
-		closeButton?.focus();
-
-		document.addEventListener('keydown', keyboardHandler, true);
-		document.addEventListener('click', handleClickOutside, true);
-		return {
-			destroy: () => {
-				document.removeEventListener('keydown', keyboardHandler, true);
-				document.removeEventListener('click', handleClickOutside, true);
-			}
-		};
-	}
-
-	// shake save and discard buttons if forbidden to exit
-	let animated = false,
-		timeoutHandler;
-	$: if (animated) {
-		timeoutHandler = setTimeout(() => {
-			clearTimeout(timeoutHandler);
-			animated = false;
-		}, 400);
-	}
-	onDestroy(() => clearTimeout(timeoutHandler));
+	setData();
 </script>
 
 <editor-outer>
-	<editor-inner use:eventHandler>
+	<editor-inner use:createEventHandler>
 		<editor-head>
 			{#each selectedPlayers as value, i}
 				<PlayerSelector players={tempPlayers} {value} playerIndex={i} on:change={selectPlayer} />
-				{#if i === 0}<score-counter aria-label="Score">{score}</score-counter>{/if}
+				{#if i === 0}<score-counter aria-label="Score {score}">{score ?? ''}</score-counter>{/if}
 			{/each}
 		</editor-head>
 		{#if selectedPlayers[0] && selectedPlayers[1]}
-			{#if tempGames.length > 0}
-				<editor-games>
-					<ul aria-label="games">
-						{#each tempGames as { id, data, winner }, i (id)}
-							<li aria-label="game">
-								<Game {data}>
-									<Switcher
-										let:style
-										let:class={className}
-										on:click={() => updateScore(i)}
-										{style}
-										{className}
-										value={winner}
-										label="Winner"
-										aria-label="Winner switcher. Current is {series.players[winner]?.name}"
-										slot="score-switcher"
-									/>
-									<button
-										let:style
-										let:class={className}
-										let:text
-										on:click={() => deleteGame(i)}
-										class={className}
-										aria-label="Delete game {i + 1}"
-										slot="delete-game"
-										type="button"
-										{style}
-									>
-										{text ?? 'Delete game'}
-									</button>
-								</Game>
-							</li>
-						{/each}
-					</ul>
-				</editor-games>
-			{/if}
-			<button type="button" class="button add-game" on:click={addGame}>Add game</button>
+			<GameManager round={series.round} bind:selectedPlayers bind:games={seriesData.games} />
 		{:else}
-			<editor-games style:width="unset">Select 2 players to be able to add games.</editor-games>
+			<no-players-notion style:width="unset"
+				>Select 2 players to be able to edit series.</no-players-notion
+			>
 		{/if}
 		<editor-buttons>
 			{#if changed.games || changed.players}
-				<button type="button" class="discard button" on:click={discard} class:animated
-					>Discard</button
-				>
+				<button type="button" class="discard button" on:click={discard} class:animated>
+					Discard
+				</button>
 				<button type="button" class="save button" on:click={save} class:animated>Save</button>
 			{:else}
-				<button type="button" class="button" on:click={close}>Close</button>
+				<button type="button" class="button" on:click={closeEditor}>Close</button>
 			{/if}
 		</editor-buttons>
 	</editor-inner>
@@ -355,34 +203,10 @@
 		font-size: 1.25em;
 	}
 
-	editor-games {
+	no-players-notion {
 		padding: var(--padding);
-		padding-bottom: 0;
-		border-bottom: var(--border-inner);
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		width: 100%;
-	}
-
-	ul {
-		margin: 0;
-		padding: 0;
-		list-style-type: none;
-	}
-
-	li {
-		border: 1px solid lightgray;
-		box-shadow: 1px 1px 3px #878da0;
-		background-color: var(--color-bg-light);
-	}
-	li:not(:last-of-type) {
-		margin-bottom: var(--space-m);
-	}
-
-	.add-game {
-		align-self: flex-start;
-		margin: var(--padding);
+		align-items: center;
 	}
 
 	editor-buttons {
@@ -407,10 +231,10 @@
 		animation-timing-function: ease-out;
 		animation-direction: normal;
 
-		background-color: hsl(120, 50%, 65%);
+		background-color: hsl(120, 60%, 60%);
 	}
 	.discard.animated {
-		background-color: hsl(0, 62%, 64%);
+		background-color: hsl(0, 70%, 60%);
 		animation-timing-function: ease-in-out;
 		animation-direction: alternate-reverse;
 	}

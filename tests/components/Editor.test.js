@@ -1,4 +1,4 @@
-import { render, screen, within, fireEvent } from '@testing-library/svelte';
+import { render, screen, within, fireEvent/**,waitFor, waitForElementToBeRemoved */ } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 import { afterEach, vi } from "vitest"
 
@@ -6,8 +6,6 @@ import Editor from '../../src/components/Editor/Editor.svelte';
 import { setStore } from '../testUtils';
 import { createGame, createSeries } from '../../src/lib/utils';
 import { tourneyStore } from '../../src/stores';
-
-
 
 
 describe("Editor", () => {
@@ -29,9 +27,10 @@ describe("Editor", () => {
         const game = createGame({ round, index: 0, players: names })
 
         series.players = participants
+        series.games = [game]
         game.winner = 1
 
-        setStore({ players, games: [game] })
+        setStore({ players, games: series.games })
         const { rerender, component } = render(Editor, { series })
 
         const selectorSearchArgs = { value: new RegExp(names.join("|")), name: /Player [12]/ }
@@ -45,7 +44,7 @@ describe("Editor", () => {
      * Expects them to be in the document if value is true and missing if false. 
      * @param {boolean|{ [key: string]: boolean }} buttonsAppearance 
      */
-    function checkButtons(buttonsAppearance) {
+    async function checkButtons(buttonsAppearance) {
 
         if (typeof buttonsAppearance === "boolean") {
             return checkButtons({
@@ -55,28 +54,48 @@ describe("Editor", () => {
             })
         }
 
-        for (const key in buttonsAppearance) {
-            const button = screen.queryByRole("button", { name: new RegExp(key, "i") })
+        return Promise.all(Object.entries(buttonsAppearance).map(async ([key, value]) => {
 
-            let expectation = expect(button)
-            if (buttonsAppearance[key] === false) expectation = expectation.not
-            expectation.toBeInTheDocument()
-        }
+            const options = { name: new RegExp(key, "i") }
+
+            if (value === true) return screen.findByRole("button", options)
+
+            const button = screen.queryByRole("button", { name })
+            expect(button).toBeNull()
+        }))
     }
+
+
+    async function checkScore(a, b) {
+        const labelPattern = new RegExp(`score ${a}.{1,3}${b}`, "i")
+        const score = await screen.findByLabelText(labelPattern)
+
+        const visiblePattern = new RegExp(`${a}.{1,3}${b}`)
+        expect(score).toHaveTextContent(visiblePattern)
+    }
+
+
 
     /** 
      * Expects number of games in series to be equal to `n`. 
      * @param {number} n
      */
-    const expectNGames = n => {
-        const games = screen.queryAllByRole("listitem", { name: /game/i })
-        expect(games.length).toBe(n)
+    async function expectNGames(n) {
 
-        return games
+        if (n === 0) {
+            const game = screen.queryByRole("listitem", { name: /game/i })
+            expect(game).toBe(null)
+            return null
+        }
+        else {
+            const games = await screen.findAllByRole("listitem", { name: /game/i })
+            expect(games.length).toBe(n)
+            return games
+        }
     }
 
 
-    it("renders correctly with minimal props", () => {
+    it("renders correctly with minimal props", async () => {
 
         setStore()
         const { rerender } = render(Editor, { series: createSeries(0, 0) })
@@ -84,15 +103,12 @@ describe("Editor", () => {
 
 
         expect(selects).toHaveLength(2)
-
-        // 0 - 0
-        const score = screen.getByLabelText("Score")
-        expect(score).toHaveTextContent(/0.{1,3}0/)
+        await checkScore(0, 0)
 
         // no changes have been made - only Close visible
         // can't add games without players either
-        checkButtons(false)
-        checkButtons({ "add game": false })
+        await checkButtons(false)
+        await checkButtons({ "add game": false })
 
         // check next round
         rerender({ series: createSeries(1, 0) })
@@ -103,7 +119,7 @@ describe("Editor", () => {
         expect(selects).toHaveLength(2)
     })
 
-    it("renders correctly with normal props", () => {
+    it("renders correctly with normal props", async () => {
 
         const { players, participants, names, series, round, selectorSearchArgs, rerender } = setup()
         const selects = screen.getAllByRole("combobox", selectorSearchArgs)
@@ -126,10 +142,8 @@ describe("Editor", () => {
         })
 
         // 0 - 1 (second player won during setup)
-        const score = screen.getByLabelText("Score")
-        expect(score).toHaveTextContent(/0.{1,3}1/)
-
-        checkButtons({ "delete game": true, "winner": true, "add game": true })
+        await checkScore(0, 1)
+        await checkButtons({ "delete game": true, "winner": true, "add game": true })
 
         // switcher should also have winner's name on it (Jane, second player)
         const winnerSwitcher = screen.getByLabelText("Jane", { exact: false })
@@ -163,8 +177,7 @@ describe("Editor", () => {
         expect(addGameButton).toBeInTheDocument()
 
         // score set to 0-0
-        const score = screen.getByLabelText("Score")
-        expect(score).toHaveTextContent(/0.{1,3}0/)
+        await checkScore(0, 0)
 
         // select options should update
         selects.forEach(el => {
@@ -184,7 +197,7 @@ describe("Editor", () => {
         })
 
         // save and discard buttons should replace the Close one
-        checkButtons(true)
+        await checkButtons(true)
 
         // but store should be unaffected
         const store = get(tourneyStore)
@@ -194,7 +207,7 @@ describe("Editor", () => {
         // select John back and check that nothing has changed
         await fireEvent.change(selects[0], { target: { value: "John" } })
         await screen.findByRole("listitem", { name: /game/i })
-        checkButtons(false)
+        await checkButtons(false)
 
         // swap John and Jane - game should be still present
         await fireEvent.change(selects[0], { target: { value: "Jane" } })
@@ -203,12 +216,12 @@ describe("Editor", () => {
         await screen.findByRole("listitem", { name: /game/i })
 
         // but buttons should reflect that changes have been made
-        checkButtons(true)
+        await checkButtons(true)
 
         // de-select both
         await fireEvent.change(selects[0], { target: { value: "" } })
         await fireEvent.change(selects[1], { target: { value: "" } })
-        checkButtons(true)
+        await checkButtons(true)
     })
 
     it("updates game list temporarily", async () => {
@@ -216,17 +229,17 @@ describe("Editor", () => {
         setup()
 
         const addGame = screen.queryByRole("button", { name: /add game/i })
-        expectNGames(1)
+        await expectNGames(1)
 
         await fireEvent.click(addGame)
-        expectNGames(2)
-        checkButtons(true)
+        await expectNGames(2)
+        await checkButtons(true)
 
         await fireEvent.click(addGame)
         await fireEvent.click(addGame)
         await fireEvent.click(addGame)
         await fireEvent.click(addGame)
-        const games = expectNGames(6)
+        const games = await expectNGames(6)
 
 
         const switcherClick = game => {
@@ -248,12 +261,11 @@ describe("Editor", () => {
         await switcherClick(games[4])
 
         // 6th is still on, let's check the score for now
-        const score = screen.getByLabelText("Score")
-        expect(score).toHaveTextContent(/3.{1,3}2/)
+        await checkScore(3, 2)
 
         // according to the store, nothing is going on
         const store = get(tourneyStore)
-        const janeAndJohnGames = store.gameMap.get("Jane").get("John").get(0)
+        const janeAndJohnGames = store.gameMap.get("Jane").get("John").get(0).games
         expect(janeAndJohnGames.length).toBe(1)
         expect(janeAndJohnGames[0].winner).toBe(1)
 
@@ -264,12 +276,12 @@ describe("Editor", () => {
         }
 
         // as if nothing happened
-        checkButtons(false)
+        await checkButtons(false)
 
         // let's at least replace first game
         await fireEvent.click(within(games[0]).getByRole("button", { name: /delete game/i }))
         await fireEvent.click(addGame)
-        checkButtons(true)
+        await checkButtons(true)
     })
 
     it("saves or discards changes when called", async () => {
@@ -282,28 +294,27 @@ describe("Editor", () => {
         // change player, add game
         await fireEvent.change(selects[0], { target: { value: "Kate" } })
         expect(selects[0].value).toBe("Kate")
-        expectNGames(0)
+        await expectNGames(0)
         await fireEvent.click(addGameButton)
         await fireEvent.click(addGameButton)
-        expectNGames(2)
-        checkButtons(true)
+        await expectNGames(2)
+        await checkButtons(true)
 
         // discard
         const discardButton = screen.getByRole("button", { name: /discard/i })
         await fireEvent.click(discardButton)
-        expectNGames(1)
+        await expectNGames(1)
         expect(selects[0].value).toBe("John")
-        checkButtons(false)
+        await checkButtons(false)
 
         // change again
         const winnerSwitcher = screen.getByRole("button", { name: /switcher/i })
-        const score = screen.getByLabelText("Score")
-        expect(score).toHaveTextContent(/0.{1,3}1/)
+        await checkScore(0, 1)
         await fireEvent.click(winnerSwitcher)
-        expect(score).toHaveTextContent(/1.{1,3}0/)
-        checkButtons(true)
+        await checkScore(1, 0)
+        await checkButtons(true)
 
-        // save
+        // save and close
         const updateSpy = vi.spyOn(tourneyStore, "update")
         const closeEditorSpy = vi.fn()
         component.$on("toggleEditor", closeEditorSpy)
@@ -326,7 +337,7 @@ describe("Editor", () => {
         // changes prevent window from closing
         const winnerSwitcher = screen.getByRole("button", { name: /switcher/i })
         await fireEvent.click(winnerSwitcher)
-        checkButtons(true)
+        await checkButtons(true)
         window.document.body.dispatchEvent(new Event('click'))
         expect(closeEditorSpy).toHaveBeenCalledTimes(1)  // still 1
     })

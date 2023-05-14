@@ -16,8 +16,11 @@ const playerSorter = (a, b) => a.localeCompare(b)
  * @param {Series} a
  * @param {Series} b
  */
-const seriesSorter = (a, b) => a.index - b.index
+const gamesSorter = (a, b) => a.index - b.index
 
+/**
+ * 
+ */
 class Tourney {
     constructor({ games = [], ...data }) {
 
@@ -26,14 +29,14 @@ class Tourney {
 
         // group games by players and round
         for (const game of games) {
-            const arr = this.createSessionArray(game)
-            arr.push(game)
+            const series = this.createSessionArray(game)
+            series.games.push(game)
         }
 
         for (const subMap of this.gameMap.values())
             for (const gamesByRound of subMap.values())
-                for (const arr of gamesByRound.values())
-                    arr.sort(seriesSorter)
+                for (const series of gamesByRound.values())
+                    series.games.sort(gamesSorter)
     }
 
     /**
@@ -52,10 +55,10 @@ class Tourney {
         if (!subMap.has(id2)) subMap.set(id2, new Map())
         const gamesByRound = subMap.get(id2)
 
-        if (!gamesByRound.has(round)) gamesByRound.set(round, [])
-        const arr = gamesByRound.get(round)
+        if (!gamesByRound.has(round)) gamesByRound.set(round, { games: [], data: [] })
+        const series = gamesByRound.get(round)
 
-        return arr
+        return series
     }
 
     /**
@@ -88,14 +91,14 @@ class Tourney {
      * Returns all games this pair of players played in specified round.
      * @param {number} round 
      * @param {string[]} playerKeys 
-     * @returns {Game[]}
+     * @returns {{ games: Game[], data: string[][]}}
      */
-    getGames(round, playerKeys) {
+    getSeries(round, playerKeys) {
 
         const keys = [...playerKeys].sort(playerSorter)
         keys.push(round)
 
-        return keys.reduce((map, key) => map?.get(key), this.gameMap) || []
+        return keys.reduce((map, key) => map?.get(key), this.gameMap) || { games: [], data: [] }
     }
 
     save({ changed, selectedPlayers, series, seriesGames }) {
@@ -127,13 +130,13 @@ class Tourney {
             const roundMap = this.gameMap.get(keys[0]).get(keys[1])
 
             // update
-            const sortedGames = seriesGames.length === 0
+            const games = seriesGames.length === 0
                 ? []
                 : [...seriesGames]
                     .sort((a, b) => a.index - b.index)
                     .map((game, index) => ({ ...game, index }))
 
-            roundMap.set(series.round, sortedGames)
+            roundMap.set(series.round, { data: [], games: games })
         }
 
 
