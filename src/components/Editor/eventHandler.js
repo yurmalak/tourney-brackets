@@ -2,29 +2,31 @@
  * Usage:
  * ```
  * // inside <script>
- * const craeteEventHandler = (el) => eventHandler(el, closeEditor, changed, animation)
+ * const craeteEventHandler = (el) => {
+ *     return eventHandler(el, changed, closeEditor, animateButtons);
+ * }
  * 
  * // svelte markup
  * <editor-inner use:createEventHandler>
- *  ...
+ *     ...
  * </editor-inner>
  * ```
  * @param {HTMLElement} editor 
- * @param {() => void} closeEditor 
  * @param {{ games: boolean, players: boolean }} changed 
- * @param {{ active: boolean }} animation 
+ * @param {() => void} closeEditor 
+ * @param {() => void} animateButtons 
  */
-export default function eventHandler(editor, closeEditor, changed, animation) {
+export default function eventHandler(editor, changed, closeEditor, animateButtons) {
 
     /**
      * Closes window if nothing changed, suggests to save or discard otherwise.
      */
     function maybeClose() {
-        if (!changed.games && !changed.players) closeEditor();
+        if (!Object.values(changed).some(Boolean)) closeEditor();
         else {
             // animate buttons and focus discard button
             editor.querySelector('.discard').focus();
-            animation.active = true;
+            animateButtons()
         }
     }
 
@@ -72,7 +74,7 @@ export default function eventHandler(editor, closeEditor, changed, animation) {
     // focus on close button after opening
     // it's last so, combined with Tab listener, next tab will focus first element
     // also allows to close immediately
-    const closeButton = editor.querySelector('editor-buttons > button');
+    const closeButton = editor?.querySelector('button.close');
     closeButton?.focus();
 
     document.addEventListener('keydown', keyboardHandler, true);

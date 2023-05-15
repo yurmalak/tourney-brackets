@@ -44,6 +44,20 @@
 
 <svelte:head>
 	<style>
+		:root {
+			--color-bg-dark: hsl(230, 40%, 78%);
+			--color-bg-medium: hsl(223, 46%, 85%);
+			--color-bg-light: hsl(230, 30%, 93%);
+			--color-input: hsl(227, 0%, 96%);
+			--space-s: 0.2rem;
+			--space-m: 0.5rem;
+			--space-l: 0.8rem;
+			--border-radius: 3px;
+
+			font-family: sans-serif;
+			font-size: 14px;
+		}
+
 		body {
 			background-color: var(--color-bg-light);
 		}
@@ -55,6 +69,7 @@
 			border-radius: var(--border-radius);
 			margin: 0;
 			border: 1px solid gray;
+			background-color: var(--color-input);
 		}
 
 		.button,
@@ -87,7 +102,7 @@
 
 		@media (hover: hover) {
 			.button:hover {
-				background-color: hsl(223, 15%, 90%);
+				background-color: var(--color-bg-light);
 				box-shadow: 0 0 2px hsl(233, 20%, 67%);
 			}
 			.button-no-bg:hover {
@@ -107,19 +122,3 @@
 		}
 	</style>
 </svelte:head>
-
-<style>
-	:root {
-		--color-bg-dark: hsl(230, 40%, 78%);
-		--color-bg-medium: hsl(223, 46%, 85%);
-		--color-bg-light: hsl(230, 30%, 93%);
-		--color-input: white;
-		--space-s: 0.2rem;
-		--space-m: 0.5rem;
-		--space-l: 0.8rem;
-		--border-radius: 3px;
-
-		font-family: sans-serif;
-		font-size: 14px;
-	}
-</style>

@@ -10,52 +10,81 @@ import { writable } from 'svelte/store';
  * @param {string} a
  * @param {string} b
  */
-const playerSorter = (a, b) => a.localeCompare(b)
+export const playerSorter = (a, b) => a.localeCompare(b)
 
 /** 
  * @param {Series} a
  * @param {Series} b
  */
-const gamesSorter = (a, b) => a.index - b.index
+export const gamesSorter = (a, b) => a.index - b.index
+
+
+/** 
+ * @param {[string,[]][]} a
+ * @param {[string,[]][]} b
+ */
+const kvMapSorter = (a, b) => {
+
+    // put pairs with single value first
+    const lessValues = a[1].length - b[1].length
+
+    // then sort by keys
+    return lessValues || a[0].localeCompare(b[0])
+}
+
+
+function Container() {
+    this.games = []
+    this.kvMap = []
+}
+
 
 /**
  * 
  */
 class Tourney {
-    constructor({ games = [], ...data }) {
+    constructor({ games = [], kvMaps = [], ...data }) {
 
-        this.gameMap = new Map()
+        this.tree = new Map()
         Object.assign(this, data)
 
         // group games by players and round
         for (const game of games) {
-            const series = this.createSessionArray(game)
+            const series = this.storeSessionData(game)
             series.games.push(game)
         }
 
-        for (const subMap of this.gameMap.values())
+        // same for maps
+        for (const { round, players, kvMap } of kvMaps) {
+            const series = this.storeSessionData({ round, players })
+            series.kvMap.push(...kvMap)
+        }
+
+        // sort games
+        for (const subMap of this.tree.values())
             for (const gamesByRound of subMap.values())
                 for (const series of gamesByRound.values())
                     series.games.sort(gamesSorter)
     }
 
     /**
-     * Creates array at the end of nested maps `gameMap => player1 => player2 => round`.
-     * Keeps existing values intact.
+     * Creates array at the end of nested maps `tree => player1 => player2 => round`.
+     * Players are sorted by names.
+     * Keeps existing entities intact.
      * @param {{ players: string[], round: number }} gameLike
      * @returns {Game[]}
      */
-    createSessionArray({ players, round }) {
+    storeSessionData({ players, round }) {
 
         const [id1, id2] = [...players].sort(playerSorter)
 
-        if (!this.gameMap.has(id1)) this.gameMap.set(id1, new Map())
-        const subMap = this.gameMap.get(id1)
+        if (!this.tree.has(id1)) this.tree.set(id1, new Map())
+        const subMap = this.tree.get(id1)
 
         if (!subMap.has(id2)) subMap.set(id2, new Map())
         const gamesByRound = subMap.get(id2)
 
-        if (!gamesByRound.has(round)) gamesByRound.set(round, { games: [], data: [] })
+        if (!gamesByRound.has(round)) gamesByRound.set(round, new Container())
         const series = gamesByRound.get(round)
 
         return series
@@ -98,11 +127,10 @@ class Tourney {
         const keys = [...playerKeys].sort(playerSorter)
         keys.push(round)
 
-        return keys.reduce((map, key) => map?.get(key), this.gameMap) || { games: [], data: [] }
+        return keys.reduce((map, key) => map?.get(key), this.tree) || new Container()
     }
 
-    save({ changed, selectedPlayers, series, seriesGames }) {
-
+    save({ changed, selectedPlayers, series, seriesData }) {
 
         if (changed.players) {
             this.players = this.players = this.players.map(({ ...p }) => {
@@ -118,27 +146,31 @@ class Tourney {
             });
         }
 
-
-        if (changed.games) {
+        const { games, kvMap } = seriesData
+        if (changed.gamesOrMap) {
 
             // make path
-            this.createSessionArray({
+            this.storeSessionData({
                 players: selectedPlayers,
                 round: series.round
             })
             const keys = selectedPlayers.sort(playerSorter)
-            const roundMap = this.gameMap.get(keys[0]).get(keys[1])
+            const roundMap = this.tree.get(keys[0]).get(keys[1])
 
-            // update
-            const games = seriesGames.length === 0
-                ? []
-                : [...seriesGames]
-                    .sort((a, b) => a.index - b.index)
-                    .map((game, index) => ({ ...game, index }))
+            // update games
+            const sortedGames = games
+                .sort(gamesSorter)
+                .map((game, index) => ({ ...game, index }))
 
-            roundMap.set(series.round, { data: [], games: games })
+            // sort kvMap by keys and drop empty ones
+            const sortedMap = kvMap
+                .filter(([key, [v1, v2]]) => key || v1 || v2)
+                .sort(kvMapSorter)
+
+            // and save
+            const data = { kvMap: sortedMap, games: sortedGames }
+            roundMap.set(series.round, data)
         }
-
 
         console.log("[log] Updating tourneyStore.", arguments)
         return this

@@ -6,10 +6,11 @@
 	import equal from 'fast-deep-equal';
 	import clone from 'rfdc/default';
 	import { createEventDispatcher, onDestroy } from 'svelte';
-	import { calculateScore } from '../../lib/utils';
-	import { tourneyStore } from '../../stores';
+	import { createGame, calculateScore } from '../../lib/utils';
+	import { tourneyStore, playerSorter, gamesSorter } from '../../stores';
 	import PlayerSelector from './PlayerSelector.svelte';
 	import GameManager from './GameManager.svelte';
+	import DataMapper from './DataMapper.svelte';
 	import eventHandler from './eventHandler';
 	import buildPlayerList from './buildPlayerList';
 
@@ -26,7 +27,7 @@
 
 	/**
 	 * Games and additional data of series with this round and selected players.
-	 * @type {{ games: Game[], data: [string, string[]][] }}
+	 * @type {{ games: Game[], kvMap: [string, []] }}
 	 */
 	let seriesData;
 
@@ -36,30 +37,33 @@
 	 **/
 	let selectedPlayers = series.players.map((p) => p?.name);
 
-	/** @type {{ players: boolean, games: boolean }} */
-	let changed = { players: false, games: false };
+	/**
+	 * Reveals `Save` and `Discard` buttons if one of values is `true`.
+	 */
+	let changed = { players: false, gamesOrMap: false };
 
-	// check if games changed if not first render
+	// check if games or kvMap changed
 	let firstRender = true;
 	$: {
+		// they couldn't at first render
 		if (firstRender) firstRender = false;
 		else {
-			changed.games = !equal(
-				seriesData.games,
-				$tourneyStore.getSeries(series.round, selectedPlayers).games
-			);
+			const storedData = $tourneyStore.getSeries(series.round, selectedPlayers);
+			const gamesHaveChanged = !equal(seriesData.games, storedData.games);
+			changed.gamesOrMap = gamesHaveChanged || !equal(seriesData.kvMap, storedData.kvMap);
 		}
 	}
 
 	/** @type {string} */
 	$: score = calculateScore(seriesData.games).join(' - ');
 
-	/** Sets fills editor with data from {@link tourneyStore} */
+	/** Sets data stored in {@link tourneyStore}. */
 	function setData() {
 		// tempPlayers are only used for selecting players
 		// and player can only be selected in first round
-		tempPlayers =
-			series.round > 0 ? null : buildPlayerList(series, selectedPlayers, $tourneyStore.players);
+		if (series.round > 0) tempPlayers = null;
+		else tempPlayers = buildPlayerList(series, selectedPlayers, $tourneyStore.players);
+
 		seriesData = clone($tourneyStore.getSeries(series.round, selectedPlayers));
 		changed.players = series.players.map((p) => p?.name).some((v, i) => selectedPlayers[i] !== v);
 	}
@@ -67,7 +71,6 @@
 	/**
 	 * Updates {@link selectedPlayers}
 	 * @param {Event} ev
-	 * @param {0|1} i - player's index within series
 	 */
 	function selectPlayer(ev) {
 		const { value, dataset } = ev.target;
@@ -83,20 +86,33 @@
 		selectedPlayers = [...selectedPlayers];
 		selectedPlayers[i] = value || undefined;
 
+		// order is irrelevant
 		if (!swapped) setData();
 	}
 
+	/** */
+	function addGame() {
+		const game = createGame({
+			round: series.round,
+			index: seriesData.games.length,
+			players: [...selectedPlayers].sort(playerSorter)
+		});
+		seriesData.games = [...seriesData.games, game];
+	}
+
 	/**
-	 * Saves {@link selectedPlayers} and {@link seriesData}.
+	 * Updates store with data from {@link selectedPlayers} and {@link seriesData}.
 	 */
 	function save() {
-		tourneyStore.update({
-			changed,
-			selectedPlayers,
-			series,
-			seriesGames: seriesData.games.map((g) => clone(g)) // deep clone just to be safe
-			// data
-		});
+		// deep clone just to be safe
+		tourneyStore.update(
+			clone({
+				changed: changed,
+				selectedPlayers,
+				series,
+				seriesData
+			})
+		);
 
 		closeEditor();
 	}
@@ -107,22 +123,26 @@
 		setData();
 	}
 
+	/** Button shaking animation timer */
 	let timeoutHandler;
 	onDestroy(() => clearTimeout(timeoutHandler));
 
+	/**
+	 * ACtivated by performing forbidden action.
+	 * E.g. trying to exid with unsaved changes.
+	 */
 	let animated = false;
-	const animation = { active: false };
-	$: {
-		animated = animation.active;
+	$: if (animated) {
 		timeoutHandler = setTimeout(() => {
 			clearTimeout(timeoutHandler);
-			animation.active = false;
+			animated = false;
 		}, 400);
 	}
 
 	const dispatch = createEventDispatcher();
 	const closeEditor = () => dispatch('toggleEditor');
-	const createEventHandler = (el) => eventHandler(el, closeEditor, changed, animation);
+	const animateButtons = () => (animated = true);
+	const createEventHandler = (el) => eventHandler(el, changed, closeEditor, animateButtons);
 
 	setData();
 </script>
@@ -136,22 +156,29 @@
 			{/each}
 		</editor-head>
 		{#if selectedPlayers[0] && selectedPlayers[1]}
-			<GameManager round={series.round} bind:selectedPlayers bind:games={seriesData.games} />
+			<GameManager bind:selectedPlayers bind:games={seriesData.games} />
+			<DataMapper
+				bind:data={seriesData.kvMap}
+				slot="inbetween"
+				label="Key-value map for series"
+				style="width:100%"
+				buttonClass="button"
+				buttonsOutside
+			/>
+			<button type="button" class="button add-game" on:click={addGame}>Add game</button>
 		{:else}
 			<no-players-notion style:width="unset"
 				>Select 2 players to be able to edit series.</no-players-notion
 			>
 		{/if}
-		<editor-buttons>
-			{#if changed.games || changed.players}
-				<button type="button" class="discard button" on:click={discard} class:animated>
-					Discard
-				</button>
-				<button type="button" class="save button" on:click={save} class:animated>Save</button>
-			{:else}
-				<button type="button" class="button" on:click={closeEditor}>Close</button>
-			{/if}
-		</editor-buttons>
+		{#if Object.values(changed).some(Boolean)}
+			<button type="button" class="discard button" on:click={discard} class:animated>
+				Discard
+			</button>
+			<button type="button" class="save button" on:click={save} class:animated>Save</button>
+		{:else}
+			<button type="button" class="close button" on:click={closeEditor}>Close</button>
+		{/if}
 	</editor-inner>
 </editor-outer>
 
@@ -166,7 +193,6 @@
 	}
 
 	editor-inner {
-		--padding: 0.8rem 0.5rem;
 		--border-inner: 1px solid lightgray;
 
 		position: absolute;
@@ -178,6 +204,8 @@
 		flex-wrap: wrap;
 		width: 600px;
 		max-width: 98vw;
+		padding: var(--space-m);
+		gap: var(--space-m);
 
 		border: 1px solid gray;
 		background-color: var(--color-bg-medium);
@@ -187,11 +215,13 @@
 
 	editor-head {
 		display: flex;
-		padding: var(--padding);
-		border-bottom: var(--border-inner);
-		width: 100%;
+		padding: var(--space-m);
+		margin: calc(-1 * var(--space-m));
+		width: calc(100% + 2 * var(--space-m));
+		margin-bottom: 0;
 		background-color: var(--color-bg-dark);
-		box-shadow: 1px 1px 3px gray;
+		box-shadow: 1px 1px 3px hsl(238 30% 66% / 1);
+		border-bottom: 1px solid gray;
 	}
 
 	score-counter {
@@ -204,24 +234,33 @@
 	}
 
 	no-players-notion {
-		padding: var(--padding);
 		display: flex;
 		align-items: center;
 	}
 
-	editor-buttons {
-		padding: var(--padding);
+	:global(editor-inner > .button) {
+		width: 100px;
+		flex-shrink: 1;
 		flex-grow: 1;
-		display: flex;
-		justify-content: end;
+		white-space: nowrap;
 	}
 
-	editor-buttons > button {
-		width: 6rem;
+	.close {
+		justify-self: flex-end;
 	}
 
 	.save {
-		margin-left: 1rem;
+		--color-highlight: hsl(120, 55%, 70%);
+	}
+	.discard {
+		--color-highlight: hsl(0, 60%, 70%);
+	}
+
+	@media (hover: hover) {
+		.save:hover:not(:active),
+		.discard:hover:not(:active) {
+			background-color: var(--color-highlight);
+		}
 	}
 
 	.animated {
@@ -230,11 +269,10 @@
 		animation-iteration-count: infinite;
 		animation-timing-function: ease-out;
 		animation-direction: normal;
-
-		background-color: hsl(120, 60%, 60%);
+		background-color: var(--color-highlight);
 	}
 	.discard.animated {
-		background-color: hsl(0, 70%, 60%);
+		background-color: var(--color-highlight);
 		animation-timing-function: ease-in-out;
 		animation-direction: alternate-reverse;
 	}

@@ -9,6 +9,7 @@ export default defineConfig({
 		onConsoleLog: message => !message.startsWith("[log]"),
 		environment: 'jsdom',
 		include: ['src/**/*.{test,spec}.{js,ts}', 'tests/**/*.{test,spec}.{js,ts}'],
-		setupFiles: ['./setupTests.js']
+		setupFiles: ['./setupTests.js'],
+		testTimeout: 10000
 	}
 });

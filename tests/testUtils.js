@@ -10,6 +10,7 @@ export function setStore(options) {
         playersTotal: 8,
         players: [],
         games: [],
+        kvMaps: [],
         ...options
     })
 }

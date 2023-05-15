@@ -1,5 +1,5 @@
 import mockedPlayers from './players';
-import mockedGames from './games';
+import { games, kvMaps } from './games';
 
 /** @typedef {import('../types.ts').Player} Player */
 /** @typedef {import('../types.ts').Participant} Participant */
@@ -26,7 +26,8 @@ export async function mockedFetchData() {
         withTop3: true,
         status: 'ongoing',
         players,
-        games: mockedGames
+        games,
+        kvMaps
     };
 
     // add couple of unassigned players

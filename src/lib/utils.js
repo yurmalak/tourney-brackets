@@ -18,23 +18,8 @@ export function createGame({ round, index, players }) {
         round,
         index,
         players,
-        data: []
+        kvMap: []
     }
-}
-
-/**
- * @param {Game[]} games 
- */
-export function calculateScore(games) {
-
-    return games.reduce(
-        (score, game) => {
-            if (game.winner === undefined) return score;
-            score[game.winner]++;
-            return score;
-        },
-        [0, 0]
-    )
 }
 
 /**
@@ -51,6 +36,21 @@ export function createSeries(round, index) {
         score: [0, 0],
         players: [null, null],
         games: [],
-        data: []
+        kvMap: []
     };
+}
+
+/**
+ * @param {Game[]} games 
+ */
+export function calculateScore(games) {
+
+    return games.reduce(
+        (score, game) => {
+            if (game.winner === undefined) return score;
+            score[game.winner]++;
+            return score;
+        },
+        [0, 0]
+    )
 }

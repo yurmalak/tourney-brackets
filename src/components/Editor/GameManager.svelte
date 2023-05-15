@@ -1,20 +1,9 @@
 <script>
 	import Switcher from './Switcher.svelte';
 	import Game from './Game.svelte';
-	import { createGame } from '../../lib/utils';
 
 	export let selectedPlayers;
-	export let round;
 	export let games;
-
-	function addGame() {
-		const game = createGame({
-			round,
-			index: games.length,
-			players: [...selectedPlayers]
-		});
-		games = [...games, game];
-	}
 
 	function deleteGame(gameIndex) {
 		games.splice(gameIndex, 1);
@@ -28,6 +17,14 @@
 		games[gameIndex] = { ...game };
 		games = [...games];
 	}
+
+	function label(game) {
+		let str = 'Winner switcher.';
+		if (selectedPlayers[game.winner]) {
+			str += ` Current winner is ${selectedPlayers[game.winner]}.`;
+		}
+		return str;
+	}
 </script>
 
 {#if games.length > 0}
@@ -35,7 +32,7 @@
 		<ul aria-label="games">
 			{#each games as game, i (game.id)}
 				<li aria-label="game">
-					<Game bind:data={game.data}>
+					<Game bind:data={game.kvMap}>
 						<Switcher
 							let:style
 							let:class={className}
@@ -44,7 +41,7 @@
 							{className}
 							value={game.winner}
 							label="Winner"
-							aria-label="Winner switcher. Current winner is {selectedPlayers[game.winner]}"
+							aria-label={label(game)}
 							slot="score-switcher"
 						/>
 						<button
@@ -67,13 +64,8 @@
 	</editor-games>
 {/if}
 
-<slot name="inbetween" />
-
-<button type="button" class="button add-game" on:click={addGame}>Add game</button>
-
 <style>
 	editor-games {
-		padding: var(--padding);
 		padding-bottom: 0;
 		border-bottom: var(--border-inner);
 		display: flex;
@@ -89,15 +81,12 @@
 	}
 
 	li {
-		border: 1px solid lightgray;
-		box-shadow: 1px 1px 3px #878da0;
+		border: 1px solid gray;
+		box-shadow: 1px 1px 4px hsl(238 30% 66% / 1);
 		background-color: var(--color-bg-light);
+		margin: var(--space-m) 0;
 	}
 	li:not(:last-of-type) {
 		margin-bottom: var(--space-m);
-	}
-
-	.add-game {
-		margin: var(--padding);
 	}
 </style>
