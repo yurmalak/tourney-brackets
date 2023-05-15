@@ -1,3 +1,5 @@
+<svelte:options immutable />
+
 <script>
 	export let label;
 	export let value;
@@ -21,6 +23,7 @@
 		margin-bottom: -0.2em;
 		user-select: none;
 		font-size: 0.85em;
+		cursor: pointer;
 	}
 
 	button {
@@ -51,9 +54,6 @@
 		background-color: hsl(225, 50%, 55%);
 		transition: transform 150ms ease-out;
 	}
-	button:active:active:before {
-		background-color: hsl(220, 75%, 60%);
-	}
 
 	.state-undefined.state-undefined:before {
 		background-color: hsl(0, 0%, 65%);
@@ -66,9 +66,9 @@
 	@media (hover: hover) {
 		button:hover {
 			background-color: var(--color);
-			box-shadow: 0 0 2px #5d6883d3;
+			box-shadow: 0 0 3px #5d6883;
 		}
-		button:hover:before {
+		button:not(:active):hover:before {
 			background-color: hsl(210, 80%, 60%);
 		}
 	}

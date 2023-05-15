@@ -1,3 +1,5 @@
+<svelte:options immutable />
+
 <script>
 	export let span = 1;
 	export let horisontal = false;

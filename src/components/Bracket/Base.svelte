@@ -1,3 +1,5 @@
+<svelte:options immutable />
+
 <script>
 	import PowersOf2 from './templates/PowersOf2.svelte';
 
