@@ -42,7 +42,7 @@ function Container() {
 /**
  * 
  */
-class Tourney {
+export class Tourney {
     constructor({ games = [], kvMaps = [], ...data }) {
 
         this.tree = new Map()

@@ -1,6 +1,6 @@
-import PowersOf2 from '../../../src/components/Bracket/templates/PowersOf2.svelte';
+import PowersOf2 from '../../src/components/brackets/PowersOf2/PowersOf2.svelte';
 import { render, screen } from '@testing-library/svelte';
-import { setStore } from '../../testUtils';
+import { setStore } from '../testUtils';
 
 
 

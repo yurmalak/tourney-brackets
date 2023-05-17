@@ -1,7 +1,7 @@
 <svelte:options immutable />
 
 <script>
-	import PowersOf2 from './templates/PowersOf2.svelte';
+	import PowersOf2 from './PowersOf2/PowersOf2.svelte';
 
 	const templates = {
 		powersOf2: PowersOf2
