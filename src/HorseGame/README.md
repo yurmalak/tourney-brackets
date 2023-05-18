@@ -1,0 +1,1 @@
+Stuff specific for HoMM3 tourney "Игра в Коня".

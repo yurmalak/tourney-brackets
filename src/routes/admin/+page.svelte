@@ -1,5 +1,8 @@
 <script>
 	import Admin from '../../components/Admin.svelte';
+	import AdminContextProvider from '../../HorseGame/adminParts/AdminContextProvider.svelte';
 </script>
 
-<Admin />
+<AdminContextProvider>
+	<Admin />
+</AdminContextProvider>
