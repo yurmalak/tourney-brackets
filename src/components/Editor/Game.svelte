@@ -1,18 +1,23 @@
 <script>
-	import DataMapper from './DataMapper.svelte';
+	import Switcher from './Switcher.svelte';
+
+	// data is game-specific and only used by custom component replacing this one
+	// so simply mute the warning here
 	export let data;
+	data;
+
+	export let winner;
 </script>
 
 <editor-game>
-	<slot name="score-switcher" style="grid-column: 2;" />
-	<slot name="delete-game" class="delete-game-button" text="&#10006;" />
-	<DataMapper
-		bind:data
-		slot="data-map"
-		label="Key-value map for the game"
-		buttonClass="button-no-bg"
-		style="grid-column: span 3;"
+	<Switcher
+		bind:value={winner}
+		label="Winner"
+		aria-label="Winner switcher. Current winner - player {winner + 1}."
 	/>
+	<slot name="data-mapper" />
+	<slot name="kv-creator" />
+	<slot name="delete-button" />
 </editor-game>
 
 <style>
@@ -22,26 +27,5 @@
 		padding: var(--space-m);
 		gap: var(--space-m);
 		padding: var(--space-m);
-	}
-
-	.delete-game-button {
-		grid-column: 3;
-		justify-self: end;
-		border: none;
-		background: none;
-		padding: 0 var(--space-l);
-		font-size: 1.3rem;
-		color: var(--color-bg-dark);
-		cursor: pointer;
-	}
-
-	.delete-game-button:active:active {
-		color: hsl(0, 65%, 72%);
-	}
-
-	@media (hover: hover) {
-		.delete-game-button:hover {
-			color: hsl(0, 75%, 42%);
-		}
 	}
 </style>

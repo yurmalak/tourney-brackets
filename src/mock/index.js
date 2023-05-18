@@ -3,7 +3,7 @@ import { games, kvMaps } from './games';
 
 /** @typedef {import('../types.ts').Player} Player */
 /** @typedef {import('../types.ts').Participant} Participant */
-/** @typedef {import('../types.ts').Participant} TourneyData */
+/** @typedef {import('../types.ts').TourneyData} TourneyData */
 
 
 /** @returns {Promise<{ tourneys: object; currentTourneyId: string; }>} */
@@ -36,15 +36,5 @@ export async function mockedFetchData() {
         { name: "Idler 2", sIndex: null, pIndex: 0 },
     )
 
-    return {
-        tourneys: {
-            [mockedTourney.id]: mockedTourney,
-            "id123": {
-                id: "id123",
-                name: "Unfetched tourney",
-                status: "finished"
-            }
-        },
-        currentTourneyId: mockedTourney.id
-    };
+    return mockedTourney;
 }

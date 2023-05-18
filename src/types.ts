@@ -17,7 +17,8 @@ export interface Game {
     round: number
     index: number
     players: string[]
-    kvMap: [string, string[]][]
+    kvMap: KvMap
+    data: {}
     winner?: number
 }
 
@@ -27,7 +28,7 @@ export interface Series {
     score: number[]
     players: (Participant | null)[]
     games: Game[]
-    kvMap: [string, string[]][]
+    kvMap: KvMap
     winner?: number
 }
 
@@ -39,4 +40,7 @@ export interface TourneyData {
     players: Participant[]
     games: Game[]
     playersTotal: number
+}
+
+export interface KvMap extends Array<[string, string[]]> {
 }

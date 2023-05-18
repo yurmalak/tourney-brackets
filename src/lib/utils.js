@@ -1,10 +1,13 @@
 /** @typedef {import("../types").Game} Game */
 
 
-/** @returns {string} 32-length string of numbers */
-export function uniqueNumber() {
+/** 
+ * @param {number} n
+ * @returns {string} n-length string of numbers 
+ */
+export function uniqueNumber(n = 20) {
     const firstPart = Math.random().toString().slice(2) + Date.now()
-    const secondPart = Math.random().toString().slice(2).slice(0, 32 - firstPart.length)
+    const secondPart = Math.random().toString().slice(2).slice(0, n - firstPart.length)
     return firstPart + secondPart
 }
 
@@ -18,7 +21,8 @@ export function createGame({ round, index, players }) {
         round,
         index,
         players,
-        kvMap: []
+        kvMap: [],
+        data: {}
     }
 }
 

@@ -19,9 +19,10 @@
 	data-player-index={playerIndex}
 	disabled={!players}
 	value={value ?? ''}
+	class:occupied={Boolean(value)}
 >
 	{#if players}
-		<option value="" class="idle" aria-label="select none">---</option>
+		<option value="" class="idle" aria-label="select none" />
 		{#each players as { name, sIndex } (name)}
 			<option value={name} class:idle={sIndex === null}>
 				{name}
@@ -37,9 +38,13 @@
 		appearance: none;
 		-webkit-appearance: none;
 		-moz-appearance: none;
+		user-select: all;
+		opacity: 0.4;
+	}
+
+	select.occupied:disabled {
 		opacity: 1;
 		color: inherit;
-		user-select: all;
 	}
 
 	select {
@@ -48,6 +53,6 @@
 		background-color: var(--color-input);
 	}
 	option:not(.idle) {
-		background-color: var(--color-bg-light);
+		background-color: lightgray;
 	}
 </style>

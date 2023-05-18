@@ -1,6 +1,7 @@
 /** @typedef {import('./types.ts').Participant} Participant */
 /** @typedef {import('./types.ts').TourneyData} TourneyData */
 /** @typedef {import('./types.ts').Series} Series */
+/** @typedef {import('./types.ts').KvMap} KvMap */
 /** @typedef {import('./types.ts').Game} Game */
 
 import { writable } from 'svelte/store';
@@ -20,10 +21,10 @@ export const gamesSorter = (a, b) => a.index - b.index
 
 
 /** 
- * @param {[string,[]][]} a
- * @param {[string,[]][]} b
+ * @param {KvMap} a
+ * @param {KvMap} b
  */
-const kvMapSorter = (a, b) => {
+export const kvMapSorter = (a, b) => {
 
     // put pairs with single value first
     const lessValues = a[1].length - b[1].length
@@ -124,6 +125,8 @@ export class Tourney {
      */
     getSeries(round, playerKeys) {
 
+        if (!playerKeys.every(Boolean)) return new Container()
+
         const keys = [...playerKeys].sort(playerSorter)
         keys.push(round)
 
@@ -133,7 +136,7 @@ export class Tourney {
     save({ changed, selectedPlayers, series, seriesData }) {
 
         if (changed.players) {
-            this.players = this.players = this.players.map(({ ...p }) => {
+            this.players = this.players.map(({ ...p }) => {
                 if (selectedPlayers.includes(p.name)) {
                     p.sIndex = series.index;
                     p.pIndex = selectedPlayers.indexOf(p.name);

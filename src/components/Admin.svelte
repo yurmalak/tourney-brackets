@@ -1,26 +1,34 @@
 <script>
-	import { onMount } from 'svelte';
-	import { tourneyStore, tourneyList } from '../stores';
-	import Bracket from './Bracket/Base.svelte';
-	import Editor from './Editor/Editor.svelte';
-
 	/** @typedef {import('../../types.ts').Series} Series */
+	import { onMount, setContext, getContext } from 'svelte';
+	import { configKey } from '$lib/context';
+	import { createGame } from '$lib/utils';
+	import { tourneyStore } from '../stores';
+	import Bracket from './brackets/Base.svelte';
+	import Editor from './Editor/Editor.svelte';
+	import Game from './Editor/Game.svelte';
 
 	// mock
 	import { mockedFetchData } from '../mock';
 
+	// setup fallback in case game-specific functions are not provided
+	const gameContext = {
+		createGame,
+		GameEditor: Game,
+		fetchData: mockedFetchData,
+		...getContext(configKey)
+	};
+	setContext(configKey, gameContext);
+
 	// fetch list of tourneys and data for ongoing or latest one
 	let ready = false;
+	let error = false;
 	onMount(async () => {
-		let data = JSON.parse(localStorage.getItem('mockedData'));
-		if (!data) {
-			data = await mockedFetchData();
-			localStorage.setItem('mockedData', JSON.stringify(data));
-		}
-		const { tourneys, currentTourneyId } = data;
+		const data = await gameContext.fetchData().catch((err) => (error = err));
 
-		tourneyStore.set(tourneys[currentTourneyId]);
-		tourneyList.set(tourneys);
+		// check if players are there to preserve changes between pages
+		if (!error && !$tourneyStore.players) tourneyStore.set(data);
+		else console.log(console.error('Admin, failed to fetch data', error));
 
 		ready = true;
 	});
@@ -49,6 +57,7 @@
 			--color-bg-medium: hsl(223, 46%, 85%);
 			--color-bg-light: hsl(230, 30%, 93%);
 			--color-input: hsl(227, 0%, 96%);
+			--color-warn: hsl(0, 60%, 70%);
 			--space-s: 0.2rem;
 			--space-m: 0.5rem;
 			--space-l: 0.8rem;
@@ -59,6 +68,8 @@
 		}
 
 		body {
+			height: 100vh;
+			margin: 0;
 			background-color: var(--color-bg-light);
 		}
 

@@ -3,10 +3,11 @@ import userEvent from "@testing-library/user-event"
 import { get } from 'svelte/store';
 import { afterEach, vi } from "vitest"
 
-import Editor from '../../src/components/Editor/Editor.svelte';
-import { setStore } from '../testUtils';
-import { createGame, createSeries } from '../../src/lib/utils';
-import { tourneyStore } from '../../src/stores';
+import { setStore } from '../../../tests/testUtils';
+import { createGame, createSeries } from '$lib/utils';
+import { tourneyStore } from '../../stores';
+import Editor from './EditorTestAssistant.svelte';
+
 
 
 describe("Editor", () => {
@@ -166,7 +167,7 @@ describe("Editor", () => {
         await checkButtons({ "delete game": true, "winner": true, "add game": true })
 
         // switcher should also have winner's name on it (Jane, second player)
-        const winnerSwitcher = screen.getByLabelText("Jane", { exact: false })
+        const winnerSwitcher = screen.getByLabelText(/current.+player.+2/i)
         expect(winnerSwitcher).toBeInTheDocument()
 
         // order of players' names in game should not be relevant
@@ -292,15 +293,23 @@ describe("Editor", () => {
 
         // well, if it says so...
         for (let i = 1; i < games.length; i++) {
+
             const deleteButton = within(games[i]).getByRole("button", { name: /delete game/i })
+            await user.click(deleteButton)
+
+            // deletion requires confirmation
+            expect(deleteButton.textContent).toBe("Confirm")
             await user.click(deleteButton)
         }
 
         // as if nothing happened
         await checkButtons(false)
 
+
         // let's at least replace first game
-        await user.click(within(games[0]).getByRole("button", { name: /delete game/i }))
+        const deleteButton = within(games[0]).getByRole("button", { name: /delete game/i })
+        await user.click(deleteButton)
+        await user.click(deleteButton)  // confirm
         await user.click(addGame)
         await checkButtons(true)
     })

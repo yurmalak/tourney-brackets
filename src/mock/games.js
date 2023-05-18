@@ -1,4 +1,5 @@
 /** @typedef {import('../types.ts').Game} Game */
+/** @typedef {import('../types.ts').KvMap} KvMap */
 
 import playerList from "./players"
 import { createGame } from "../lib/utils"
@@ -34,7 +35,7 @@ function makeMockedData(items) {
 /** @type {Array<Game>} */
 export const games = []
 
-/** @type {[string, [string, string]]} */
+/** @type {KvMap} */
 export const kvMaps = []
 
 
