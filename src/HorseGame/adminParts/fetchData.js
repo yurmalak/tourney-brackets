@@ -7,5 +7,5 @@ import tourneyData from '../data/tourneyData';
  */
 export default async function fetchData() {
 
-    return { ...tourneyData.data, templateCode: 'powersOf2' }
+    return tourneyData.data
 }

@@ -1,19 +1,42 @@
 <script>
-	/** @type {Array<string|undefined>}*/
-	let pages = [];
-	const modules = import.meta.glob('./**/**.svelte');
-
-	for (const path in modules) {
-		pages.push(/\.\/([^\/]+)\//.exec(path)?.[1]);
-	}
-
-	pages = pages.filter(Boolean);
-	pages.unshift('');
+	import { page } from '$app/stores';
 </script>
 
-<header>
-	{#each pages as path}
-		<a href={'/' + path}>{path ? path?.[0].toUpperCase() + path?.slice(1) : 'Home'}</a>
-	{/each}
-</header>
+{#if $page.route.id !== '/auth'}
+	<header style:position="absolute" style:z-index="999">
+		<a href="/">Сетка</a>
+		<a href="/demo-cms">Демка</a>
+	</header>
+{/if}
+
 <slot />
+
+<svelte:head>
+	<style>
+		body {
+			margin: 0;
+		}
+		.visually-hidden {
+			clip: rect(0 0 0 0);
+			clip-path: inset(50%);
+			height: 1px;
+			overflow: hidden;
+			position: absolute;
+			white-space: nowrap;
+			width: 1px;
+		}
+	</style>
+</svelte:head>
+
+<style>
+	header {
+		position: absolute;
+		width: 100%;
+		z-index: 999;
+		display: flex;
+		justify-content: center;
+		gap: 20px;
+		font-size: 16px;
+		font-family: Verdana, Geneva, Tahoma, sans-serif;
+	}
+</style>

@@ -26,9 +26,9 @@
 	onMount(async () => {
 		const data = await gameContext.fetchData().catch((err) => (error = err));
 
+		if (error) console.log(console.error('Admin, failed to fetch data', error));
 		// check if players are there to preserve changes between pages
-		if (!error && !$tourneyStore.players) tourneyStore.set(data);
-		else console.log(console.error('Admin, failed to fetch data', error));
+		else if (!$tourneyStore.players) tourneyStore.set(data);
 
 		ready = true;
 	});
@@ -41,7 +41,7 @@
 	let editableSeries;
 </script>
 
-<div>
+<div class="root">
 	{#if !ready}
 		Hold on...
 	{:else}
@@ -67,9 +67,12 @@
 			font-size: 14px;
 		}
 
+		.root {
+			overflow: auto;
+		}
+
 		body {
 			height: 100vh;
-			margin: 0;
 			background-color: var(--color-bg-light);
 		}
 
@@ -120,16 +123,6 @@
 				border: 2px solid hsl(237, 69%, 69%);
 				background-color: var(--color-bg-medium);
 			}
-		}
-
-		.visually-hidden {
-			clip: rect(0 0 0 0);
-			clip-path: inset(50%);
-			height: 1px;
-			overflow: hidden;
-			position: absolute;
-			white-space: nowrap;
-			width: 1px;
 		}
 	</style>
 </svelte:head>

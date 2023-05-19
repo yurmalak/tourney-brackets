@@ -6,3 +6,7 @@
 <AdminContextProvider>
 	<Admin />
 </AdminContextProvider>
+
+<svelte:head>
+	<title>Игра в Коня | Демка</title>
+</svelte:head>
