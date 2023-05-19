@@ -2,11 +2,14 @@
 <script>
 	import { setContext } from 'svelte';
 	import { configKey } from '$lib/context';
-	import { createGame } from '$lib/utils';
-	import Game from './Game.svelte';
+	import { createGame as defaultCreateGame } from '$lib/utils';
+	import DefaultGameEditor from './GameEditor.svelte';
 	import Editor from './Editor.svelte';
 
-	setContext(configKey, { createGame, GameEditor: Game });
+	export let GameEditor = DefaultGameEditor;
+	export let createGame = defaultCreateGame;
+
+	setContext(configKey, { createGame, GameEditor });
 </script>
 
 <Editor {...$$props} on:toggleEditor />

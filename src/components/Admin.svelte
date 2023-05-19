@@ -6,7 +6,7 @@
 	import { tourneyStore } from '../stores';
 	import Bracket from './brackets/Base.svelte';
 	import Editor from './Editor/Editor.svelte';
-	import Game from './Editor/Game.svelte';
+	import GameEditor from './Editor/GameEditor.svelte';
 
 	// mock
 	import { mockedFetchData } from '../mock';
@@ -14,7 +14,7 @@
 	// setup fallback in case game-specific functions are not provided
 	const gameContext = {
 		createGame,
-		GameEditor: Game,
+		GameEditor,
 		fetchData: mockedFetchData,
 		...getContext(configKey)
 	};
