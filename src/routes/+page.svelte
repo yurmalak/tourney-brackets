@@ -17,4 +17,8 @@
 			Турнир на 32 участника играется на шаблоне JC (фулл рандом) с дополнительными усложнениями. 
 		"
 	/>
+	<script
+		type="text/javascript"
+		src="https://identity.netlify.com/v1/netlify-identity-widget.js"
+	></script>
 </svelte:head>
