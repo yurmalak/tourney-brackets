@@ -8,7 +8,7 @@ export default function processKVMap(series) {
         hide: {}
     }
 
-    for (const [key, [v1, /*v2*/]] of series.kvMap) {
+    for (const [key, v1, /*v2*/] of series.kvMap) {
         switch (key) {
             // render clock icon to tell that game date has been defined
             case "начало":
@@ -32,7 +32,7 @@ export default function processKVMap(series) {
 
 
     for (const game of series.games) {
-        for (const [key, [v1, v2]] of game.kvMap) {
+        for (const [key, v1, v2] of game.kvMap) {
             switch (key) {
 
                 // render start icon for each challenge completed

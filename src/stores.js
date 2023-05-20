@@ -27,7 +27,7 @@ export const gamesSorter = (a, b) => a.index - b.index
 export const kvMapSorter = (a, b) => {
 
     // put pairs with single value first
-    const lessValues = a[1].length - b[1].length
+    const lessValues = a.length - b.length
 
     // then sort by keys
     return lessValues || a[0].localeCompare(b[0])
@@ -167,7 +167,7 @@ export class Tourney {
 
             // sort kvMap by keys and drop empty ones
             const sortedMap = kvMap
-                .filter(([key, [v1, v2]]) => key || v1 || v2)
+                .filter(([key, v1, v2]) => key || v1 || v2)
                 .sort(kvMapSorter)
 
             // and save

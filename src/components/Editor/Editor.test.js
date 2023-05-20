@@ -30,15 +30,15 @@ describe("Editor", () => {
         const game = createGame({ round, index: 0, players: names })
         game.winner = 1
         game.kvMap = [
-            ["game-kv-single-key", ["game-kv-single-value"]],
-            ["game-kv-dual-key", ["game-kv-dual-value-1", "game-kv-dual-value-2"]],
+            ["game-kv-single-key", "game-kv-single-value"],
+            ["game-kv-dual-key", "game-kv-dual-value-1", "game-kv-dual-value-2"],
         ]
 
         series.games = [game]
         series.players = participants
         const kvMap = [
-            ["series-kv-single-key", ["series-kv-single-value"]],
-            ["series-kv-dual-key", ["series-kv-dual-value-1", "series-kv-dual-value-2"]]
+            ["series-kv-single-key", "series-kv-single-value"],
+            ["series-kv-dual-key", "series-kv-dual-value-1", "series-kv-dual-value-2"]
         ]
         const kvMaps = [{ round, sIndex: 0, players: names, kvMap }]
 
@@ -322,7 +322,7 @@ describe("Editor", () => {
         // edit existing maps and check if they are recognized
         const texts = [
             kvMaps.s1[0],
-            kvMaps.g2[1][1]
+            kvMaps.g2[2]
         ]
 
         // these are contenteditables so check for textContent instaed of value
@@ -431,12 +431,12 @@ describe("Editor", () => {
         expect(args.seriesData.games[0].winner).toBe(0)
         expect(args.seriesData.games[0].players).toEqual(["John", "Kate"])
         expect(args.seriesData.games[0].kvMap).toEqual([
-            ["date", ["January, 1st"]],
-            ["starting gold", ["500", "400"]]
+            ["date", "January, 1st"],
+            ["starting gold", "500", "400"]
         ])
         expect(args.seriesData.kvMap).toEqual([
-            ["type", ["bo3"]],
-            ["hat", ["cylinder", "beanie"]]
+            ["type", "bo3"],
+            ["hat", "cylinder", "beanie"]
         ])
     })
 

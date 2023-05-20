@@ -9,16 +9,15 @@
 <data-mapper {style} class={className}>
 	{#if kvMap.length > 0}
 		<dl aria-label={label}>
-			{#each kvMap as [key, values]}
+			{#each kvMap as [key, v1, v2]}
 				<dt aria-label="key" contenteditable bind:textContent={key} spellcheck="false" />
-				{#each values as textContent, i}
-					<dd
-						bind:textContent
-						contenteditable
-						aria-label="value{values.length === 1 ? '' : ` (${i + 1} of 2)`}"
-						style:grid-column="span {3 - values.length}"
-					/>
-				{/each}
+
+				{#if v2 === undefined}
+					<dd bind:textContent={v1} contenteditable aria-label="value" style:grid-column="span 2" />
+				{:else}
+					<dd bind:textContent={v1} contenteditable aria-label="value (1 of 2)" />
+					<dd bind:textContent={v2} contenteditable aria-label="value (2 of 2)" />
+				{/if}
 			{/each}
 		</dl>
 	{/if}

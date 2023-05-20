@@ -14,7 +14,7 @@
 	/** @param {Event} */
 	async function addKvPair(ev) {
 		const { dual } = ev.target.dataset;
-		kvMap[kvMap.length] = ['', dual ? ['', ''] : ['']];
+		kvMap[kvMap.length] = dual ? ['', '', ''] : ['', ''];
 
 		// focus new pair
 		await tick();

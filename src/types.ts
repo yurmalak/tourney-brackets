@@ -42,5 +42,5 @@ export interface TourneyData {
     playersTotal: number
 }
 
-export interface KvMap extends Array<[string, string[]]> {
+export interface KvMap extends Array<[string, string] | [string, string, string]> {
 }
