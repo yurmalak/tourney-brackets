@@ -10,6 +10,8 @@
 		data.towns[i] = town;
 		data.starters[i] = null;
 	}
+
+	const color = (blue, i) => (blue === null ? '' : blue === i ? 'blue' : 'red');
 </script>
 
 <editor-game>
@@ -18,7 +20,7 @@
 		{#each data.towns as town, i}
 			<select
 				on:change={(ev) => setTown(i, ev.target.value)}
-				class="{data.blue === i ? '' : 'red'} {town ? '' : 'not-selected'}"
+				class="{color(data.blue, i)} {town ? '' : 'not-selected'}"
 				value={town ?? ''}
 			>
 				<option value="">{town ? '' : 'Town'}</option>
@@ -31,11 +33,9 @@
 
 			<!-- Town icons with winner swapper between them -->
 			{#if i === 0}
-				{#if data.towns[0]}<GamePicture name={town} title="Player 1 town" />
-				{:else}<img-placeholder />{/if}
+				<GamePicture name={data.towns[0]} />
 				<Switcher bind:value={winner} label="Winner" />
-				{#if data.towns[1]}<GamePicture name={data.towns[1]} title="Player 2 town" />
-				{:else}<img-placeholder />{/if}
+				<GamePicture name={data.towns[1]} />
 			{/if}
 		{/each}
 
@@ -44,7 +44,7 @@
 			{@const town = data.towns[i]}
 			<select
 				on:change={(ev) => (data.starters[i] = ev.target.value)}
-				class="{data.blue === i ? '' : 'red'} {starter ? '' : 'not-selected'}"
+				class="{color(data.blue, i)} {starter ? '' : 'not-selected'}"
 				value={starter ?? ''}
 				disabled={!town}
 			>
@@ -58,14 +58,16 @@
 
 			<!-- Starters icons with color swapper between them -->
 			{#if i === 0}
-				{#if data.starters[0]}<GamePicture name={starter} title="Player 1 starter" />
-				{:else}<img-placeholder />{/if}
+				<GamePicture name={data.starters[0]} />
 				<label class="swap-color">
-					<button type="button" class="swap-color" on:click={() => (data.blue = 1 - data.blue)} />
+					<button
+						type="button"
+						class="swap-color"
+						on:click={() => (data.blue = 1 - (data.blue ?? 1))}
+					/>
 					Color
 				</label>
-				{#if data.starters[1]}<GamePicture name={data.starters[1]} title="Player 2 starter" />
-				{:else}<img-placeholder />{/if}
+				<GamePicture name={data.starters[1]} />
 			{/if}
 		{/each}
 	</homm3-snippet>
@@ -96,7 +98,7 @@
 			grid-template-columns: 1fr auto 1fr;
 		}
 		:global(homm3-snippet > img),
-		img-placeholder {
+		:global(img-placeholder) {
 			display: none;
 		}
 	}
@@ -110,8 +112,6 @@
 	}
 
 	select {
-		background-color: hsl(237 70% 90% / 1);
-		border: 4px solid hsl(240deg, 75%, 65%);
 	}
 	select:disabled {
 		opacity: 1;
@@ -119,6 +119,10 @@
 	.red {
 		background-color: hsl(350deg 55% 90%);
 		border-color: hsl(0, 75%, 65%);
+	}
+	.blue {
+		background-color: hsl(237 70% 90% / 1);
+		border: 4px solid hsl(240deg, 75%, 65%);
 	}
 
 	select:nth-of-type(-n + 2) {
@@ -157,7 +161,7 @@
 	@media (hover: hover) {
 		button.swap-color:hover:not(:active):after {
 			transform: scale(1.05);
-			filter: drop-shadow(0px 0px 1px hsl(240, 8%, 50%));
+			filter: text-shadow(0px 0px 1px hsl(240, 8%, 50%));
 		}
 	}
 </style>

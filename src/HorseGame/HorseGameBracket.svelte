@@ -20,7 +20,7 @@
 	const imgStats = { width: 1920, height: 1080, widths: [1400, 1980, 3920] };
 
 	// related to Card
-	let cardData, imgRef;
+	let cardData, imgRef, cardRef;
 	let locked = false,
 		hoverBlocked = false;
 	const nodeClassName = 'bracket-node';
@@ -55,7 +55,7 @@
 		}
 
 		// ignore clicks inside opened card
-		if (ev.target.closest('article')) {
+		if (cardRef?.contains(ev.target)) {
 			return;
 		}
 
@@ -89,8 +89,10 @@
 		// clicks take priority over hover
 		if (locked) return;
 
-		const node = ev.target.closest('.' + nodeClassName);
+		// keep open on hovering over the Card
+		if (cardRef?.contains(ev.target)) return;
 
+		const node = ev.target.closest('.' + nodeClassName);
 		if (!node || node.disabled) {
 			cardData = null;
 		} else if (!hoverBlocked && cardData?.node !== node) {
@@ -121,7 +123,17 @@
 			{/each}
 		{/each}
 		{#if cardData}
-			<Modal root={imgRef} anchor={cardData.node} width={360}>
+			<Modal
+				bind:ref={cardRef}
+				root={imgRef}
+				anchor={cardData.node}
+				width={360}
+				style="
+					border: 4px solid #624627;
+					box-shadow: 0px 0px 2px 1px black;
+					display: flex;
+					"
+			>
 				<Card series={seriesByRound[cardData.round][cardData.sIndex]} />
 			</Modal>
 		{/if}

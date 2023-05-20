@@ -13,7 +13,7 @@ export default function createGame(args) {
     game.data = {
         towns: [null, null],
         starters: [null, null],
-        blue: 1
+        blue: null
     }
 
     return game

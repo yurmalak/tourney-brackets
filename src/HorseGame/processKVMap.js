@@ -44,6 +44,10 @@ export default function processKVMap(series) {
                 case "рулетка":
                     data.roulette.push(v1)
                     break
+
+                case "replay":
+                    data.replay = v1
+                    break
             }
         }
     }

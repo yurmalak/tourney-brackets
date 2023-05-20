@@ -3,6 +3,7 @@
 	export let anchor;
 	export let width;
 	export let style = null;
+	export let ref = null;
 
 	let top, left, transform, container, opacity;
 	$: placeModal(root, anchor);
@@ -16,11 +17,11 @@
 	function adjustHorizontally(anchorRect, rootRect) {
 		// right
 		if (anchorRect.right + width + 10 < window.innerWidth) {
-			left = ((anchorRect.right - rootRect.left + 4) / rootRect.width) * 100 + '%';
+			left = ((anchorRect.right - rootRect.left) / rootRect.width) * 100 + '%';
 		}
 		// left
 		else if (anchorRect.left - width - 10 > 0) {
-			const n = ((anchorRect.left - rootRect.left - 10) / rootRect.width) * 100;
+			const n = ((anchorRect.left - rootRect.left - 8) / rootRect.width) * 100;
 			left = `calc(${n}% - ${width}px)`;
 		}
 		// center
@@ -82,7 +83,7 @@
 	}
 </script>
 
-<div {style} style:top style:left style:transform style:opacity use:setupObserver>
+<div {style} bind:this={ref} style:top style:left style:transform style:opacity use:setupObserver>
 	<slot />
 </div>
 

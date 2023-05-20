@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 20 20" width="10" height="10">
+<path
+	id="star"
+	fill="yellow"
+	stroke="black"
+	stroke-width="1"
+	d="M 0,-10 L 2.35,-3.24 L 9.51,-3.09 L 3.8,1.24 L 5.88,8.09 L 0,4 L -5.88,8.09 L -3.8,1.24 L -9.51,-3.09 L -2.35,-3.24 Z"
+/>
+</svg>

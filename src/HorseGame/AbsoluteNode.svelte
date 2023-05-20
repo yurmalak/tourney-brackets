@@ -102,7 +102,7 @@
 			background: var(--bg);
 		}
 		button:hover:not(:active):not(:disabled) > svg {
-			filter: url(#drop-shadow);
+			filter: url(#text-shadow);
 		}
 		.clock:hover {
 			scale: 0.28;
@@ -118,5 +118,6 @@
 	svg {
 		flex-grow: 1;
 		overflow: visible;
+		font-family: cursive;
 	}
 </style>

@@ -2,7 +2,7 @@
 
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;opacitty:0;">
 	<defs>
-		<filter id="drop-shadow"><feDropShadow dx="0.3" dy="0.3" stdDeviation="0.2" /></filter>
+		<filter id="text-shadow"><feDropShadow dx="0.3" dy="0.3" stdDeviation="0.2" /></filter>
 		<path
 			id="star"
 			stroke-width="1"
