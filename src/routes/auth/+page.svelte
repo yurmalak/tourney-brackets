@@ -1,8 +1,20 @@
+<script>
+	import netlifyIdentity from 'netlify-identity-widget';
+	import { onDestroy, onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
+	const handler = () => goto('/cms');
+	onMount(() => {
+		netlifyIdentity.init();
+		netlifyIdentity.open();
+		netlifyIdentity.on('login', handler);
+	});
+	onDestroy(() => {
+		netlifyIdentity.off('login', handler);
+	});
+</script>
+
 <svelte:head>
-	<script
-		type="text/javascript"
-		src="https://identity.netlify.com/v1/netlify-identity-widget.js"
-	></script>
 	<style>
 		body {
 			background-color: #5d686d;

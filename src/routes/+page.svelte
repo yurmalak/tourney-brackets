@@ -1,6 +1,24 @@
 <script>
+	import { onDestroy, onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import HorseGame from '../HorseGame/HorseGameBracket.svelte';
 	import SvgDefs from '../HorseGame/SvgDefs.svelte';
+
+	const handler = () => {
+		netlifyIdentity.close();
+		goto('/cms');
+	};
+
+	onMount(() => {
+		if (typeof window !== 'undefined') {
+			if (window.netlifyIdentity) window.netlifyIdentity.on('login', handler);
+			else console.warn('No netlifyIdentity on window object');
+		}
+	});
+
+	onDestroy(() => {
+		if (typeof window !== 'undefined') window.netlifyIdentity.off('login', handler);
+	});
 </script>
 
 <h1 class="visually-hidden">Сетка турнира Игра в Коня</h1>
