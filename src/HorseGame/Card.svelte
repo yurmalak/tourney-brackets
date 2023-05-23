@@ -5,44 +5,41 @@
 	import starUrl from './star.svg';
 	export let series;
 
-	$: ({ players, score, games, kvData } = series);
+	$: ({ players, score, games, data } = series);
 </script>
 
 <div class="card-modal" aria-label="Детали серии {players[0].name} vs {players[1].name}.">
 	<!-- players and score -->
 	<header>
-		{#each players as { twitch, name }, i}
-			<a class="player-link" href="https://www.twitch.tv/{twitch}" aria-label="Стрим {name}">
+		{#each players as { name, url }, i}
+			<a class="player-link" href={url} aria-label="Стрим {name}">
 				{name}
 			</a>
 			{#if i === 0}<series-score>{score.join('-')}</series-score>{/if}
 		{/each}
 	</header>
 
-	{#if kvData.start}
-		<div class="games-coming">{kvData.start}</div>
+	{#if data.start}
+		<div class="games-coming">{data.start}</div>
 	{:else}
-		{#each games as { data, kvMap }}
+		{#each games as game}
 			{@const {
 				towns: [t1, t2],
 				starters: [s1, s2],
 				blue
-			} = data}
-
-			{@const imgData = [s1, t1, t2, s2].map((name) => ({ name, alt: name, title: name }))}
-			{@const challenges = kvMap.filter(([key]) => key === 'челлендж')}
+			} = game}
 
 			<!-- games -->
 			<article class={blue === null ? undefined : blue === 0 ? 'blueRed' : 'redBlue'}>
 				<!-- 1st player's -->
 				<div class="town-and-starter">
-					<GamePicture {...imgData[0]} />
-					<GamePicture {...imgData[1]} />
+					<GamePicture name={s1} />
+					<GamePicture name={t1} />
 				</div>
 
 				<!-- replay link -->
-				{#if 'replay' in kvData}
-					<a href={kvData.replay}>
+				{#if 'replay' in game}
+					<a href={game.replay}>
 						<svg viewBox="0 0 100 100" height="20" width="30" class="play-icon">
 							<polygon points="10,15 10,85 90,50" stroke-width="15" stroke-linejoin="round" />
 						</svg>
@@ -51,32 +48,33 @@
 
 				<!-- 2nd player's -->
 				<div class="town-and-starter">
-					<GamePicture {...imgData[2]} />
-					<GamePicture {...imgData[3]} />
+					<GamePicture name={t2} />
+					<GamePicture name={s2} />
 				</div>
 
 				<!--  roulette -->
 				<ul aria-label="усложнения">
-					{#each kvMap.filter((r) => r[0] === 'рулетка') as rule}
-						<li aria-label="правило">{rule[1]}</li>
+					{#each game.roulette as rule}
+						<li aria-label="правило">{rule}</li>
 					{/each}
 				</ul>
 
 				<!-- challenges -->
-				{#if challenges.length > 0}
+				{#if game.challenges}
 					<ul
 						class="challenges"
 						aria-label="выполненные челленджи"
 						style="list-style-image: url({starUrl})"
 					>
-						{#each challenges as [_, name, text]}
-							<li>{name}: {text}</li>
+						{#each Object.entries(game.challenges) as [name, list]}
+							{#each list as text}
+								<li>{name}: {text}</li>
+							{/each}
 						{/each}
 					</ul>
 				{/if}
 			</article>
-		{/each}
-	{/if}
+		{/each}{/if}
 </div>
 
 <style>
@@ -109,10 +107,12 @@
 		text-align: center;
 		color: black;
 		font-size: 1.2rem;
+		text-align: start;
 	}
 	.player-link:first-of-type {
 		text-align: end;
 	}
+
 	series-score {
 		margin: 0 12px;
 	}

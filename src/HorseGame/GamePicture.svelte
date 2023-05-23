@@ -1,7 +1,7 @@
 <script>
 	export let name;
-	export let alt = '';
-	export let title = null;
+	export let alt = name;
+	export let title = name;
 	export let style = null;
 </script>
 

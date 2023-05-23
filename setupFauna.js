@@ -49,19 +49,13 @@ const functions = {
         )
     ),
     updateTourney: q.Query(
-        (id, data) => q.Update(
-            q.Ref(q.Collection("Tourneys"), id),
+        (data) => q.Update(
+            q.Ref(q.Collection("Tourneys"), q.Select("id", data)),
             {
                 // remove immutables from updater
-                data: q.ToObject(
-                    q.Filter(
-                        q.ToArray(data),
-                        entry => q.Not(q.ContainsValue(
-                            q.Select(0, entry),
-                            ["playersTotal", "templateCode", "withTop3"]
-                        ))
-
-                    )
+                data: q.Merge(
+                    data,
+                    { id: null, playersTotal: null, templateCode: null, withTop3: null }
                 )
             }
         )
@@ -114,7 +108,10 @@ const functions = {
             },
             q.If(q.Exists(q.Var("ref")),
                 {
-                    tourney: q.Get(q.Var("ref")),
+                    tourney: q.Merge(
+                        q.Select("data", q.Get(q.Var("ref"))),
+                        { id }
+                    ),
                     sList: q.Map(
                         q.Select("data", q.Paginate(q.Match("Series_by_tourney", id), { size: 100000 })),
                         sRef => q.Let(
@@ -157,6 +154,23 @@ const functions = {
                 )
             }
         )
+    ),
+    getPlayersData: q.Query(
+        q.Lambda(
+            [],
+            q.ToObject(
+                q.Map(
+                    q.Select("data", q.Paginate(q.Documents(q.Collection("Players")), { size: 100000 })),
+                    docRef => q.Let(
+                        { doc: q.Get(docRef) },
+                        [
+                            q.Select(["data", "name"], q.Var("doc")),
+                            q.Select(["data"], q.Var("doc"))
+                        ]
+                    )
+                )
+            )
+        )
     )
 }
 
@@ -176,10 +190,12 @@ function updateFunctions() {
     const dos = []
 
     for (const name in functions) {
+
+        const role = name === "createEditorKey" ? "admin" : "server"
         dos.push(
             q.If(q.Exists(q.Function(name)),
-                q.Update(q.Function(name), { role: "server", body: functions[name] }),
-                q.CreateFunction({ name, role: "server", body: functions[name] })
+                q.Update(q.Function(name), { role, body: functions[name] }),
+                q.CreateFunction({ name, role, body: functions[name] })
             )
         )
     }
@@ -187,12 +203,11 @@ function updateFunctions() {
     return q.Do(...dos)
 }
 
-
 client.query(
     // q.CreateIndex({ name: "Tourneys_sorted_by_update_time", ...indexes["Tourneys_sorted_by_update_time"] })
     // updateFunctions()
-
-    q.Call("getData", null)
+    // q.Update(q.Function("getPlayersData"), { body: functions.getPlayersData })
+    // q.Call("getData", null)
 )
     .then(resp => console.log(resp))
     .catch(console.error)

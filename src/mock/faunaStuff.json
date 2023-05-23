@@ -1,0 +1,833 @@
+{
+    "tourney": {
+        "name": "Игра в Коня",
+        "withTop3": true,
+        "participants": [
+            "Enakkin",
+            "Master_of__mind",
+            "HILTYHA",
+            "Chester_Investor",
+            "HellLighT111",
+            "maugli35",
+            "newb1kk",
+            "yarostnayaKoshka",
+            "zhoporez_",
+            "papashkaiz4atika",
+            "Coach_Jekich",
+            "HotaGirl",
+            "Pavllovich",
+            "heroes3troll",
+            "unutcon",
+            "YAR_",
+            "Weronest",
+            "akaStinger",
+            "duszamonaha",
+            "VooDooSh",
+            "2BISHOP",
+            "M_on_t",
+            "turgeneff",
+            "VovastikMashina",
+            "amieloo",
+            "pup_ok_",
+            "DarkPepego",
+            "yama_darma",
+            "valerie_rayne",
+            "Pereyaslavsky_",
+            "beZZdar_",
+            "Wukosha"
+        ],
+        "id": "365310089364504781",
+        "playersTotal": 32,
+        "templateCode": "powersOf2"
+    },
+    "sList": [
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "Enakkin",
+                "Master_of__mind"
+            ],
+            "id": "365413043231785165",
+            "games": [
+                {
+                    "winner": 1,
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Сложность 200%"
+                        ],
+                        [
+                            "рулетка",
+                            "Запрет на захват замков в Треже"
+                        ],
+                        [
+                            "достижение",
+                            "Enakkin, Истинный ролевик",
+                            "Пробить ГО юнитами спецы героя"
+                        ]
+                    ],
+                    "data": {
+                        "starters": [
+                            "Wystan",
+                            "Caitlin"
+                        ],
+                        "towns": [
+                            "Fortress",
+                            "Castle"
+                        ],
+                        "blue": 1
+                    }
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ],
+                [
+                    "начало",
+                    "22.05 в 22:00"
+                ]
+            ],
+            "players": [
+                "duszamonaha",
+                "VooDooSh"
+            ],
+            "id": "365413043231786189",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "HILTYHA",
+                "Chester_Investor"
+            ],
+            "id": "365413043231787213",
+            "games": [
+                {
+                    "winner": 0,
+                    "data": {
+                        "starters": [
+                            "Tazar",
+                            "Ignatius"
+                        ],
+                        "towns": [
+                            "Fortress",
+                            "Inferno"
+                        ],
+                        "blue": 0
+                    },
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Нельзя использовать внешний рынок"
+                        ],
+                        [
+                            "рулетка",
+                            "У игроков есть по рестарту"
+                        ],
+                        [
+                            "челлендж",
+                            "HILTYHA",
+                            "Выйти с респа на 115"
+                        ],
+                        [
+                            "челлендж",
+                            "HILTYHA",
+                            "Пробить ГО без книги"
+                        ],
+                        [
+                            "челлендж",
+                            "HILTYHA",
+                            "Взять утопу на 116"
+                        ]
+                    ]
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "HellLighT111",
+                "maugli35"
+            ],
+            "id": "365413043232833741",
+            "games": [
+                {
+                    "winner": 0,
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Нельзя использовать магию воздуха"
+                        ],
+                        [
+                            "рулетка",
+                            "Нельзя в родном замке грейдить Т3-Т4 юнитов"
+                        ]
+                    ],
+                    "data": {
+                        "towns": [
+                            "Necropolis",
+                            "Inferno"
+                        ],
+                        "starters": [
+                            "Xsi",
+                            "Octavia"
+                        ],
+                        "blue": 0
+                    }
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ],
+                [
+                    "начало",
+                    "24.05 в 22:00"
+                ]
+            ],
+            "players": [
+                "valerie_rayne",
+                "Pereyaslavsky_"
+            ],
+            "id": "365413043232834765",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "newb1kk",
+                "yarostnayaKoshka"
+            ],
+            "id": "365413043232835789",
+            "games": [
+                {
+                    "winner": 0,
+                    "data": {
+                        "blue": 1,
+                        "towns": [
+                            "Castle",
+                            "Conflux"
+                        ],
+                        "starters": [
+                            "Adelaide",
+                            "Pasis"
+                        ]
+                    },
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Запрет на использование сборных артов"
+                        ],
+                        [
+                            "рулетка",
+                            "Запрет на использование магии Огня"
+                        ]
+                    ]
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ],
+                [
+                    "начало",
+                    "23.05 в 22:00"
+                ]
+            ],
+            "players": [
+                "beZZdar_",
+                "Wukosha"
+            ],
+            "id": "365413043232836813",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "zhoporez_",
+                "papashkaiz4atika"
+            ],
+            "id": "365413043232837837",
+            "games": [
+                {
+                    "winner": 1,
+                    "data": {
+                        "towns": [
+                            "Conflux",
+                            "Cove"
+                        ],
+                        "starters": [
+                            "Gelare",
+                            "Zilare"
+                        ],
+                        "blue": 0
+                    },
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Запрет на захват замков в Треже"
+                        ]
+                    ]
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "Coach_Jekich",
+                "HotaGirl"
+            ],
+            "id": "365413043232838861",
+            "games": [
+                {
+                    "winner": 1,
+                    "kvMap": [],
+                    "data": {
+                        "blue": 1,
+                        "towns": [
+                            "Dungeon",
+                            "Tower"
+                        ],
+                        "starters": [
+                            "Deemer",
+                            "Cyra"
+                        ]
+                    }
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "HellLighT111",
+                "newb1kk"
+            ],
+            "id": "365413043232839885",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 1
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "Pavllovich",
+                "heroes3troll"
+            ],
+            "id": "365413043232840909",
+            "games": [
+                {
+                    "winner": 0,
+                    "kvMap": [],
+                    "data": {
+                        "towns": [
+                            "Tower",
+                            "Cove"
+                        ],
+                        "starters": [
+                            "Torosar",
+                            "Leena"
+                        ],
+                        "blue": 0
+                    }
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "2BISHOP",
+                "M_on_t"
+            ],
+            "id": "365413043232841933",
+            "games": [
+                {
+                    "winner": 1,
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Всегда выбирать правый навык"
+                        ]
+                    ],
+                    "data": {
+                        "towns": [
+                            "Necropolis",
+                            "Rampart"
+                        ],
+                        "starters": [
+                            "Tamika",
+                            "Giselle"
+                        ],
+                        "blue": 0
+                    }
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "papashkaiz4atika",
+                "HotaGirl"
+            ],
+            "id": "365413043232842957",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 1
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "turgeneff",
+                "VovastikMashina"
+            ],
+            "id": "365413043233882317",
+            "games": [
+                {
+                    "winner": 1,
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Всегда выбирать правый навык"
+                        ],
+                        [
+                            "рулетка",
+                            "Нельзя захватывать золотые шахты"
+                        ]
+                    ],
+                    "data": {
+                        "starters": [
+                            "Rissa",
+                            "Tiva"
+                        ],
+                        "towns": [
+                            "Tower",
+                            "Fortress"
+                        ],
+                        "blue": 0
+                    }
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "amieloo",
+                "pup_ok_"
+            ],
+            "id": "365413043233883341",
+            "games": [
+                {
+                    "winner": 0,
+                    "kvMap": [
+                        [
+                            "replay",
+                            "youtube.com/watch?v=m8DpgsIKOfg"
+                        ],
+                        [
+                            "рулетка",
+                            "Запрет на артефакты которые дают ТОЛЬКО Атаку"
+                        ]
+                    ],
+                    "data": {
+                        "blue": 1,
+                        "towns": [
+                            "Fortress",
+                            "Tower"
+                        ],
+                        "starters": [
+                            "Kyrre",
+                            "Aine"
+                        ]
+                    }
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    "amieloo"
+                ]
+            ],
+            "players": [
+                "amieloo",
+                "DarkPepego"
+            ],
+            "id": "365413043233884365",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 1
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "DarkPepego",
+                "yama_darma"
+            ],
+            "id": "365413043233885389",
+            "games": [
+                {
+                    "winner": 0,
+                    "data": {
+                        "blue": 1,
+                        "towns": [
+                            "Inferno",
+                            "Necropolis"
+                        ],
+                        "starters": [
+                            "Olema",
+                            "Sandro"
+                        ]
+                    },
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Нельзя использовать внешний рынок"
+                        ],
+                        [
+                            "рулетка",
+                            "У игроков есть по рестарту"
+                        ],
+                        [
+                            "челлендж",
+                            "yama_darma",
+                            "Поставить Грааль до 116 включительно"
+                        ]
+                    ]
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ],
+                [
+                    "начало",
+                    "25.05 в 22:00"
+                ]
+            ],
+            "players": [
+                "unutcon",
+                "YAR_"
+            ],
+            "id": "365413043233886413",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        },
+        {
+            "kvMap": [
+                [
+                    "hide",
+                    ""
+                ]
+            ],
+            "players": [
+                "Weronest",
+                "akaStinger"
+            ],
+            "id": "365413043233887437",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 0
+        }
+    ],
+    "playersData": {
+        "Enakkin": {
+            "name": "Enakkin",
+            "media": {
+                "twitch": "enakkin"
+            }
+        },
+        "Master_of__mind": {
+            "name": "Master_of__mind",
+            "media": {
+                "twitch": "master_of__mind"
+            }
+        },
+        "HILTYHA": {
+            "name": "HILTYHA",
+            "media": {
+                "twitch": "hiltyha"
+            }
+        },
+        "Chester_Investor": {
+            "name": "Chester_Investor",
+            "media": {
+                "twitch": "chester_investor"
+            }
+        },
+        "HellLighT111": {
+            "name": "HellLighT111",
+            "media": {
+                "twitch": "helllight111"
+            }
+        },
+        "maugli35": {
+            "name": "maugli35",
+            "media": {
+                "twitch": "maugli35"
+            }
+        },
+        "newb1kk": {
+            "name": "newb1kk",
+            "media": {
+                "twitch": "newb1kk"
+            }
+        },
+        "yarostnayaKoshka": {
+            "name": "yarostnayaKoshka",
+            "media": {
+                "twitch": "yarostnayakoshka"
+            }
+        },
+        "zhoporez_": {
+            "name": "zhoporez_",
+            "media": {
+                "twitch": "zhoporez_"
+            }
+        },
+        "papashkaiz4atika": {
+            "name": "papashkaiz4atika",
+            "media": {
+                "twitch": "papashkaiz4atika"
+            }
+        },
+        "Coach_Jekich": {
+            "name": "Coach_Jekich",
+            "media": {
+                "twitch": "coach_jekich"
+            }
+        },
+        "HotaGirl": {
+            "name": "HotaGirl",
+            "media": {
+                "twitch": "hotagirl"
+            }
+        },
+        "Pavllovich": {
+            "name": "Pavllovich",
+            "media": {
+                "twitch": "pavllovich"
+            }
+        },
+        "heroes3troll": {
+            "name": "heroes3troll",
+            "media": {
+                "twitch": "heroes3troll"
+            }
+        },
+        "unutcon": {
+            "name": "unutcon",
+            "media": {
+                "twitch": "unutcon"
+            }
+        },
+        "YAR_": {
+            "name": "YAR_",
+            "media": {
+                "twitch": "yar_"
+            }
+        },
+        "Weronest": {
+            "name": "Weronest",
+            "media": {
+                "twitch": "weronest"
+            }
+        },
+        "akaStinger": {
+            "name": "akaStinger",
+            "media": {
+                "twitch": "akastinger"
+            }
+        },
+        "duszamonaha": {
+            "name": "duszamonaha",
+            "media": {
+                "twitch": "duszamonaha"
+            }
+        },
+        "VooDooSh": {
+            "name": "VooDooSh",
+            "media": {
+                "twitch": "voodoosh"
+            }
+        },
+        "2BISHOP": {
+            "name": "2BISHOP",
+            "media": {
+                "twitch": "2bishop"
+            }
+        },
+        "M_on_t": {
+            "name": "M_on_t",
+            "media": {
+                "twitch": "m_on_t"
+            }
+        },
+        "turgeneff": {
+            "name": "turgeneff",
+            "media": {
+                "twitch": "turgeneff"
+            }
+        },
+        "VovastikMashina": {
+            "name": "VovastikMashina",
+            "media": {
+                "twitch": "vovastikmashina"
+            }
+        },
+        "amieloo": {
+            "name": "amieloo",
+            "media": {
+                "twitch": "amieloo"
+            }
+        },
+        "pup_ok_": {
+            "name": "pup_ok_",
+            "media": {
+                "twitch": "pup_ok_"
+            }
+        },
+        "DarkPepego": {
+            "name": "DarkPepego",
+            "media": {
+                "twitch": "darkpepego"
+            }
+        },
+        "yama_darma": {
+            "name": "yama_darma",
+            "media": {
+                "twitch": "yama_darma"
+            }
+        },
+        "valerie_rayne": {
+            "name": "valerie_rayne",
+            "media": {
+                "twitch": "valerie_rayne"
+            }
+        },
+        "Pereyaslavsky_": {
+            "name": "Pereyaslavsky_",
+            "media": {
+                "twitch": "pereyaslavsky_"
+            }
+        },
+        "beZZdar_": {
+            "name": "beZZdar_",
+            "media": {
+                "twitch": "bezzdar_"
+            }
+        },
+        "Wukosha": {
+            "name": "Wukosha",
+            "media": {
+                "twitch": "wukosha"
+            }
+        }
+    }
+}

@@ -2,7 +2,7 @@
 import { createSeries, calculateScore } from '$lib/utils';
 
 /** @typedef {import("../../../types").Series} Series */
-/** @typedef {import("../../../stores").Tourney} TourneyStore */
+/** @typedef {import("../../../lib/Tourney").Tourney} TourneyStore */
 
 
 /**
@@ -15,25 +15,24 @@ function populateSeries(series, roundsTotal, seriesByRound) {
 
     // loser finals for 3rd place (second game of last round) doesn't fit normal schema
     const isLoserFinals = round === roundsTotal - 1 && index === 1;
-    const prevGamesIndices = isLoserFinals ? [0, 2] : [index * 2, index * 2 + 2];
+    const prevSeriesIndices = isLoserFinals ? [0, 2] : [index * 2, index * 2 + 2];
 
     // check if series leading to this one have been finished
-    const predecessors = seriesByRound[round - 1]?.slice(...prevGamesIndices);
+    const predecessors = seriesByRound[round - 1]?.slice(...prevSeriesIndices);
     predecessors.forEach((s, i) => {
         if (s.winner === undefined) return;
 
-        let playerIndex = s.winner;
-        if (isLoserFinals) playerIndex = 1 - playerIndex;
+        let j = s.winner
+        if (isLoserFinals) j = 1 - j;
 
-        series.players[i] = s.players[playerIndex];
+        series.players[i] = s.players[j];
     });
 }
 
 
 /** @param {TourneyStore} tourneyStore */
 export default function bundleSeries(tourneyStore) {
-
-    const { playersTotal, withTop3 } = tourneyStore;
+    const { playersTotal, withTop3, participants } = tourneyStore;
     const roundsTotal = Math.log(playersTotal) / Math.log(2);
 
     // create array for each round
@@ -52,21 +51,26 @@ export default function bundleSeries(tourneyStore) {
         seriesByRound[roundsTotal - 1].push(losersFinals);
     }
 
+
     // fill series with data
     seriesByRound.forEach((arr, round) => {
-        // add players
-        if (round === 0) tourneyStore.assignPlayers(arr);
-        else arr.forEach(series => populateSeries(series, roundsTotal, seriesByRound));
 
         // finals and loser finals are bo3, other bo1
         const bestOf = round < roundsTotal - 1 ? 1 : 2;
 
-        // games and score
-        for (const series of arr) {
-            if (!series.players.every(Boolean)) continue;
+        // figure out which players played it based on previous rounds
+        const populate = round === 0
+            ? s => s.players = participants.slice(s.index * 2, s.index * 2 + 2)
+            : s => populateSeries(s, roundsTotal, seriesByRound)
 
-            const names = series.players.map((p) => p.name);
-            Object.assign(series, tourneyStore.getSeries(round, names))
+        //  participants are ordered the way they should be displayed
+        for (let i = 0; i < playersTotal / 2 ** (round + 1); i++) {
+
+            const series = arr[i]
+            populate(series)
+
+            const data = tourneyStore.getSeries(round, series.players)
+            Object.assign(series, data)
 
             series.score = calculateScore(series.games);
             const maxScore = Math.max(...series.score);

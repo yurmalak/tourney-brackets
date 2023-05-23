@@ -1,20 +1,14 @@
 <script>
-	import { onMount } from 'svelte';
-	import { tourneyStore } from '../stores';
-	import bundleSeries from '../components/brackets/PowersOf2/bundleSeries';
 	import WideBgImage from './WideBgImage.svelte';
 	import Modal from '../components/Modal.svelte';
-
-	import tourneyData from './data/tourneyData';
-
-	import processKVMap from './processKVMap';
 	import AbsoluteNode from './AbsoluteNode.svelte';
 	import Card from './Card.svelte';
 
-	let seriesByRound = [];
+	/** @type {{ processedSeries: FrontSeries[][], width: number, height: number }} */
+	export let data;
+	const { processedSeries, width, height } = data;
 
-	// related to image
-	let width, height;
+	/** @param {number} width */
 	const getImgSrc = (width) =>
 		`https://ik.imagekit.io/dobdk1ymwif/tourney_brackets/horse_game_bracket_${width}.png`;
 	const imgStats = { width: 1920, height: 1080, widths: [1400, 1980, 3920] };
@@ -24,24 +18,6 @@
 	let locked = false,
 		hoverBlocked = false;
 	const nodeClassName = 'bracket-node';
-
-	// fech data
-	onMount(async () => {
-		// const tourneyData = await fetchDataFromSomewhere()
-		const { anchors, data } = tourneyData;
-
-		// set data
-		if (!$tourneyStore.players) tourneyStore.set(data);
-		seriesByRound = bundleSeries($tourneyStore);
-
-		({ width, height } = anchors);
-		for (const rSeries of seriesByRound) {
-			for (const series of rSeries) {
-				series.nodeLeftTop = anchors.coordinates[series.round][series.index];
-				series.kvData = processKVMap(series);
-			}
-		}
-	});
 
 	/**
 	 * Toggle modal {@link Card}.
@@ -115,10 +91,10 @@
 
 <main>
 	<WideBgImage {imgStats} {getImgSrc} bind:imgRef>
-		{#each seriesByRound as roundGames}
-			{#each roundGames as series}
-				{#if series.players.some(Boolean)}
-					<AbsoluteNode {series} {width} {height} className={nodeClassName} />
+		{#each processedSeries as roundSeries, round}
+			{#each roundSeries as series, index}
+				{#if series.players}
+					<AbsoluteNode {round} {index} {series} {width} {height} className={nodeClassName} />
 				{/if}
 			{/each}
 		{/each}
@@ -134,7 +110,7 @@
 					display: flex;
 					"
 			>
-				<Card series={seriesByRound[cardData.round][cardData.sIndex]} />
+				<Card series={processedSeries[cardData.round][cardData.sIndex]} />
 			</Modal>
 		{/if}
 	</WideBgImage>

@@ -4,6 +4,8 @@
 	import HorseGame from '../HorseGame/HorseGameBracket.svelte';
 	import SvgDefs from '../HorseGame/SvgDefs.svelte';
 
+	export let data;
+
 	const handler = () => {
 		netlifyIdentity.close();
 		goto('/cms');
@@ -24,7 +26,7 @@
 <h1 class="visually-hidden">Сетка турнира Игра в Коня</h1>
 
 <SvgDefs />
-<HorseGame />
+<HorseGame {data} />
 
 <svelte:head>
 	<title>Игра в Коня | Сетка</title>

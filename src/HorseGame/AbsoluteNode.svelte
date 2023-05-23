@@ -4,7 +4,6 @@
 
 <script>
 	import ChallengersStar from './ChallengersStar.svelte';
-	/** @typedef {import("../types").Series} Series*/
 
 	/** @type {string} percentage css length */
 	export let width;
@@ -12,17 +11,22 @@
 	/** @type {string} percentage css length */
 	export let height;
 
-	/** @type {Series} */
+	/** @type {import("../types").FrontSeries} */
 	export let series;
+
+	/** @type {number}*/
+	export let round;
+
+	/** @type {number}*/
+	export let index;
 
 	/** @type {string}*/
 	export let className;
 
 	const {
+		data,
 		players,
-		round,
-		index,
-		kvData,
+		games,
 		nodeLeftTop: [left, top]
 	} = series;
 
@@ -44,13 +48,16 @@
 	<svg viewBox="0 0 100 50" {id}>
 		{#each players as player, i}
 			{#if player}
-				{@const { length } = player.name}
+				{@const { name } = player}
+				{@const { length } = name}
 
 				<!-- completed challenges icon -->
-				{#if player.name in kvData.challenges}<ChallengersStar {series} pIndex={i} />{/if}
+				{#if games.some((g) => g.challenges?.[name])}
+					<ChallengersStar {series} pIndex={i} />
+				{/if}
 
 				<!-- name moved up for 1st and down for second player -->
-				{#if !kvData.hide[player.name]}
+				{#if data.hide !== true && data.hide !== name}
 					<text
 						x="50%"
 						y="55%"
@@ -59,16 +66,16 @@
 						baseline-shift={i ? '-75%' : '75%'}
 						textLength="{length > 8 ? 100 : 40 + length * 5}%"
 					>
-						{player.name}
+						{name}
 					</text>
 				{/if}
 			{/if}
 		{/each}
 
 		<!-- defined game date icon -->
-		{#if kvData.start}
+		{#if data.start}
 			<use class="clock" href="#clock">
-				<title>{kvData.start}</title>
+				<title>{data.start}</title>
 			</use>
 		{/if}
 	</svg>
