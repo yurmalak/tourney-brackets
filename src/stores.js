@@ -81,12 +81,13 @@ class WritableTourney extends Tourney {
                 ...oldData,
             }
 
-            // crrate new one
+            // create new one
             // selectedPlayers will match series.players if Editor has been saved without changes to players
             // no id or id === null in seriesData will cause new series to be created
             // otherwise the one with matching id will be updated
             // see setupFauna.js
             newSeries = {
+                tourneyId: this.data.id,
                 round: series.round,
                 players: selectedPlayers,
                 ...seriesData,
