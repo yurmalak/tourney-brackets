@@ -1,39 +1,67 @@
 <script>
 	/** @typedef {import('../../types.ts').Series} Series */
-	import { onMount, setContext, getContext } from 'svelte';
-	import { configKey } from '$lib/context';
-	import { createGame } from '$lib/utils';
+	/** @typedef {import('../../types.ts').TourneyData} TourneyData */
+	import { onMount, getContext, setContext } from 'svelte';
+	import { configKey, dbKey } from '$lib/context';
 	import { tourneyStore } from '../stores';
+	import setupDbClient from '../lib/setupDbClient';
 	import Bracket from './brackets/Base.svelte';
 	import Editor from './Editor/Editor.svelte';
-	import GameEditor from './Editor/GameEditor.svelte';
 
-	// mock
-	import { mockedFetchData } from '../mock';
-
-	// setup fallback in case game-specific functions are not provided
-	const gameContext = {
-		createGame,
-		GameEditor,
-		fetchData: mockedFetchData,
-		...getContext(configKey)
-	};
-	setContext(configKey, gameContext);
-
-	// fetch list of tourneys and data for ongoing or latest one
 	let ready = false;
 	let error = false;
-	onMount(async () => {
-		const data = await gameContext.fetchData().catch((err) => (error = err));
 
-		if (error) console.log(console.error('Admin, failed to fetch data', error));
-		// check if players are there to preserve changes between pages
-		else if (!$tourneyStore.players) tourneyStore.set(data);
+	const { client, task } = setupDbClient();
+	setContext(dbKey, client);
+
+	// ensure contexts has all necessary parts
+	const gameContext = getContext(configKey);
+	const requiredKeys = ['createGame', 'GameEditor'];
+	for (const key of requiredKeys) {
+		if (!(key in gameContext)) {
+			error = new Error(`Crucial part missing: "${key}".`);
+			console.error(error);
+		}
+	}
+
+	// fetch list of tourneys and data for ongoing or latest one
+	onMount(async () => {
+		/**
+		 * @type {{
+		 * 	  tourneyData: {
+		 * 		 tourney: TourneyData,
+		 * 		 sList: Series[]
+		 * 	  },
+		 * 	  tourneyList: [ts:number, name:string, id:string][]
+		 * }}
+		 */
+		let data;
+		const getData = async () => {
+			const task = client.getData();
+			const result = await task.promise.catch((err) => (error = err));
+
+			if (task.status === 'error') error = task.error;
+			return result;
+		};
+
+		// dev
+		if (localStorage.getItem('fauna--fetching-disabled')) {
+			data = JSON.parse(localStorage.getItem('fauna-stuff'));
+			if (!data?.tourneyData) {
+				data = await getData();
+				localStorage.setItem('fauna-stuff', JSON.stringify(data));
+			}
+		}
+		// production
+		else data = await getData();
+
+		if (error) console.error('Admin, failed to fetch data', error);
+		else tourneyStore.set(data.tourneyData);
 
 		ready = true;
 	});
 
-	function handleEditor(ev) {
+	function toggleEditor(ev) {
 		editableSeries = ev?.detail?.series;
 	}
 
@@ -42,11 +70,15 @@
 </script>
 
 <div class="root">
-	{#if !ready}
+	{#if error}
+		<p>Something went wrong</p>
+		<p>{error.name}</p>
+		<p>{error.message}</p>
+	{:else if !ready}
 		Hold on...
 	{:else}
-		<Bracket templateCode={$tourneyStore?.templateCode} on:nodeClick={handleEditor} />
-		{#if editableSeries}<Editor series={editableSeries} on:toggleEditor={handleEditor} />{/if}
+		<Bracket templateCode={$tourneyStore?.data?.templateCode} on:nodeClick={toggleEditor} />
+		{#if editableSeries}<Editor series={editableSeries} on:toggleEditor={toggleEditor} />{/if}
 	{/if}
 </div>
 

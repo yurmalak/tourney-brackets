@@ -1,5 +1,4 @@
 <script>
-	/** @typedef {import('../../types').Participant} Participant */
 	/** @typedef {import('../../types').Series} Series */
 	/** @typedef {import('../../types').KvMap} KvMap */
 	/** @typedef {import('../../types').Game} Game */
@@ -7,25 +6,26 @@
 	import equal from 'fast-deep-equal';
 	import clone from 'rfdc/default';
 	import { createEventDispatcher, onDestroy, getContext } from 'svelte';
-	import { configKey } from '$lib/context';
+	import { configKey, dbKey } from '$lib/context';
 	import { calculateScore } from '$lib/utils';
-	import { tourneyStore, playerSorter } from '../../stores';
+	import { playerSorter } from '$lib/Tourney';
+	import { tourneyStore } from '../../stores';
 	import PlayerSelector from './PlayerSelector.svelte';
 	import DataMapper from './DataMapper.svelte';
 	import eventHandler from './eventHandler';
-	import buildPlayerList from './buildPlayerList';
 	import KvFieldCreators from './KvFieldCreators.svelte';
 	import DeleteButton from './DeleteButton.svelte';
 
 	/** @type {Series}*/
 	export let series;
 	const { GameEditor, createGame } = getContext(configKey);
+	const dbClient = getContext(dbKey);
 
 	/**
 	 * List of all players participating in the tourney.
 	 * Idle ones (not assigned to any series) are on top.
 	 * Others sorted by name.
-	 * @type {Participant[]}
+	 * @type {{ idle: string[], busy: string[] } | null}
 	 */
 	let tempPlayers;
 
@@ -39,12 +39,13 @@
 	 * Currently selected but not yet saved players.
 	 * @type {[ string?, string? ]}
 	 **/
-	let selectedPlayers = series.players.map((p) => p?.name ?? null);
+	let selectedPlayers = [...series.players];
 
 	/**
 	 * Reveals `Save` and `Discard` buttons if one of values is truthy.
 	 */
-	let changed = { players: false, gamesOrMap: false };
+	let changed = { players: false, series: false };
+	$: changed.players = series.players.some((v, i) => selectedPlayers[i] !== v);
 
 	// check if games or kvMap changed
 	let firstRender = true;
@@ -54,27 +55,55 @@
 		else {
 			const storedData = $tourneyStore.getSeries(series.round, selectedPlayers);
 			const gamesHaveChanged = !equal(seriesData.games, storedData.games);
-			changed.gamesOrMap = gamesHaveChanged || !equal(seriesData.kvMap, storedData.kvMap);
+			changed.series = gamesHaveChanged || !equal(seriesData.kvMap, storedData.kvMap);
 		}
 	}
 
 	/** @type {string} */
-	$: score = calculateScore(seriesData.games).join(' - ');
+	$: score = calculateScore(seriesData.games, selectedPlayers).join(' - ');
 
 	/**
 	 * Sets deep copy of games and kvMaps stored in {@link tourneyStore}
 	 * free to update by other components.
 	 */
 	function setData() {
-		// tempPlayers are only used for selecting players
-		// and player can only be selected in first round
+		const { participants, playersTotal } = $tourneyStore.data;
+
+		// players selected automatically after 1st round
 		if (series.round > 0) tempPlayers = null;
-		else tempPlayers = buildPlayerList(series, selectedPlayers, $tourneyStore.players);
+		// split players into busy and idle
+		// move selected to busy and de-selected to idle
+		else {
+			const players = [...participants];
+			const idle = players.slice(playersTotal);
+			const busy = players.slice(0, playersTotal);
+
+			const arrs = [series.players, selectedPlayers];
+			for (let i = 0; i < 2; i++) {
+				for (const player of arrs[i]) {
+					if (arrs[1 - i].includes(player)) continue;
+
+					const index = busy.indexOf(player);
+					// de-select
+					if (!i) {
+						delete busy[index];
+						idle.push(player);
+					}
+					// move from idle if it's not busy already
+					else if (index === -1) {
+						busy.push(player);
+						delete idle[idle.indexOf(player)];
+					}
+				}
+			}
+
+			tempPlayers = {
+				idle: idle.filter(Boolean).sort(playerSorter),
+				busy: busy.filter(Boolean).sort(playerSorter)
+			};
+		}
 
 		seriesData = clone($tourneyStore.getSeries(series.round, selectedPlayers));
-		changed.players = series.players
-			.map((p) => p?.name ?? null)
-			.some((v, i) => selectedPlayers[i] !== v);
 	}
 
 	/**
@@ -89,11 +118,10 @@
 		let swapped = false;
 		if (value && value === selectedPlayers[1 - i]) {
 			selectedPlayers[1 - i] = selectedPlayers[i];
-			swapped = false;
+			swapped = true;
 		}
 
-		selectedPlayers = [...selectedPlayers];
-		selectedPlayers[i] = value || null;
+		selectedPlayers[i] = value;
 
 		// order is irrelevant
 		if (!swapped) setData();
@@ -101,19 +129,13 @@
 
 	/** */
 	function addGame() {
-		const game = createGame({
-			round: series.round,
-			index: seriesData.games.length,
-			players: [...selectedPlayers].sort(playerSorter)
-		});
+		const game = createGame({ ...series, players: selectedPlayers });
 		seriesData.games = [...seriesData.games, game];
 	}
 
 	/** @type {number} gameIndex */
 	function deleteGame(gameIndex) {
-		seriesData.games.splice(gameIndex, 1);
-		seriesData.games.sort((a, b) => a.index - b.index);
-		seriesData.games = seriesData.games.map((g, index) => ({ ...g, index }));
+		seriesData.games = seriesData.games.filter((_, i) => i !== gameIndex);
 	}
 
 	/**
@@ -123,11 +145,12 @@
 		// deep clone just to be safe
 		tourneyStore.update(
 			clone({
-				changed: changed,
+				changed,
 				selectedPlayers,
 				series,
 				seriesData
-			})
+			}),
+			dbClient
 		);
 
 		closeEditor();
@@ -135,7 +158,7 @@
 
 	/** Discards changes made to {@link selectedPlayers} and {@link seriesData}. */
 	function discard() {
-		selectedPlayers = series.players.map((p) => p?.name ?? null);
+		selectedPlayers = [...series.players];
 		setData();
 	}
 
@@ -161,25 +184,25 @@
 	const createEventHandler = (el) => eventHandler(el, changed, closeEditor, animateButtons);
 
 	setData();
-	const hasPlayers = selectedPlayers[0] && selectedPlayers[1];
+	const hasBothPlayers = selectedPlayers[0] && selectedPlayers[1];
 </script>
 
 <editor-outer>
 	<editor-inner use:createEventHandler>
 		<editor-header>
-			{#each selectedPlayers as value, i}
-				<PlayerSelector players={tempPlayers} {value} playerIndex={i} on:change={selectPlayer} />
-				{#if i === 0}<score-counter aria-label="Score {score}">{score ?? ''}</score-counter>{/if}
+			{#each selectedPlayers as player, i}
+				<PlayerSelector players={tempPlayers} {player} playerIndex={i} on:change={selectPlayer} />
+				{#if i === 0}<score-counter aria-label="Score {score}">{score}</score-counter>{/if}
 			{/each}
 		</editor-header>
 
 		<editor-body>
-			{#if hasPlayers}
+			{#if hasBothPlayers}
 				<ul aria-label="games">
-					{#each seriesData.games as { data, kvMap, id, winner }, i (id)}
+					{#each seriesData.games as { data, winner, kvMap, id }, i (id)}
 						<li aria-label="game">
 							<!-- Possibly injected component -->
-							<svelte:component this={GameEditor} bind:data bind:winner>
+							<svelte:component this={GameEditor} players={selectedPlayers} bind:data bind:winner>
 								<DataMapper
 									let:style
 									let:className
@@ -221,7 +244,7 @@
 		</editor-body>
 
 		<editor-footer>
-			{#if hasPlayers}
+			{#if hasBothPlayers}
 				<KvFieldCreators
 					className="button"
 					bind:kvMap={seriesData.kvMap}
@@ -242,7 +265,7 @@
 			{:else}
 				<button
 					type="button"
-					class="close button{hasPlayers ? '' : ' alone'}"
+					class="close button{hasBothPlayers ? '' : ' alone'}"
 					on:click={closeEditor}
 				>
 					Close

@@ -66,8 +66,8 @@ const functions = {
                 id: q.Select("id", data, null),
                 ref: q.If(
                     q.IsNull(q.Var("id")),
-                    null,
-                    q.Ref(q.Collection("Series"), q.Var("id"))
+                    null,                                           // create new
+                    q.Ref(q.Collection("Series"), q.Var("id"))      // update by id
                 ),
                 innerData: q.Merge(data, { id: null })
             },
@@ -89,12 +89,12 @@ const functions = {
             tourney: q.If(
                 q.ContainsField("tourney", data),
                 q.Do(q.Call("updateTourney", q.Select("tourney", data)), "ok"),
-                "ok"
+                null
             ),
             series: q.If(
                 q.ContainsField("series", data),
-                q.Do(q.Call("createOrUpdateSeries", q.Select("series", data)), "ok"),
-                "ok"
+                q.Call("createOrUpdateSeries", q.Select("series", data)),
+                null
             )
         })
     ),
@@ -206,7 +206,7 @@ function updateFunctions() {
 client.query(
     // q.CreateIndex({ name: "Tourneys_sorted_by_update_time", ...indexes["Tourneys_sorted_by_update_time"] })
     // updateFunctions()
-    // q.Update(q.Function("getPlayersData"), { body: functions.getPlayersData })
+    // q.Update(q.Function("updateData"), { body: functions.updateData })
     // q.Call("getData", null)
 )
     .then(resp => console.log(resp))

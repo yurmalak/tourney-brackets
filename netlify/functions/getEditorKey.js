@@ -6,11 +6,16 @@ const q = faunadb.query
 exports.handler = async function (event, context) {
 
     const { user } = context.clientContext
-    if (!user || !user.app_metadata.roles.includes("editor")) {
-        return {
-            statusCode: 403,
-            body: JSON.stringify("You do not have permission to perform this action")
-        }
+    let error
+    if (!user) {
+        error = "No authorized user"
+    }
+    else if (!user.app_metadata.roles.includes("editor")) {
+        error = "User does not have permission"
+    }
+    if (error) return {
+        statusCode: 403,
+        body: error
     }
 
     const userName = context.clientContext.user.user_metadata.full_name

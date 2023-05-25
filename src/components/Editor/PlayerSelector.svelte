@@ -1,12 +1,10 @@
 <svelte:options immutable />
 
 <script>
-	/** @typedef {import('../../types.ts').Participant} Participant */
-
 	/** @type {string} */
-	export let value;
+	export let player;
 
-	/** @type {Participant[]} */
+	/** @type @type {{ idle: string[], busy: string[] } | null} */
 	export let players;
 
 	/** @type {0|1} */
@@ -18,18 +16,19 @@
 	aria-label="Player {playerIndex + 1}"
 	data-player-index={playerIndex}
 	disabled={!players}
-	value={value ?? ''}
-	class:occupied={Boolean(value)}
+	value={player}
+	class:occupied={Boolean(player)}
 >
 	{#if players}
 		<option value="" class="idle" aria-label="select none" />
-		{#each players as { name, sIndex } (name)}
-			<option value={name} class:idle={sIndex === null}>
-				{name}
-			</option>
+		{#each players.idle as name (name)}
+			<option value={name} class="idle">{name}</option>
+		{/each}
+		{#each players.busy as name (name)}
+			<option value={name}>{name}</option>
 		{/each}
 	{:else}
-		<option {value}>{value}</option>
+		<option value={player}>{player}</option>
 	{/if}
 </select>
 

@@ -4,9 +4,8 @@
 
 	import GameEditor from './GameEditor.svelte';
 	import createGame from './createGame';
-	import fetchData from './fetchData';
 
-	setContext(configKey, { fetchData, createGame, GameEditor });
+	setContext(configKey, { createGame, GameEditor });
 </script>
 
 <slot />

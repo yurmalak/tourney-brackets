@@ -22,17 +22,20 @@ function populateSeries(series, roundsTotal, seriesByRound) {
     predecessors.forEach((s, i) => {
         if (s.winner === undefined) return;
 
-        let j = s.winner
-        if (isLoserFinals) j = 1 - j;
+        series.players[i] = s.winner
+        if (isLoserFinals) {
+            const wIndex = s.players.indexOf(s.winner)
+            const lIndex = 1 - wIndex
+            series.players[i] = s.players[lIndex]
+        }
 
-        series.players[i] = s.players[j];
     });
 }
 
 
 /** @param {TourneyStore} tourneyStore */
 export default function bundleSeries(tourneyStore) {
-    const { playersTotal, withTop3, participants } = tourneyStore;
+    const { playersTotal, withTop3, participants } = tourneyStore.data;
     const roundsTotal = Math.log(playersTotal) / Math.log(2);
 
     // create array for each round
@@ -51,7 +54,6 @@ export default function bundleSeries(tourneyStore) {
         seriesByRound[roundsTotal - 1].push(losersFinals);
     }
 
-
     // fill series with data
     seriesByRound.forEach((arr, round) => {
 
@@ -64,19 +66,20 @@ export default function bundleSeries(tourneyStore) {
             : s => populateSeries(s, roundsTotal, seriesByRound)
 
         //  participants are ordered the way they should be displayed
-        for (let i = 0; i < playersTotal / 2 ** (round + 1); i++) {
+        arr.forEach(series => {
 
-            const series = arr[i]
             populate(series)
-
             const data = tourneyStore.getSeries(round, series.players)
             Object.assign(series, data)
 
-            series.score = calculateScore(series.games);
+            series.score = calculateScore(series.games, series.players);
             const maxScore = Math.max(...series.score);
             const seriesFinished = maxScore >= bestOf;
-            if (seriesFinished) series.winner = series.score.indexOf(maxScore);
-        }
+            if (seriesFinished) {
+                const wIndex = series.score.indexOf(maxScore)
+                series.winner = series.players[wIndex];
+            }
+        })
     });
 
     return seriesByRound

@@ -19,12 +19,19 @@
 
 <bracket-node {style}>
 	<button type="button" on:click={handleClick}>
-		{#each series.score as num, i}
-			{@const c = series.winner === i ? 'winner' : series.winner === undefined ? '' : 'loser'}
-			<span class="name r{i} {c}">
-				{series.players[i]?.name ?? ''}
+		{#each series.players as name, i}
+			<span
+				class="name r{i} {series.winner === undefined
+					? ''
+					: series.winner === series.players[i]
+					? 'winner'
+					: 'loser'}"
+			>
+				{name}
 			</span>
-			<span class="score r{i}">{num}</span>
+			<span class="score r{i}">
+				{series.score[i]}
+			</span>
 		{/each}
 	</button>
 </bracket-node>

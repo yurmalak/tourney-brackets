@@ -55,7 +55,7 @@
             "id": "365413043231785165",
             "games": [
                 {
-                    "winner": 1,
+                    "winner": "Master_of__mind",
                     "kvMap": [
                         [
                             "рулетка",
@@ -72,15 +72,16 @@
                         ]
                     ],
                     "data": {
-                        "starters": [
-                            "Wystan",
-                            "Caitlin"
-                        ],
-                        "towns": [
-                            "Fortress",
-                            "Castle"
-                        ],
-                        "blue": 1
+                        "Enakkin": {
+                            "town": "Fortress",
+                            "starter": "Wystan",
+                            "color": "red"
+                        },
+                        "Master_of__mind": {
+                            "town": "Castle",
+                            "starter": "Caitlin",
+                            "color": "blue"
+                        }
                     }
                 }
             ],
@@ -121,17 +122,18 @@
             "id": "365413043231787213",
             "games": [
                 {
-                    "winner": 0,
+                    "winner": "HILTYHA",
                     "data": {
-                        "starters": [
-                            "Tazar",
-                            "Ignatius"
-                        ],
-                        "towns": [
-                            "Fortress",
-                            "Inferno"
-                        ],
-                        "blue": 0
+                        "HILTYHA": {
+                            "town": "Fortress",
+                            "starter": "Tazar",
+                            "color": "blue"
+                        },
+                        "Chester_Investor": {
+                            "town": "Inferno",
+                            "starter": "Ignatius",
+                            "color": "red"
+                        }
                     },
                     "kvMap": [
                         [
@@ -177,7 +179,7 @@
             "id": "365413043232833741",
             "games": [
                 {
-                    "winner": 0,
+                    "winner": "HellLighT111",
                     "kvMap": [
                         [
                             "рулетка",
@@ -189,15 +191,16 @@
                         ]
                     ],
                     "data": {
-                        "towns": [
-                            "Necropolis",
-                            "Inferno"
-                        ],
-                        "starters": [
-                            "Xsi",
-                            "Octavia"
-                        ],
-                        "blue": 0
+                        "HellLighT111": {
+                            "town": "Necropolis",
+                            "starter": "Xsi",
+                            "color": "blue"
+                        },
+                        "maugli35": {
+                            "town": "Inferno",
+                            "starter": "Octavia",
+                            "color": "red"
+                        }
                     }
                 }
             ],
@@ -238,17 +241,18 @@
             "id": "365413043232835789",
             "games": [
                 {
-                    "winner": 0,
+                    "winner": "newb1kk",
                     "data": {
-                        "blue": 1,
-                        "towns": [
-                            "Castle",
-                            "Conflux"
-                        ],
-                        "starters": [
-                            "Adelaide",
-                            "Pasis"
-                        ]
+                        "newb1kk": {
+                            "town": "Castle",
+                            "starter": "Adelaide",
+                            "color": "red"
+                        },
+                        "yarostnayaKoshka": {
+                            "town": "Conflux",
+                            "starter": "Pasis",
+                            "color": "blue"
+                        }
                     },
                     "kvMap": [
                         [
@@ -299,17 +303,18 @@
             "id": "365413043232837837",
             "games": [
                 {
-                    "winner": 1,
+                    "winner": "papashkaiz4atika",
                     "data": {
-                        "towns": [
-                            "Conflux",
-                            "Cove"
-                        ],
-                        "starters": [
-                            "Gelare",
-                            "Zilare"
-                        ],
-                        "blue": 0
+                        "zhoporez_": {
+                            "town": "Conflux",
+                            "starter": "Gelare",
+                            "color": "blue"
+                        },
+                        "papashkaiz4atika": {
+                            "town": "Cove",
+                            "starter": "Zilare",
+                            "color": "red"
+                        }
                     },
                     "kvMap": [
                         [
@@ -336,18 +341,19 @@
             "id": "365413043232838861",
             "games": [
                 {
-                    "winner": 1,
+                    "winner": "HotaGirl",
                     "kvMap": [],
                     "data": {
-                        "blue": 1,
-                        "towns": [
-                            "Dungeon",
-                            "Tower"
-                        ],
-                        "starters": [
-                            "Deemer",
-                            "Cyra"
-                        ]
+                        "Coach_Jekich": {
+                            "town": "Dungeon",
+                            "starter": "Deemer",
+                            "color": "red"
+                        },
+                        "HotaGirl": {
+                            "town": "Tower",
+                            "starter": "Cyra",
+                            "color": "blue"
+                        }
                     }
                 }
             ],
@@ -384,18 +390,19 @@
             "id": "365413043232840909",
             "games": [
                 {
-                    "winner": 0,
+                    "winner": "Pavllovich",
                     "kvMap": [],
                     "data": {
-                        "towns": [
-                            "Tower",
-                            "Cove"
-                        ],
-                        "starters": [
-                            "Torosar",
-                            "Leena"
-                        ],
-                        "blue": 0
+                        "Pavllovich": {
+                            "town": "Tower",
+                            "starter": "Torosar",
+                            "color": "blue"
+                        },
+                        "heroes3troll": {
+                            "town": "Cove",
+                            "starter": "Leena",
+                            "color": "red"
+                        }
                     }
                 }
             ],
@@ -416,7 +423,7 @@
             "id": "365413043232841933",
             "games": [
                 {
-                    "winner": 1,
+                    "winner": "M_on_t",
                     "kvMap": [
                         [
                             "рулетка",
@@ -424,15 +431,16 @@
                         ]
                     ],
                     "data": {
-                        "towns": [
-                            "Necropolis",
-                            "Rampart"
-                        ],
-                        "starters": [
-                            "Tamika",
-                            "Giselle"
-                        ],
-                        "blue": 0
+                        "2BISHOP": {
+                            "town": "Necropolis",
+                            "starter": "Tamika",
+                            "color": "blue"
+                        },
+                        "M_on_t": {
+                            "town": "Rampart",
+                            "starter": "Giselle",
+                            "color": "red"
+                        }
                     }
                 }
             ],
@@ -469,7 +477,7 @@
             "id": "365413043233882317",
             "games": [
                 {
-                    "winner": 1,
+                    "winner": "VovastikMashina",
                     "kvMap": [
                         [
                             "рулетка",
@@ -481,15 +489,16 @@
                         ]
                     ],
                     "data": {
-                        "starters": [
-                            "Rissa",
-                            "Tiva"
-                        ],
-                        "towns": [
-                            "Tower",
-                            "Fortress"
-                        ],
-                        "blue": 0
+                        "turgeneff": {
+                            "town": "Tower",
+                            "starter": "Rissa",
+                            "color": "blue"
+                        },
+                        "VovastikMashina": {
+                            "town": "Fortress",
+                            "starter": "Tiva",
+                            "color": "red"
+                        }
                     }
                 }
             ],
@@ -510,7 +519,7 @@
             "id": "365413043233883341",
             "games": [
                 {
-                    "winner": 0,
+                    "winner": "amieloo",
                     "kvMap": [
                         [
                             "replay",
@@ -522,15 +531,16 @@
                         ]
                     ],
                     "data": {
-                        "blue": 1,
-                        "towns": [
-                            "Fortress",
-                            "Tower"
-                        ],
-                        "starters": [
-                            "Kyrre",
-                            "Aine"
-                        ]
+                        "amieloo": {
+                            "town": "Fortress",
+                            "starter": "Kyrre",
+                            "color": "red"
+                        },
+                        "pup_ok_": {
+                            "town": "Tower",
+                            "starter": "Aine",
+                            "color": "blue"
+                        }
                     }
                 }
             ],
@@ -567,17 +577,18 @@
             "id": "365413043233885389",
             "games": [
                 {
-                    "winner": 0,
+                    "winner": "DarkPepego",
                     "data": {
-                        "blue": 1,
-                        "towns": [
-                            "Inferno",
-                            "Necropolis"
-                        ],
-                        "starters": [
-                            "Olema",
-                            "Sandro"
-                        ]
+                        "DarkPepego": {
+                            "town": "Inferno",
+                            "starter": "Olema",
+                            "color": "red"
+                        },
+                        "yama_darma": {
+                            "town": "Necropolis",
+                            "starter": "Sandro",
+                            "color": "blue"
+                        }
                     },
                     "kvMap": [
                         [

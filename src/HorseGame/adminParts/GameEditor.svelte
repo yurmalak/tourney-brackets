@@ -3,73 +3,114 @@
 	import GamePicture from '../GamePicture.svelte';
 	import { heroList } from '../data/h3Data';
 
+	/** @type {object} */
 	export let data;
+
+	/** @type {string?} */
 	export let winner;
 
-	function setTown(i, town) {
-		data.towns[i] = town;
-		data.starters[i] = null;
+	/** @type {string[]} */
+	export let players;
+
+	/**
+	 * @param {string} player
+	 * @param {string} town
+	 */
+	function setTown(player, town) {
+		data[player].town = town;
+		data[player].starter = '';
 	}
 
-	const color = (blue, i) => (blue === null ? '' : blue === i ? 'blue' : 'red');
+	function swapColor() {
+		const c0 = data[players[0]].color;
+		const c1 = data[players[1]].color;
+		data[players[0]].color = c1;
+		data[players[1]].color = c0;
+	}
+
+	function switchWinner() {
+		winner = players.indexOf(winner) === 0 ? players[1] : players[0];
+	}
 </script>
 
 <editor-game>
 	<homm3-snippet>
-		<!-- towns -->
-		{#each data.towns as town, i}
+		{#each players as player, i}
+			{@const townSelected = Boolean(data[player].town)}
+			{@const starterSelected = Boolean(data[player].starter)}
+
+			<!-- 
+				town 
+			-->
 			<select
-				on:change={(ev) => setTown(i, ev.target.value)}
-				class="{color(data.blue, i)} {town ? '' : 'not-selected'}"
-				value={town ?? ''}
+				on:change={(ev) => setTown(player, ev.target.value)}
+				value={data[player].town}
+				class="{data[player].color} {townSelected ? '' : 'not-selected'}"
+				style:grid-area="t{i}"
+				aria-label="{players[i]}'s town"
 			>
-				<option value="">{town ? '' : 'Town'}</option>
+				<!-- placeholder -->
+				{#if townSelected}
+					<option value="" />
+				{:else}
+					<option value="" style="display:none"> Town </option>
+				{/if}
+
+				<!-- options -->
 				{#each Object.keys(heroList) as town}
-					<option value={town}>
-						{town}
-					</option>
+					<option value={town}>{town}</option>
 				{/each}
 			</select>
 
-			<!-- Town icons with winner swapper between them -->
-			{#if i === 0}
-				<GamePicture name={data.towns[0]} />
-				<Switcher bind:value={winner} label="Winner" />
-				<GamePicture name={data.towns[1]} />
-			{/if}
-		{/each}
+			<!-- town picture -->
+			<GamePicture name={data[player].town} style="grid-area:t{i}pic" />
 
-		<!-- starters -->
-		{#each data.starters as starter, i}
-			{@const town = data.towns[i]}
+			<!-- 
+				starter 
+			-->
 			<select
-				on:change={(ev) => (data.starters[i] = ev.target.value)}
-				class="{color(data.blue, i)} {starter ? '' : 'not-selected'}"
-				value={starter ?? ''}
-				disabled={!town}
+				bind:value={data[player].starter}
+				class="{data[player].color} {starterSelected ? '' : 'not-selected'}"
+				style:grid-area="s{i}"
+				disabled={!townSelected}
+				aria-label="{players[i]}'s starter"
 			>
-				<option value="">{starter ? '' : town ? 'Starter' : 'Select town first'}</option>
-				{#if town}
-					{#each heroList[data.towns[i]] || [] as hero}
-						<option value={hero}>{hero}</option>
-					{/each}
+				<!-- placeholder -->
+				{#if starterSelected}
+					<option value="" />
+				{:else}
+					<option value="" style="display:none">
+						{townSelected ? 'Starter' : 'Select town'}
+					</option>
 				{/if}
+
+				<!-- options -->
+				{#each heroList[data[player].town] || [] as starter}
+					<option value={starter}>{starter}</option>
+				{/each}
 			</select>
 
-			<!-- Starters icons with color swapper between them -->
-			{#if i === 0}
-				<GamePicture name={data.starters[0]} />
-				<label class="swap-color">
-					<button
-						type="button"
-						class="swap-color"
-						on:click={() => (data.blue = 1 - (data.blue ?? 1))}
-					/>
-					Color
-				</label>
-				<GamePicture name={data.starters[1]} />
-			{/if}
+			<!-- starter picture -->
+			<GamePicture name={data[player].starter} style="grid-area:s{i}pic" />
 		{/each}
+
+		<Switcher
+			label="Winner"
+			style="grid-area:winner"
+			aria-label="Winner switcher. Current winner - {winner}."
+			value={winner === undefined ? undefined : players.indexOf(winner)}
+			on:click={switchWinner}
+		/>
+		<label
+			class="swap-color"
+			style="grid-area:color"
+			aria-label="Color switcher ({players
+				.map((name) => `${data[name].color} - ${name}`)
+				.join(', ')})."
+		>
+			<button type="button" class="swap-color" on:click={swapColor} />
+			Color
+		</label>
 	</homm3-snippet>
 
 	<slot name="data-mapper" style="grid-column:span 3" />
@@ -89,13 +130,23 @@
 	homm3-snippet {
 		display: grid;
 		grid-template-columns: 1fr 46px auto 46px 1fr;
+		grid-template-rows: 1fr 1fr;
+		grid-template-areas:
+			't0  t0pic  winner 	t1pic  t1'
+			's0	 s0pic  color	s1pic  s1';
 		gap: 0 var(--space-m);
 		grid-column: span 3;
+	}
+	:global(homm3-snippet > img) {
+		align-self: center;
 	}
 
 	@media (max-width: 600px) {
 		homm3-snippet {
 			grid-template-columns: 1fr auto 1fr;
+			grid-template-areas:
+				't0    winner 	  t1'
+				's0	   color	  s1';
 		}
 		:global(homm3-snippet > img),
 		:global(img-placeholder) {
@@ -111,26 +162,27 @@
 		color: black;
 	}
 
-	select {
-	}
 	select:disabled {
 		opacity: 1;
+		appearance: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
 	}
 	.red {
 		background-color: hsl(350deg 55% 90%);
-		border-color: hsl(0, 75%, 65%);
+		border: 4px solid hsl(0, 75%, 65%);
 	}
 	.blue {
 		background-color: hsl(237 70% 90% / 1);
 		border: 4px solid hsl(240deg, 75%, 65%);
 	}
 
-	select:nth-of-type(-n + 2) {
+	select:nth-of-type(odd) {
 		border-bottom: none;
 		border-bottom-left-radius: 0;
 		border-bottom-right-radius: 0;
 	}
-	select:nth-of-type(n + 3) {
+	select:nth-of-type(even) {
 		border-top: none;
 		border-top-left-radius: 0;
 		border-top-right-radius: 0;
@@ -141,7 +193,6 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		cursor: pointer;
 		user-select: none;
 		font-size: 0.85em;
 	}
@@ -151,11 +202,14 @@
 		padding: 0;
 		background-color: transparent;
 		cursor: pointer;
+		transform-origin: center;
 	}
 	button.swap-color:after {
 		content: '\21C4';
 		display: inline-block;
 		font-size: 1.8em;
+		transform: translateY(5%);
+		transform-origin: center;
 	}
 
 	@media (hover: hover) {

@@ -1,26 +1,17 @@
 /** @typedef {import("../types").Game} Game */
-
+/** @typedef {import("../types").Series} Series */
 
 /** 
- * @param {number} n
- * @returns {string} n-length string of numbers 
+ * @returns {string} 16-length string of numbers 
  */
-export function uniqueNumber(n = 20) {
-    const firstPart = Math.random().toString().slice(2) + Date.now()
-    const secondPart = Math.random().toString().slice(2).slice(0, n - firstPart.length)
-    return firstPart + secondPart
+function uniqueNumber() {
+    return Math.random().toString().slice(2, 5) + Date.now()
 }
 
-/**
- * @param {{ round: number, index: number, players: string[]}}
- * @return {Game}
- */
-export function createGame({ round, index, players }) {
+/** @returns {Game} */
+export function createGame() {
     return {
         id: uniqueNumber(),
-        round,
-        index,
-        players,
         kvMap: [],
         data: {}
     }
@@ -38,7 +29,7 @@ export function createSeries(round, index) {
         round,
         index,
         score: [0, 0],
-        players: [null, null],
+        players: ["", ""],
         games: [],
         kvMap: []
     };
@@ -46,13 +37,16 @@ export function createSeries(round, index) {
 
 /**
  * @param {Game[]} games 
+ * @param {[string, string]} players
  */
-export function calculateScore(games) {
+export function calculateScore(games, players) {
 
     return games.reduce(
         (score, game) => {
             if (game.winner === undefined) return score;
-            score[game.winner]++;
+
+            const winnerIndex = players.indexOf(game.winner)
+            score[winnerIndex]++;
             return score;
         },
         [0, 0]

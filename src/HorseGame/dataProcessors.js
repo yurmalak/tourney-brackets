@@ -8,7 +8,7 @@ function series(series) {
         switch (key) {
             // render clock icon to tell that game date has been defined
             case "начало":
-                if (series.winner === undefined) data.start = v1
+                if (!series.games.length) data.start = v1
                 break
 
             // hide nodes that currently overlap with static text on the image
@@ -28,10 +28,18 @@ function series(series) {
     return data
 }
 
-function game(game) {
+function game(game, series) {
 
-    const gameData = { roulette: ["Пробить ГО стартовым героем"] }
+    const gameData = { roulette: [] }
 
+    // add condition common fo all games in round
+    const commonRules = [
+        "Пробить ГО стартовым героем"
+    ]
+    const rule = commonRules[series.round]
+    if (rule) gameData.roulette.push(rule)
+
+    // kvMap
     for (const [key, v1, v2] of game.kvMap) {
 
         switch (key) {
@@ -54,7 +62,10 @@ function game(game) {
     }
 
     // town, starters, color
-    Object.assign(gameData, game.data)
+    const bluePlayer = Object.entries(game.data).find(nameAndData => nameAndData[1].color === "blue")[0]
+    gameData.blue = series.players.indexOf(bluePlayer)
+    gameData.towns = series.players.map(p => game.data[p].town)
+    gameData.starters = series.players.map(p => game.data[p].starter)
 
     return gameData
 }

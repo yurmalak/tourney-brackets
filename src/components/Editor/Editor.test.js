@@ -9,51 +9,42 @@ import { tourneyStore } from '../../stores';
 import Editor from './EditorTestAssistant.svelte';
 
 
-
 describe("Editor", () => {
 
     afterEach(() => { vi.clearAllMocks() })
 
-    function setup() {
+    /** @param {object} props - object passed to rendered Editor */
+    function setup(props = {}) {
 
-        const players = [
-            { name: "John", sIndex: 0, pIndex: 0 },
-            { name: "Jane", sIndex: 0, pIndex: 1 },
-            { name: "Kate", sIndex: null, pIndex: null }
+        const playersTotal = 8
+        const participants = [
+            "John",
+            "Jane",
+            ...Array(playersTotal - 2).fill(""), // make Kate idle
+            "Kate",
         ]
 
-        const round = 0
-        const participants = players.slice(0, 2)
-        const names = participants.map(p => p.name)
-        const series = createSeries(round, 0)
+        const series = createSeries(0, 0)
+        series.players = participants.slice(0, 2)
 
-        const game = createGame({ round, index: 0, players: names })
-        game.winner = 1
+        const game = createGame(series)
+        game.winner = "Jane"
         game.kvMap = [
             ["game-kv-single-key", "game-kv-single-value"],
             ["game-kv-dual-key", "game-kv-dual-value-1", "game-kv-dual-value-2"],
         ]
 
-        series.games = [game]
-        series.players = participants
-        const kvMap = [
+        series.games.push(game)
+        series.kvMap = [
             ["series-kv-single-key", "series-kv-single-value"],
             ["series-kv-dual-key", "series-kv-dual-value-1", "series-kv-dual-value-2"]
         ]
-        const kvMaps = [{ round, sIndex: 0, players: names, kvMap }]
 
-        setStore({ players, games: series.games, kvMaps })
-        const { rerender, component } = render(Editor, { series })
+        setStore({ participants, playersTotal }, [series])
+        const { component } = render(Editor, { series, ...props })
 
-        const maps = {
-            g1: game.kvMap[0],
-            g2: game.kvMap[1],
-            s1: kvMap[0],
-            s2: kvMap[1]
-        }
-
-        const selectorSearchArgs = { value: new RegExp(names.join("|")), name: /Player [12]/ }
-        return { players, participants, names, series, game, round, selectorSearchArgs, rerender, component, kvMaps: maps }
+        const selectorSearchArgs = { value: new RegExp(series.players.join("|")), name: /Player [12]/ }
+        return { series, selectorSearchArgs, playersTotal, component }
     }
 
     /**
@@ -142,11 +133,10 @@ describe("Editor", () => {
 
     it("renders correctly with normal props", async () => {
 
-        const { players, participants, names, series, round, selectorSearchArgs, rerender } = setup()
+        const { series, selectorSearchArgs } = setup()
         const selects = screen.getAllByRole("combobox", selectorSearchArgs)
 
-
-        participants.forEach(p => expect(selects[p.pIndex]).toHaveValue(p.name))
+        series.players.forEach((name, i) => expect(selects[i]).toHaveValue(name))
         selects.forEach(el => {
             const options = within(el).getAllByRole("option")
 
@@ -167,22 +157,14 @@ describe("Editor", () => {
         await checkButtons({ "delete game": true, "winner": true, "add game": true })
 
         // switcher should also have winner's name on it (Jane, second player)
-        const winnerSwitcher = screen.getByLabelText(/current.+player.+2/i)
+        const winnerSwitcher = screen.getByLabelText(/current.+winner.+Jane/i)
         expect(winnerSwitcher).toBeInTheDocument()
-
-        // order of players' names in game should not be relevant
-        names.reverse()
-        setStore({ players, games: [createGame({ round, index: 0, players: names })] })
-        rerender({ series })
-
-        const sameSelects = screen.getAllByRole("combobox", selectorSearchArgs)
-        participants.forEach(p => expect(sameSelects[p.pIndex]).toHaveValue(p.name))
     })
 
     it("selects and de-selects players", async () => {
 
         const user = userEvent.setup()
-        const { selectorSearchArgs } = setup()
+        const { playersTotal, selectorSearchArgs } = setup()
         const selects = screen.getAllByRole("combobox", selectorSearchArgs)
 
 
@@ -222,8 +204,8 @@ describe("Editor", () => {
 
         // but store should be unaffected
         const store = get(tourneyStore)
-        expect(store.players.find(p => p.name === "Kate").sIndex === null)
-        expect(store.players.find(p => p.name === "John").sIndex === 0)
+        expect(store.data.participants.indexOf("Kate")).toBe(playersTotal)
+        expect(store.data.participants.indexOf("John")).toBe(0)
 
         // select John back and check that nothing has changed
         await user.selectOptions(selects[0], "John")
@@ -287,9 +269,9 @@ describe("Editor", () => {
 
         // according to the store, nothing is going on
         const store = get(tourneyStore)
-        const janeAndJohnGames = store.tree.get("Jane").get("John").get(0).games
-        expect(janeAndJohnGames.length).toBe(1)
-        expect(janeAndJohnGames[0].winner).toBe(1)
+        const storedSeries = store.getSeries(0, ["John", "Jane"])
+        expect(storedSeries.games.length).toBe(1)
+        expect(storedSeries.games[0].winner).toBe("Jane")
 
         // well, if it says so...
         for (let i = 1; i < games.length; i++) {
@@ -305,24 +287,23 @@ describe("Editor", () => {
         // as if nothing happened
         await checkButtons(false)
 
-
         // let's at least replace first game
         const deleteButton = within(games[0]).getByRole("button", { name: /delete game/i })
         await user.click(deleteButton)
         await user.click(deleteButton)  // confirm
         await user.click(addGame)
-        await checkButtons(true)
+        await checkButtons(true)    // it detects that game has been replaced
     })
 
     it("updates key-value maps", async () => {
 
-        const { kvMaps } = setup()
+        const { series } = setup()
         const user = userEvent.setup()
 
         // edit existing maps and check if they are recognized
         const texts = [
-            kvMaps.s1[0],
-            kvMaps.g2[2]
+            series.kvMap[0][0], // key in series map
+            series.games[0].kvMap[0][1] // value in game map
         ]
 
         // these are contenteditables so check for textContent instaed of value
@@ -335,7 +316,7 @@ describe("Editor", () => {
             // won't appear unless component "changed"
             await user.click(screen.getByRole("button", { name: /discard/i }))
 
-            // won't appear unless changes have been discarded
+            // won't appear if there are changes
             expect(screen.getByRole("button", { name: /close/i })).toBeInTheDocument()
         }
 
@@ -364,8 +345,15 @@ describe("Editor", () => {
 
     it("saves or discards changes when called", async () => {
 
+        // setup spies
+        const dbContext = { updateData: () => ({ promise: Promise.resolve({}) }) }
+        const dbSpy = vi.spyOn(dbContext, "updateData")
+        const closeEditorSpy = vi.fn()
+        const updateSpy = vi.spyOn(tourneyStore, "update")
+        const { selectorSearchArgs, component } = setup({ dbContext })
+        component.$on("toggleEditor", closeEditorSpy)
+
         const user = userEvent.setup()
-        const { selectorSearchArgs, component } = setup()
         const selects = screen.getAllByRole("combobox", selectorSearchArgs)
         const addGameButton = screen.getByRole("button", { name: /add game/i })
 
@@ -415,21 +403,19 @@ describe("Editor", () => {
         await user.type(values[5], "beanie")
 
         // save and close
-        const closeEditorSpy = vi.fn()
-        const updateSpy = vi.spyOn(tourneyStore, "update")
-        component.$on("toggleEditor", closeEditorSpy)
-
         const saveButton = screen.getByRole("button", { name: /save/i })
         await user.click(saveButton)
         expect(updateSpy).toHaveBeenCalledTimes(1)
         expect(closeEditorSpy).toHaveBeenCalledTimes(1)
+        expect(dbSpy).toHaveBeenCalledTimes(1)
 
         // check that it saved with correct data
         const args = updateSpy.mock.lastCall[0]
         expect(args.changed.players).toBe(true)
-        expect(args.changed.gamesOrMap).toBe(true)
-        expect(args.seriesData.games[0].winner).toBe(0)
-        expect(args.seriesData.games[0].players).toEqual(["John", "Kate"])
+        expect(args.changed.series).toBe(true)
+        expect(args.series.players).toEqual(["John", "Jane"])
+        expect(args.selectedPlayers).toEqual(["John", "Kate"])
+        expect(args.seriesData.games[0].winner).toBe("John")
         expect(args.seriesData.games[0].kvMap).toEqual([
             ["date", "January, 1st"],
             ["starting gold", "500", "400"]

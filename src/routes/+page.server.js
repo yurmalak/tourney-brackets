@@ -10,9 +10,9 @@ import staticData from "../mock/faunaStuff.json"
 /** @type {import('./$types').PageServerLoad} */
 export async function load() {
 
-    let data, playersData
+    let tourneyData, playersData
     if (process.env.NODE_ENV === "development") {
-        ({ playersData, ...data } = staticData)
+        ({ playersData, ...tourneyData } = staticData)
     }
     else {
         const client = new faunadb.Client({
@@ -21,14 +21,14 @@ export async function load() {
         })
 
         const q = faunadb.query;
-        [{ tourneyData: data }, playersData] = await client.query([
+        [{ tourneyData }, playersData] = await client.query([
             q.Call("getData", null),
             q.Call("getPlayersData")
         ]);
     }
 
     const { width, height } = anchors
-    const tourney = new Tourney(data)
+    const tourney = new Tourney(tourneyData)
     const seriesByRound = bundleSeries(tourney)
 
     const processedSeries = seriesByRound.map((rSeries, round) =>
@@ -60,11 +60,13 @@ export async function load() {
                 players,
                 nodeLeftTop: anchors.coordinates[round][sIndex],
                 data: processors.series(s),
-                score: calculateScore(s.games),
-                games: s.games.map(g => ({
-                    ...processors.game(g, s),
-                    winner: g.winner
-                })),
+                score: calculateScore(s.games, s.players),
+                games: s.games.map(g => {
+
+                    const game = processors.game(g, s)
+                    if (g.winner) game.winner = s.players.indexOf(g.winner)
+                    return game
+                }),
             }
 
             return series

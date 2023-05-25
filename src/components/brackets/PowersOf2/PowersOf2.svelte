@@ -6,7 +6,7 @@
 	import { tourneyStore } from '../../../stores';
 	import bundleSeries from './bundleSeries';
 
-	const { playersTotal, withTop3 } = $tourneyStore;
+	const { playersTotal, withTop3 } = $tourneyStore.data;
 	const roundsTotal = Math.log(playersTotal) / Math.log(2);
 	const cols = 2 * (roundsTotal - 1);
 	const rows = playersTotal / 4;
@@ -14,13 +14,12 @@
 	/** @type {Series[][]},  */
 	let seriesByRound;
 
-	// /** @type {Series[]},  */
+	/** @type {Series[]},  */
 	let finals;
 
 	$: {
-		// finals won't fit general schema
 		seriesByRound = bundleSeries($tourneyStore);
-		finals = seriesByRound.pop();
+		finals = seriesByRound.pop(); // finals won't fit general schema
 	}
 </script>
 
@@ -49,22 +48,16 @@
 	<!-- place finals by hand -->
 	{#if withTop3}
 		<!-- 2 finals in same column -->
+		{@const style = `grid-column:${cols + 1};grid-row: span ${playersTotal / 8}`}
 		<Joiner span={playersTotal / 2} style="transform:rotateY(180deg)" />
 		{#each finals as series}
-			<Node
-				{series}
-				on:nodeClick
-				style="grid-column:{cols + 1};grid-row: span {playersTotal / 8}"
-			/>
+			<Node {series} on:nodeClick {style} />
 		{/each}
 		<Joiner span={playersTotal / 2} />
 	{:else}
+		{@const style = `grid-column:${cols + 1};grid-row: span ${playersTotal / 4}`}
 		<Joiner span={playersTotal / 2} horisontal />
-		<Node
-			series={finals[0]}
-			on:nodeClick
-			style="grid-column:{cols + 1};grid-row: span {playersTotal / 4}"
-		/>
+		<Node series={finals[0]} on:nodeClick {style} />
 		<Joiner span={playersTotal / 2} horisontal />
 	{/if}
 </bracket-32>

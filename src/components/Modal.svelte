@@ -92,7 +92,6 @@
 		position: absolute;
 		display: block;
 		width: 360px;
-		min-height: 200px;
 		max-height: min(80vh, 80%);
 		top: 0;
 		left: 50%;

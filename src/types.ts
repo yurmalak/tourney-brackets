@@ -1,35 +1,18 @@
-export interface Player {
-    name: string
-    media: {
-        twitch?: string,
-        yt?: string
-    }
-}
-
-export interface Participant {
-    name: string
-    sIndex: number | null
-    pIndex: number | null
-}
-
 export interface Game {
     id: string
-    round: number
-    index: number
-    players: string[]
     kvMap: KvMap
     data: {}
-    winner?: number
+    winner?: string
 }
 
 export interface Series {
     round: number
     index: number
     score: number[]
-    players: (Participant | null)[]
+    players: string[]
     games: Game[]
     kvMap: KvMap
-    winner?: number
+    winner?: string
 }
 
 export interface TourneyData {
@@ -37,7 +20,7 @@ export interface TourneyData {
     name: string
     templateCode: string
     withTop3: boolean
-    players: Participant[]
+    players: string[]
     games: Game[]
     playersTotal: number
 }

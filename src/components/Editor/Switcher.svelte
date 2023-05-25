@@ -8,7 +8,7 @@
 </script>
 
 <label {style} class={className} {...$$restProps}>
-	<button type="button" on:click={() => (value = 1 - (value ?? 1))} class="state-{value}" />
+	<button type="button" on:click class="state-{value}" />
 	{label}
 </label>
 

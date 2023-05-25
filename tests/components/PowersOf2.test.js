@@ -10,7 +10,7 @@ describe('Bracket PowersOf2', () => {
     /** Setup for test #4 */
     function setupDwarfTournament() {
 
-        const names = [
+        const participants = [
             "Thror",
             "Thrain",
             "Bifur",
@@ -20,34 +20,52 @@ describe('Bracket PowersOf2', () => {
             "Nori",
             "Dori",
         ]
-        let s = 0
-        const players = names.map((name, i) => ({
-            name,
-            sIndex: i % 2 ? s++ : s,
-            pIndex: i % 2
-        }))
 
-        const t = (a, b) => [names[a], names[b]]
+        const t = (a, b) => [participants[a], participants[b]]
         const games = [
-            { players: t(0, 1), round: 0, winner: 1 },
-            { players: t(2, 3), round: 0, winner: 0 },
-            { players: t(4, 5), round: 0, winner: 1 },
-            { players: t(6, 7), round: 0, winner: 0 },
+            [{ players: t(0, 1), round: 0, winner: 1 }],
+            [{ players: t(2, 3), round: 0, winner: 0 }],
+            [{ players: t(4, 5), round: 0, winner: 1 }],
+            [{ players: t(6, 7), round: 0, winner: 0 }],
             // first semi-finals 1-2
-            { players: t(1, 2), round: 1, winner: 0 },
-            { players: t(1, 2), round: 1, winner: 1 },
-            { players: t(1, 2), round: 1, winner: 1 },
+            [
+                { players: t(1, 2), round: 1, winner: 0 },
+                { players: t(1, 2), round: 1, winner: 1 },
+                { players: t(1, 2), round: 1, winner: 1 },
+            ],
             // seconds semi-finals 2-0
-            { players: t(5, 6), round: 1, winner: 0 },
-            { players: t(5, 6), round: 1, winner: 0 },
+            [
+                { players: t(5, 6), round: 1, winner: 0 },
+                { players: t(5, 6), round: 1, winner: 0 },
+            ],
             // 1st place 2-0
-            { players: t(2, 5), round: 2, winner: 0 },
-            { players: t(2, 5), round: 2, winner: 0 },
-            // 3rd place 1-2
-            { players: t(1, 6), round: 2, winner: 1 },
-            { players: t(1, 6), round: 2, winner: 0 },
-            { players: t(1, 6), round: 2, winner: 0 },
+            [
+                { players: t(2, 5), round: 2, winner: 0 },
+                { players: t(2, 5), round: 2, winner: 0 },
+            ],
+            // 3rd place 2-1
+            [
+                { players: t(1, 6), round: 2, winner: 1 },
+                { players: t(1, 6), round: 2, winner: 0 },
+                { players: t(1, 6), round: 2, winner: 0 },
+            ]
         ]
+
+        const sList = games.map(gs => {
+            const { players, round } = gs[0]
+            return {
+                tourneyId: "123",
+                players,
+                round,
+                kvMap: [],
+                games: gs.map((g, i) => ({
+                    id: "321" + i,
+                    winner: players[g.winner],
+                    data: {},
+                    kvMap: []
+                }))
+            }
+        })
 
         /** 
          * @param {Array<string|number>} values
@@ -60,7 +78,7 @@ describe('Bracket PowersOf2', () => {
 
         }
 
-        return { names, players, games, checkNode }
+        return { participants, sList, checkNode }
     }
 
 
@@ -90,13 +108,15 @@ describe('Bracket PowersOf2', () => {
 
     it("writes players to nodes", () => {
 
-        const players = [
-            { name: "Dreeg", sIndex: 2, pIndex: 0 },
-            { name: "Solael", sIndex: 2, pIndex: 1 },
-            { name: "Bysmiel", sIndex: 5, pIndex: 1 },
-            { name: "Attendant", sIndex: 6, pIndex: 0 }
+        const participants = [
+            "Dreeg",
+            "Solael",
+            "",             // put Bysmiel in second slot
+            "Bysmiel",
+            "Attendant",
+            ...Array(11).fill("")
         ]
-        setStore({ players, playersTotal: 16 })
+        setStore({ participants, playersTotal: 16 })
         render(PowersOf2)
 
         const dreeg = screen.getByText("Dreeg")
@@ -111,37 +131,36 @@ describe('Bracket PowersOf2', () => {
 
     it("counts score and promotes winner to next round (including 3rd place)", () => {
 
-        const { names, players, games, checkNode } = setupDwarfTournament()
+        const { participants, sList, checkNode } = setupDwarfTournament()
         setStore({
-            games,
+            participants,
             playersTotal: 8,
-            withTop3: true,
-            players
-        })
+            withTop3: true
+        }, sList)
         const { rerender } = render(PowersOf2)
 
         // 2-0
-        checkNode(names[2], 2, names[5], 0)
+        checkNode(participants[2], 2, participants[5], 0)
 
-        // 1-2
-        checkNode(names[1], 2, names[6], 1)
+        // 2-1
+        checkNode(participants[1], 2, participants[6], 1)
 
 
         // finals should not happen if some game missing
+        sList[0].games.pop()
         setStore({
-            games: games.slice(1),
             playersTotal: 8,
             withTop3: true,
-            players
-        })
+            participants
+        }, sList)
         rerender({})
 
         // Thror and Thrain refuse to play since their game got sliced
-        checkNode(names[0], 0, names[1], 0)
+        checkNode(participants[0], 0, participants[1], 0)
 
         // so Bifur, Ori and Nori will have to wait for them
-        checkNode(0, names[2], 0)     // semi-finals
-        checkNode(0, names[5], 0)     // winner finals
-        checkNode(0, names[6], 0)     // loser finals
+        checkNode(0, participants[2], 0)     // semi-finals
+        checkNode(0, participants[5], 0)     // winner finals
+        checkNode(0, participants[6], 0)     // loser finals
     })
 });

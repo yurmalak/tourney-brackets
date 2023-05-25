@@ -1,178 +1,110 @@
-/** @typedef {import('./types.ts').Participant} Participant */
-/** @typedef {import('./types.ts').TourneyData} TourneyData */
-/** @typedef {import('./types.ts').Series} Series */
-/** @typedef {import('./types.ts').KvMap} KvMap */
 /** @typedef {import('./types.ts').Game} Game */
+/** @typedef {import('./types.ts').KvMap} KvMap */
 
 import { writable } from 'svelte/store';
+import { Tourney, playerSorter, kvMapSorter } from './lib/Tourney';
 
 
-/** 
- * @param {string} a
- * @param {string} b
- */
-export const playerSorter = (a, b) => a.localeCompare(b)
+class WritableTourney extends Tourney {
 
-/** 
- * @param {Series} a
- * @param {Series} b
- */
-export const gamesSorter = (a, b) => a.index - b.index
-
-
-/** 
- * @param {KvMap} a
- * @param {KvMap} b
- */
-export const kvMapSorter = (a, b) => {
-
-    // put pairs with single value first
-    const lessValues = a.length - b.length
-
-    // then sort by keys
-    return lessValues || a[0].localeCompare(b[0])
-}
-
-
-function Container() {
-    this.games = []
-    this.kvMap = []
-}
-
-
-/**
- * 
- */
-export class Tourney {
-    constructor({ games = [], kvMaps = [], ...data }) {
-
-        this.tree = new Map()
-        Object.assign(this, data)
-
-        // group games by players and round
-        for (const game of games) {
-            const series = this.storeSessionData(game)
-            series.games.push(game)
-        }
-
-        // same for maps
-        for (const { round, players, kvMap } of kvMaps) {
-            const series = this.storeSessionData({ round, players })
-            series.kvMap.push(...kvMap)
-        }
-
-        // sort games
-        for (const subMap of this.tree.values())
-            for (const gamesByRound of subMap.values())
-                for (const series of gamesByRound.values())
-                    series.games.sort(gamesSorter)
-    }
-
-    /**
-     * Creates array at the end of nested maps `tree => player1 => player2 => round`.
-     * Players are sorted by names.
-     * Keeps existing entities intact.
-     * @param {{ players: string[], round: number }} gameLike
-     * @returns {Game[]}
+    /** 
+     * @param {{ 
+     *  changed: { players: boolean, series: boolean },
+     *  selectedPlayers: [string, string],
+     *  series: import("./types").Series
+     *  seriesData: { games: Game[], kvMap: KvMap }
+     * }} args 
+     * @param {{ updateData: (data: object) => void}} dbClient - see $lib/setupDbClient.js and setupFauna.js
      */
-    storeSessionData({ players, round }) {
+    save({ changed, selectedPlayers, series, seriesData }, dbClient) {
 
-        const [id1, id2] = [...players].sort(playerSorter)
+        // to restore in case task fails
+        this.backup = {}
 
-        if (!this.tree.has(id1)) this.tree.set(id1, new Map())
-        const subMap = this.tree.get(id1)
+        // object expected by Fauna
+        const dbUpdater = {}
 
-        if (!subMap.has(id2)) subMap.set(id2, new Map())
-        const gamesByRound = subMap.get(id2)
+        // series' players and not it's position define which series it is
+        if (changed.players) {
 
-        if (!gamesByRound.has(round)) gamesByRound.set(round, new Container())
-        const series = gamesByRound.get(round)
-
-        return series
-    }
-
-    /**
-     * Fills `.players` array of each series with players
-     * according to data stored in `players`.
-     * @param {Series[]} firstRound 
-     */
-    assignPlayers(firstRound) {
-
-        for (const player of this.players) {
-            const { name, sIndex, pIndex } = player;
-
-            // idle player
-            if (sIndex === null) continue
-            const series = firstRound[sIndex];
-            const anotherPlayer = series.players[pIndex];
-
-            if (anotherPlayer) {
-                console.warn(`2 players aim for same slot (${name} and ${anotherPlayer.name}).`, this);
-                player.sIndex = null
-                player.pIndex = null
-                continue;
+            // ensure it's not called to update anything other than first round
+            if (series.round !== 0) {
+                console.error("No manual players selecting allowed for rounds past 1st.")
+                return this
             }
 
-            series.players[pIndex] = player;
-        }
-    }
+            // store to revert in case of db/conection errors
+            this.backup.participants = [...this.data.participants]
 
-    /**
-     * Returns all games this pair of players played in specified round.
-     * @param {number} round 
-     * @param {string[]} playerKeys 
-     * @returns {{ games: Game[], data: string[][]}}
-     */
-    getSeries(round, playerKeys) {
+            for (let i = 0; i < 2; i++) {
 
-        if (!playerKeys.every(Boolean)) return new Container()
-
-        const keys = [...playerKeys].sort(playerSorter)
-        keys.push(round)
-
-        return keys.reduce((map, key) => map?.get(key), this.tree) || new Container()
-    }
-
-    save({ changed, selectedPlayers, series, seriesData }) {
-
-        if (changed.players) {
-            this.players = this.players.map(({ ...p }) => {
-                if (selectedPlayers.includes(p.name)) {
-                    p.sIndex = series.index;
-                    p.pIndex = selectedPlayers.indexOf(p.name);
-                } else if (p.sIndex === series.index) {
-                    p.sIndex = null;
-                    p.pIndex = null;
+                // remove selected players from their old places
+                const player = selectedPlayers[i]
+                if (player !== "") {
+                    const oldIndex = this.data.participants.indexOf(player)
+                    this.data.participants[oldIndex] = ""
                 }
 
-                return p;
-            });
+                // replace players on selected positions
+                const newIndex = series.index * 2 + i
+                const oldOccupant = this.data.participants[newIndex]
+                this.data.participants[newIndex] = player
+
+                // append old occupant to the list
+                if (oldOccupant !== "") this.data.participants.push(oldOccupant)
+            }
+
+            // sort idle players at the end of the list
+            if (this.data.participants.length > this.data.playersTotal) {
+                const idlers = this.data.participants
+                    .splice(this.data.playersTotal)
+                    .filter(Boolean)
+                    .sort(playerSorter)
+                this.data.participants.push(...idlers)
+            }
+
+            dbUpdater.tourney = this.data
         }
 
-        const { games, kvMap } = seriesData
-        if (changed.gamesOrMap) {
+        let newSeries
+        if (changed.series) {
 
-            // make path
-            this.storeSessionData({
+            // store to revert in case of db/conection errors
+            const oldData = this.getSeries(series.round, selectedPlayers)
+            this.backup.series = {
+                round: series.round,
                 players: selectedPlayers,
-                round: series.round
-            })
-            const keys = selectedPlayers.sort(playerSorter)
-            const roundMap = this.tree.get(keys[0]).get(keys[1])
+                ...oldData,
+            }
 
-            // update games
-            const sortedGames = games
-                .sort(gamesSorter)
-                .map((game, index) => ({ ...game, index }))
+            // crrate new one
+            // selectedPlayers will match series.players if Editor has been saved without changes to players
+            // no id or id === null in seriesData will cause new series to be created
+            // otherwise the one with matching id will be updated
+            // see setupFauna.js
+            newSeries = {
+                round: series.round,
+                players: selectedPlayers,
+                ...seriesData,
+            }
 
-            // sort kvMap by keys and drop empty ones
-            const sortedMap = kvMap
-                .filter(([key, v1, v2]) => key || v1 || v2)
-                .sort(kvMapSorter)
+            // remove empty fields from maps and sort them
+            const mapFilter = entry => entry.some(Boolean)
+            newSeries.kvMap = newSeries.kvMap.filter(mapFilter).sort(kvMapSorter)
+            newSeries.games.forEach(g => g.kvMap = g.kvMap.filter(mapFilter).sort(kvMapSorter))
 
-            // and save
-            const data = { kvMap: sortedMap, games: sortedGames }
-            roundMap.set(series.round, data)
+            this.storeSeries(newSeries)
+            dbUpdater.series = newSeries
+        }
+
+        // send data to db
+        if (localStorage.getItem("fauna--saving-disabled")) {
+            console.log("Fauna has been disabled.", { dbUpdater })
+
+        } else {
+            dbClient.updateData(dbUpdater).promise
+                .then(r => { if (r.series) newSeries.id = r.series })
+                .catch(console.error)
         }
 
         console.log("[log] Updating tourneyStore.", arguments)
@@ -180,17 +112,13 @@ export class Tourney {
     }
 }
 
-
 function createTourneyStore() {
 
-    // creating this dummy is the only way I found
-    // to add suggestions to $tourneyStore object
-    const { subscribe, set, update } = writable(new Tourney({}))
+    const { subscribe, set, update } = writable(new WritableTourney({}))
 
     return {
-        /** @param {TourneyData} tourney */
-        set: (tourney) => set(new Tourney(tourney)),
-        update: (args) => update((tourney) => tourney.save(args)),
+        set: (tourney) => set(new WritableTourney(tourney)),
+        update: (...args) => update((tourney) => tourney.save(...args)),
         subscribe,
     }
 }
