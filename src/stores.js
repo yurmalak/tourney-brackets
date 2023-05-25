@@ -7,6 +7,11 @@ import { Tourney, playerSorter, kvMapSorter } from './lib/Tourney';
 
 class WritableTourney extends Tourney {
 
+    constructor({ dbClient, ...props }) {
+        super(props)
+        this.dbClient = dbClient
+    }
+
     /** 
      * @param {{ 
      *  changed: { players: boolean, series: boolean },
@@ -14,9 +19,8 @@ class WritableTourney extends Tourney {
      *  series: import("./types").Series
      *  seriesData: { games: Game[], kvMap: KvMap }
      * }} args 
-     * @param {{ updateData: (data: object) => void}} dbClient - see $lib/setupDbClient.js and setupFauna.js
      */
-    save({ changed, selectedPlayers, series, seriesData }, dbClient) {
+    save({ changed, selectedPlayers, series, seriesData }) {
 
         // to restore in case task fails
         this.backup = {}
@@ -102,7 +106,7 @@ class WritableTourney extends Tourney {
             console.log("Fauna has been disabled.", { dbUpdater })
 
         } else {
-            dbClient.updateData(dbUpdater).promise
+            this.dbClient.updateData(dbUpdater).promise
                 .then(r => { if (r.series) newSeries.id = r.series })
                 .catch(console.error)
         }

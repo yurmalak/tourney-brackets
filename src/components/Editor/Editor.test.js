@@ -13,8 +13,11 @@ describe("Editor", () => {
 
     afterEach(() => { vi.clearAllMocks() })
 
-    /** @param {object} props - object passed to rendered Editor */
-    function setup(props = {}) {
+    /**
+     * @param {object} componentProps - object passed to rendered Editor
+     * @param {object} storeProps - object passed to {@link tourneyStore.set}
+     */
+    function setup(componentProps = {}, storeProps = {}) {
 
         const playersTotal = 8
         const participants = [
@@ -40,8 +43,8 @@ describe("Editor", () => {
             ["series-kv-dual-key", "series-kv-dual-value-1", "series-kv-dual-value-2"]
         ]
 
-        setStore({ participants, playersTotal }, [series])
-        const { component } = render(Editor, { series, ...props })
+        setStore({ tourney: { participants, playersTotal }, sList: [series], ...storeProps })
+        const { component } = render(Editor, { series, ...componentProps })
 
         const selectorSearchArgs = { value: new RegExp(series.players.join("|")), name: /Player [12]/ }
         return { series, selectorSearchArgs, playersTotal, component }
@@ -346,11 +349,11 @@ describe("Editor", () => {
     it("saves or discards changes when called", async () => {
 
         // setup spies
-        const dbContext = { updateData: () => ({ promise: Promise.resolve({}) }) }
-        const dbSpy = vi.spyOn(dbContext, "updateData")
+        const dbClient = { updateData: () => ({ promise: Promise.resolve({}) }) }
+        const dbSpy = vi.spyOn(dbClient, "updateData")
         const closeEditorSpy = vi.fn()
         const updateSpy = vi.spyOn(tourneyStore, "update")
-        const { selectorSearchArgs, component } = setup({ dbContext })
+        const { selectorSearchArgs, component } = setup({}, { dbClient })
         component.$on("toggleEditor", closeEditorSpy)
 
         const user = userEvent.setup()

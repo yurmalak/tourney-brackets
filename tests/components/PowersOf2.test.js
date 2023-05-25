@@ -90,7 +90,7 @@ describe('Bracket PowersOf2', () => {
 
         for (const num of [4, 8, 16, 32, 64]) {
             expectedNumber += num
-            setStore({ playersTotal: num * 2 })
+            setStore({ tourney: { playersTotal: num * 2 } })
             rerender({})
             const buttons = screen.getAllByRole("button")
             expect(buttons.length).toBe(expectedNumber)
@@ -99,7 +99,7 @@ describe('Bracket PowersOf2', () => {
 
     it("renders extra node if 'withTop3 === true'", () => {
 
-        setStore({ playersTotal: 32, withTop3: true })
+        setStore({ tourney: { playersTotal: 32, withTop3: true } })
         render(PowersOf2)
         const buttons = screen.getAllByRole("button")
         const normal = 1 + 2 + 4 + 8 + 16
@@ -116,7 +116,7 @@ describe('Bracket PowersOf2', () => {
             "Attendant",
             ...Array(11).fill("")
         ]
-        setStore({ participants, playersTotal: 16 })
+        setStore({ tourney: { participants, playersTotal: 16 } })
         render(PowersOf2)
 
         const dreeg = screen.getByText("Dreeg")
@@ -133,10 +133,13 @@ describe('Bracket PowersOf2', () => {
 
         const { participants, sList, checkNode } = setupDwarfTournament()
         setStore({
-            participants,
-            playersTotal: 8,
-            withTop3: true
-        }, sList)
+            tourney: {
+                participants,
+                playersTotal: 8,
+                withTop3: true
+            },
+            sList
+        })
         const { rerender } = render(PowersOf2)
 
         // 2-0
@@ -149,10 +152,14 @@ describe('Bracket PowersOf2', () => {
         // finals should not happen if some game missing
         sList[0].games.pop()
         setStore({
-            playersTotal: 8,
-            withTop3: true,
-            participants
-        }, sList)
+            tourney:
+            {
+                playersTotal: 8,
+                withTop3: true,
+                participants
+            },
+            sList
+        })
         rerender({})
 
         // Thror and Thrain refuse to play since their game got sliced

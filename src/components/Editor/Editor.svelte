@@ -6,7 +6,7 @@
 	import equal from 'fast-deep-equal';
 	import clone from 'rfdc/default';
 	import { createEventDispatcher, onDestroy, getContext } from 'svelte';
-	import { configKey, dbKey } from '$lib/context';
+	import { configKey } from '$lib/context';
 	import { calculateScore } from '$lib/utils';
 	import { playerSorter } from '$lib/Tourney';
 	import { tourneyStore } from '../../stores';
@@ -19,7 +19,6 @@
 	/** @type {Series}*/
 	export let series;
 	const { GameEditor, createGame } = getContext(configKey);
-	const dbClient = getContext(dbKey);
 
 	/**
 	 * List of all players participating in the tourney.
@@ -149,8 +148,7 @@
 				selectedPlayers,
 				series,
 				seriesData
-			}),
-			dbClient
+			})
 		);
 
 		closeEditor();

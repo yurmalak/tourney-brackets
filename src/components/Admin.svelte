@@ -1,8 +1,8 @@
 <script>
 	/** @typedef {import('../../types.ts').Series} Series */
 	/** @typedef {import('../../types.ts').TourneyData} TourneyData */
-	import { onMount, getContext, setContext } from 'svelte';
-	import { configKey, dbKey } from '$lib/context';
+	import { onMount, getContext } from 'svelte';
+	import { configKey } from '$lib/context';
 	import { tourneyStore } from '../stores';
 	import setupDbClient from '../lib/setupDbClient';
 	import Bracket from './brackets/Base.svelte';
@@ -12,7 +12,6 @@
 	let error = false;
 
 	const { client, task } = setupDbClient();
-	setContext(dbKey, client);
 
 	// ensure contexts has all necessary parts
 	const gameContext = getContext(configKey);
@@ -56,7 +55,7 @@
 		else data = await getData();
 
 		if (error) console.error('Admin, failed to fetch data', error);
-		else tourneyStore.set(data.tourneyData);
+		else tourneyStore.set({ ...data.tourneyData, dvClient: client });
 
 		ready = true;
 	});

@@ -3,7 +3,7 @@ import { tourneyStore } from '../src/stores';
 /** @typedef {import("../src/types").TourneyData} TourneyData */
 
 /** @param {TourneyData} options */
-export function setStore(tourney = {}, sList = []) {
+export function setStore({ tourney = {}, sList = [], ...other } = {}) {
 
     tourneyStore.set({
         tourney: {
@@ -16,6 +16,7 @@ export function setStore(tourney = {}, sList = []) {
         },
         sList: [
             ...sList
-        ]
+        ],
+        ...other
     })
 }
