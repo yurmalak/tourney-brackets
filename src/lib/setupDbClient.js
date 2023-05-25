@@ -2,6 +2,46 @@ import faunadb from 'faunadb';
 import netlifyIdentity from 'netlify-identity-widget';
 
 
+/**
+ * Helper for requesting Netlify functions
+ * @param {string} functionName 
+ * @param {object?} fetchOptions 
+ */
+export async function netlifyFetch(functionName, fetchOptions) {
+
+    // ask for athorization
+    const user = netlifyIdentity.currentUser();
+    if (!user) {
+        console.warn("User is not authorized.")
+        await new Promise(resolve => {
+
+            netlifyIdentity.open()
+            netlifyIdentity.on("login", () => {
+                netlifyIdentity.close()
+                resolve()
+            })
+        })
+    }
+
+    // refresh token
+    // request with expired token will be rejected by serverless function
+    const timeLeft = user.token.expires_at - Date.now()
+    if (timeLeft < 5 * 60 * 1000) {
+        console.log("Refreshing JWT")
+        await netlifyIdentity.refresh(true)
+    }
+
+    const headers = { Authorization: `Bearer ${user.token.access_token}` };
+    const response = await fetch(
+        ".netlify/functions/" + functionName,
+        { ...fetchOptions, headers: { ...fetchOptions?.headers, ...headers } }
+    ).catch(err => err)
+
+    if (response.ok) return response.json()
+    throw new Error(`Error calling Function ${functionName}: ${await response.text()}`)
+}
+
+/** Helper for requesting Fauna editor key */
 async function getSecret() {
 
     const storageKey = 'fauna--editor-key';
@@ -14,17 +54,7 @@ async function getSecret() {
     console.log('Fauna key expired ot did not exist. Fetching new one...');
 
     // request new secret from netlify function
-    const user = netlifyIdentity.currentUser();
-    const endpoint = '.netlify/functions/getEditorKey';
-    const headers = { Authorization: `Bearer ${user.token.access_token}` };
-    const response = await fetch(endpoint, { headers });
-
-    let data
-    if (response.status === 200) data = await response.json()
-    else {
-        window.netlifyIdentity = netlifyIdentity
-        throw new Error(await response.text())
-    }
+    const data = await netlifyFetch('getEditorKey')
 
     console.log('Successfully fetched new Fauna key.');
     localStorage.setItem(storageKey, JSON.stringify(data));
@@ -32,61 +62,65 @@ async function getSecret() {
     return data.secret
 }
 
-
-export default function setupDbClient() {
-
-    /**
-     * @type {{
-     *    status: 'ok'|'pending'|'error',
-     *    queryData?: { tourney?: object, series?: Array },
-     * 	  promise?: Promise,
-     *    error?: Error,
-     * 	  complete: () => void
-     * }}
-     */
-    const normalState = { status: 'ok', error: null, queryData: null, promise: null, complete: resetTask };
-
-    /**
-     * Object with status of current query, its data and errors (if any)
-     */
-    const task = { ...normalState };
-    function resetTask() {
-        Object.assign(task, normalState);
-    }
+/** @param {(status:"ok"|"pending"|"error", error?: Error) => void} setStatus */
+export function setupDbClient(setStatus) {
 
     /**
      * Refresh key if necessary and Query Fauna for data/updates.
-     * @returns task object with awaitable `task.promise`
      */
-    function dbQuery(queryData) {
-        resetTask()
-        task.status = 'pending';
-        task.queryData = queryData;
+    async function dbQuery(queryData) {
+        setStatus('pending')
+        try {
+            const secret = await getSecret();
+            const client = new faunadb.Client({ secret, scheme: 'https' });
+            const result = await client.query(queryData);
+            setStatus('ok')
+            return { ok: true, result }
 
-        task.promise = getSecret()
-            .then(secret => {
+        } catch (error) {
+            setStatus("error", error);
+            return { ok: false, error, resetStatus: () => setStatus("ok") }
+        }
+    }
 
-                const client = new faunadb.Client({ secret: secret, scheme: 'https' });
-                return client.query(queryData);
-            })
-            .catch(error => {
-                console.error('Failed to query Fauna', error);
-                task.error = error;
-                task.status = 'error';
-                return task
-            })
+    /** Call "updateData" function configured in "setupFauna.js" */
+    function updateData(data) {
 
-        return task;
+        setStatus("pending")
+
+        // production
+        if (!localStorage.getItem("fauna--saving-disabled")) {
+            return dbQuery(faunadb.query.Call('updateData', data))
+        }
+
+        // dev - wait for 1s then resolve
+        console.log("Fauna has been disabled.", { data })
+        return new Promise(resolve => {
+
+            setTimeout(() => {
+                setStatus('ok')
+                resolve({ ok: true, result: {} })
+            }, 1000)
+        })
+    }
+
+    /** Call "getData" function configured in "setupFauna.js" */
+    async function getData() {
+
+        // production
+        if (!localStorage.getItem('fauna--fetching-disabled')) {
+            return dbQuery(faunadb.query.Call('getData', null))
+        }
+
+        // dev
+        const savedData = JSON.parse(localStorage.getItem('fauna-stuff'));
+        if (savedData?.tourneyData) return { ok: true, result: savedData }
+
+        const response = await dbQuery(faunadb.query.Call('getData', null))
+        if (response.ok) localStorage.setItem('fauna-stuff', JSON.stringify(response.result))
+        return response
     }
 
     // Fauna configuration can be found in "setupFauna.js" in root folder
-    const client = {
-        // returns specific tourney with provided id
-        // or recently updated one if it's null
-        getData: () => dbQuery(faunadb.query.Call('getData', null)),
-        updateData: (data) => dbQuery(faunadb.query.Call('updateData', data))
-    };
-
-
-    return { task, client }
+    return { getData, updateData };
 }

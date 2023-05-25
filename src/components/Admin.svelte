@@ -4,14 +4,24 @@
 	import { onMount, getContext } from 'svelte';
 	import { configKey } from '$lib/context';
 	import { tourneyStore } from '../stores';
-	import setupDbClient from '../lib/setupDbClient';
+	import { setupDbClient } from '../lib/setupDbClient';
 	import Bracket from './brackets/Base.svelte';
 	import Editor from './Editor/Editor.svelte';
+	import LoadingIcon from './LoadingIcon.svelte';
+	import BuildRequester from './BuildRequester.svelte';
 
+	/** Only false until data is fetched, regardless of the outcome */
 	let ready = false;
-	let error = false;
 
-	const { client, task } = setupDbClient();
+	// spin loading icon while waiting for DB reply
+	// show error sign with option to copy on error
+	let error = null;
+	let status = 'pending';
+	const setTaskStatus = (taskStatus, err = null) => {
+		status = taskStatus;
+		error = err;
+	};
+	const dbClient = setupDbClient(setTaskStatus);
 
 	// ensure contexts has all necessary parts
 	const gameContext = getContext(configKey);
@@ -23,7 +33,7 @@
 		}
 	}
 
-	// fetch list of tourneys and data for ongoing or latest one
+	// fetch list of tourneys and data for latest one
 	onMount(async () => {
 		/**
 		 * @type {{
@@ -34,32 +44,22 @@
 		 * 	  tourneyList: [ts:number, name:string, id:string][]
 		 * }}
 		 */
-		let data;
-		const getData = async () => {
-			const task = client.getData();
-			const result = await task.promise.catch((err) => (error = err));
-
-			if (task.status === 'error') error = task.error;
-			return result;
-		};
-
-		// dev
-		if (localStorage.getItem('fauna--fetching-disabled')) {
-			data = JSON.parse(localStorage.getItem('fauna-stuff'));
-			if (!data?.tourneyData) {
-				data = await getData();
-				localStorage.setItem('fauna-stuff', JSON.stringify(data));
+		const data = await dbClient.getData().then((response) => {
+			if (response.ok) {
+				status = 'ok';
+				return response.result;
+			} else {
+				console.error('Admin, failed to fetch data', response.error);
+				error = response.error;
+				status = 'error';
 			}
-		}
-		// production
-		else data = await getData();
-
-		if (error) console.error('Admin, failed to fetch data', error);
-		else tourneyStore.set({ ...data.tourneyData, dvClient: client });
+		});
 
 		ready = true;
+		if (!error) tourneyStore.set({ ...data.tourneyData, dbClient });
 	});
 
+	// open/close Editor
 	function toggleEditor(ev) {
 		editableSeries = ev?.detail?.series;
 	}
@@ -68,18 +68,41 @@
 	let editableSeries;
 </script>
 
-<div class="root">
-	{#if error}
-		<p>Something went wrong</p>
-		<p>{error.name}</p>
-		<p>{error.message}</p>
-	{:else if !ready}
-		Hold on...
-	{:else}
-		<Bracket templateCode={$tourneyStore?.data?.templateCode} on:nodeClick={toggleEditor} />
-		{#if editableSeries}<Editor series={editableSeries} on:toggleEditor={toggleEditor} />{/if}
-	{/if}
+<div id="root">
+	<header>
+		<BuildRequester />
+	</header>
+
+	<div id="body">
+		{#if error}
+			<p>Something went wrong</p>
+			<p>{error.name}</p>
+			<p>{error.message}</p>
+		{:else if !ready}
+			<div>
+				Hold on...
+				<LoadingIcon {error} {status} side={20} />
+			</div>
+		{:else}
+			<Bracket templateCode={$tourneyStore?.data?.templateCode} on:nodeClick={toggleEditor} />
+		{/if}
+		<LoadingIcon
+			{error}
+			{status}
+			side={30}
+			style="
+				position:absolute;
+				bottom:50px;
+				right:50px;
+				z-index: 999;
+			"
+		/>
+	</div>
 </div>
+
+{#if editableSeries}
+	<Editor blocked={status !== 'ok'} series={editableSeries} on:toggleEditor={toggleEditor} />
+{/if}
 
 <svelte:head>
 	<style>
@@ -96,10 +119,6 @@
 
 			font-family: sans-serif;
 			font-size: 14px;
-		}
-
-		.root {
-			overflow: auto;
 		}
 
 		body {
@@ -131,7 +150,7 @@
 			border: 1px solid gray;
 			background-color: var(--color-bg-dark);
 		}
-		.button:active:active {
+		.button:not(:disabled):active:active {
 			background-color: hsl(223, 15%, 95%);
 			box-shadow: none;
 		}
@@ -141,19 +160,36 @@
 			background-color: transparent;
 		}
 
-		.button-no-bg:active:active {
+		.button-no-bg:not(:disabled):active:active {
 			background-color: transparent;
 		}
 
 		@media (hover: hover) {
-			.button:hover {
+			.button:not(:disabled):hover {
 				background-color: var(--color-bg-light);
 				box-shadow: 0 0 2px hsl(233, 20%, 67%);
 			}
-			.button-no-bg:hover {
+			.button-no-bg:not(:disabled):hover {
 				border: 2px solid hsl(237, 69%, 69%);
 				background-color: var(--color-bg-medium);
 			}
 		}
 	</style>
 </svelte:head>
+
+<style>
+	#root {
+		display: flex;
+		flex-direction: column;
+		height: 100vh;
+	}
+	#body {
+		overflow: auto;
+		position: relative;
+		flex-grow: 1;
+	}
+	header {
+		display: flex;
+		justify-content: center;
+	}
+</style>

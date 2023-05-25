@@ -16,6 +16,9 @@
 	import KvFieldCreators from './KvFieldCreators.svelte';
 	import DeleteButton from './DeleteButton.svelte';
 
+	/** @type {boolean} */
+	export let blocked = false;
+
 	/** @type {Series}*/
 	export let series;
 	const { GameEditor, createGame, kvOptions } = getContext(configKey);
@@ -141,6 +144,11 @@
 	 * Updates store with data from {@link selectedPlayers} and {@link seriesData}.
 	 */
 	function save() {
+		if (blocked) {
+			console.warn('Saving is blocked');
+			return;
+		}
+
 		// deep clone just to be safe
 		tourneyStore.update(
 			clone({

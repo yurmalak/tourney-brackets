@@ -103,14 +103,9 @@ class WritableTourney extends Tourney {
         }
 
         // send data to db
-        if (localStorage.getItem("fauna--saving-disabled")) {
-            console.log("Fauna has been disabled.", { dbUpdater })
-
-        } else {
-            this.dbClient.updateData(dbUpdater).promise
-                .then(r => { if (r.series) newSeries.id = r.series })
-                .catch(console.error)
-        }
+        this.dbClient.updateData(dbUpdater)
+            .then(r => { if (r.series) newSeries.id = r.series })
+            .catch(console.error)
 
         console.log("[log] Updating tourneyStore.", arguments)
         return this

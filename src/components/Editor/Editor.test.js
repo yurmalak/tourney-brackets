@@ -372,7 +372,7 @@ describe("Editor", () => {
         }
 
         // setup spies
-        const dbClient = { updateData: () => ({ promise: Promise.resolve({}) }) }
+        const dbClient = { updateData: () => Promise.resolve({}) }
         const dbSpy = vi.spyOn(dbClient, "updateData")
         const closeEditorSpy = vi.fn()
         const updateSpy = vi.spyOn(tourneyStore, "update")
