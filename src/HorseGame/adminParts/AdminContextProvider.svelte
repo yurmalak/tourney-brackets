@@ -4,8 +4,9 @@
 
 	import GameEditor from './GameEditor.svelte';
 	import createGame from './createGame';
+	import kvOptions from './kvOptions';
 
-	setContext(configKey, { createGame, GameEditor });
+	setContext(configKey, { createGame, GameEditor, kvOptions });
 </script>
 
 <slot />

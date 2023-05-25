@@ -1,6 +1,7 @@
 <script>
 	export let kvMap;
 	export let label;
+	export let options;
 
 	export let style = null;
 	export let className = null;
@@ -10,7 +11,14 @@
 	{#if kvMap.length > 0}
 		<dl aria-label={label}>
 			{#each kvMap as [key, v1, v2]}
-				<dt aria-label="key" contenteditable bind:textContent={key} spellcheck="false" />
+				<dt>
+					<select bind:value={key} aria-label="key">
+						<option value="" />
+						{#each options as value}
+							<option {value}>{value}</option>
+						{/each}
+					</select>
+				</dt>
 
 				{#if v2 === undefined}
 					<dd bind:textContent={v1} contenteditable aria-label="value" style:grid-column="span 2" />
@@ -40,5 +48,8 @@
 
 	dt {
 		margin-right: var(--space-m);
+	}
+	select {
+		width: 100%;
 	}
 </style>

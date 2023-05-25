@@ -15,7 +15,7 @@
 
 	// ensure contexts has all necessary parts
 	const gameContext = getContext(configKey);
-	const requiredKeys = ['createGame', 'GameEditor'];
+	const requiredKeys = ['createGame', 'GameEditor', 'kvOptions'];
 	for (const key of requiredKeys) {
 		if (!(key in gameContext)) {
 			error = new Error(`Crucial part missing: "${key}".`);

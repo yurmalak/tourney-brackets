@@ -18,7 +18,7 @@
 
 	/** @type {Series}*/
 	export let series;
-	const { GameEditor, createGame } = getContext(configKey);
+	const { GameEditor, createGame, kvOptions } = getContext(configKey);
 
 	/**
 	 * List of all players participating in the tourney.
@@ -209,6 +209,7 @@
 									bind:kvMap
 									slot="data-mapper"
 									label="Key-value map for game {i + 1}"
+									options={kvOptions.game}
 								/>
 								<KvFieldCreators
 									bind:kvMap
@@ -217,7 +218,7 @@
 									newKeyFieldSeeker={(ev) => {
 										const selector = `editor-body li[aria-label="game"]:nth-of-type(${i + 1})`;
 										const gameLi = ev.target.closest(selector);
-										const newKeyField = gameLi.querySelector('dt:last-of-type:empty');
+										const newKeyField = gameLi.querySelector('select');
 										return newKeyField;
 									}}
 								/>
@@ -235,6 +236,7 @@
 				</ul>
 				<DataMapper
 					bind:kvMap={seriesData.kvMap}
+					options={kvOptions.series}
 					label="Key-value map for series"
 					style="width:100%"
 				/>
@@ -248,7 +250,7 @@
 					bind:kvMap={seriesData.kvMap}
 					newKeyFieldSeeker={(ev) => {
 						const editor = ev.target.closest('editor-inner');
-						const newKeyField = editor.querySelector('dl:last-of-type > dt:last-of-type:empty');
+						const newKeyField = editor.querySelector('dl:last-of-type > dt:last-of-type > select');
 						return newKeyField;
 					}}
 				/>
