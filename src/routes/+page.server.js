@@ -4,7 +4,7 @@ import { calculateScore } from "../lib/utils";
 import bundleSeries from "../components/brackets/PowersOf2/bundleSeries";
 import anchors from "../HorseGame/data/anchors.json"
 import processors from "../HorseGame/dataProcessors"
-import staticData from "../mock/faunaStuff.json"
+import staticData from "../HorseGame/staticData.json"
 
 
 /** @type {import('./$types').PageServerLoad} */
