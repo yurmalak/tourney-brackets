@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from 'svelte';
 	import WideBgImage from './WideBgImage.svelte';
 	import Modal from '../components/Modal.svelte';
 	import AbsoluteNode from './AbsoluteNode.svelte';
@@ -8,10 +9,12 @@
 	export let data;
 	const { processedSeries, width, height } = data;
 
-	/** @param {number} width */
-	const getImgSrc = (width) =>
-		`https://ik.imagekit.io/dobdk1ymwif/tourney_brackets/horse_game_bracket_${width}.png`;
-	const imgStats = { width: 1920, height: 1080, widths: [1400, 1980, 3920] };
+	// utilize ImageKit transformations
+	const endpoint = 'https://ik.imagekit.io/dobdk1ymwif';
+	const imagePath = 'tourney_brackets/horse_game_bracket_3920.png';
+	const getImgSrc = (width) => `${endpoint}/tr:w-${width}/${imagePath}`;
+
+	const imgStats = { width: 1920, height: 1080, widths: [1400, 1920, 3920] };
 
 	// related to Card
 	let cardData, imgRef, cardRef;
@@ -85,6 +88,17 @@
 				break;
 		}
 	}
+
+	// prefetch images for towns and heroes
+	let imgList = [];
+	onMount(() => {
+		const list = new Set();
+		for (const roundSeries of processedSeries)
+			for (const series of roundSeries)
+				for (const game of series.games)
+					for (const key of ['towns', 'starters']) for (const name of game[key]) list.add(name);
+		imgList = [...list];
+	});
 </script>
 
 <svelte:body on:click={clickHandler} on:keydown={keyHandler} on:mouseover={mouseOverHandler} />
@@ -114,6 +128,9 @@
 			</Modal>
 		{/if}
 	</WideBgImage>
+	{#each imgList as name}
+		<link rel="preload" as="image" href="pictures/{name}.gif" />
+	{/each}
 </main>
 
 <svelte:head>

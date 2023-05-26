@@ -40,7 +40,7 @@
 <image-wrapper {style}>
 	<img
 		bind:this={imgRef}
-		src={getImgSrc(1980)}
+		src={getImgSrc(1920)}
 		{srcset}
 		{width}
 		{height}
