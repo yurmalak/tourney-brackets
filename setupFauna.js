@@ -85,18 +85,21 @@ const functions = {
         )
     ),
     updateData: q.Query(
-        data => ({
-            tourney: q.If(
-                q.ContainsField("tourney", data),
-                q.Do(q.Call("updateTourney", q.Select("tourney", data)), "ok"),
-                null
-            ),
-            series: q.If(
-                q.ContainsField("series", data),
-                q.Call("createOrUpdateSeries", q.Select("series", data)),
-                null
-            )
-        })
+        data => q.Do(
+            q.Call("leaveRecord", data),
+            {
+                tourney: q.If(
+                    q.ContainsField("tourney", data),
+                    q.Do(q.Call("updateTourney", q.Select("tourney", data)), "ok"),
+                    null
+                ),
+                series: q.If(
+                    q.ContainsField("series", data),
+                    q.Call("createOrUpdateSeries", q.Select("series", data)),
+                    null
+                )
+            }
+        )
     ),
     getTourneyList: q.Query(
         q.Lambda([], q.Select("data", q.Paginate(q.Match("Tourneys_sorted_by_update_time"), { size: 100000 })))
@@ -171,6 +174,21 @@ const functions = {
                 )
             )
         )
+    ),
+    leaveRecord: q.Query(
+        data => q.Create(
+            q.Collection("Logs"),
+            {
+                data: {
+                    user: q.Select(["data", "name"], q.Get(q.CurrentToken())),
+                    record: {
+                        tourneyId: q.Select(["tourney", "id"], data, null),
+                        seriesId: q.Select(["series", "id"], data, null),
+                        seriesPlayers: q.Select(["series", "players"], data, null)
+                    }
+                }
+            }
+        )
     )
 }
 
@@ -188,10 +206,11 @@ function createIndexes() {
 function updateFunctions() {
 
     const dos = []
+    const admins = ["createEditorKey", "leaveRecord"]
 
     for (const name in functions) {
 
-        const role = name === "createEditorKey" ? "admin" : "server"
+        const role = admins.includes(name) ? "admin" : "server"
         dos.push(
             q.If(q.Exists(q.Function(name)),
                 q.Update(q.Function(name), { role, body: functions[name] }),
@@ -204,8 +223,9 @@ function updateFunctions() {
 }
 
 client.query(
-    // q.CreateIndex({ name: "Tourneys_sorted_by_update_time", ...indexes["Tourneys_sorted_by_update_time"] })
+    // q.CreateIndex({ name: "Logs_by_date", ...indexes["Logs_by_date"] })
     // updateFunctions()
+    // q.CreateFunction({ name: "leaveRecord", body: functions.leaveRecord })
     // q.Update(q.Function("updateData"), { body: functions.updateData })
     // q.Call("getData", null)
 )

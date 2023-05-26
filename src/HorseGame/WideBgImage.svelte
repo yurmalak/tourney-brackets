@@ -67,7 +67,7 @@
 	}
 
 	/* make parent container scroll horizontally on smaller screens */
-	@media (max-width: 1000px) {
+	@media (max-width: 800px) {
 		image-wrapper,
 		img {
 			width: 1200px;
