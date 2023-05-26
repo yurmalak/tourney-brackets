@@ -28,15 +28,12 @@ function series(series) {
     return data
 }
 
-function game(game, series) {
+function game(game, series, tourney) {
 
     const gameData = { roulette: [] }
 
     // add condition common fo all games in round
-    const commonRules = [
-        "Пробить ГО стартовым героем"
-    ]
-    const rule = commonRules[series.round]
+    const rule = tourney.data.commonRules?.[series.round] || []
     if (rule) gameData.roulette.push(rule)
 
     // kvMap

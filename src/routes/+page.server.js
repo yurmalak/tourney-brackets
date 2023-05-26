@@ -59,11 +59,11 @@ export async function load() {
             const series = {
                 players,
                 nodeLeftTop: anchors.coordinates[round][sIndex],
-                data: processors.series(s),
+                data: processors.series(s, tourney),
                 score: calculateScore(s.games, s.players),
                 games: s.games.map(g => {
 
-                    const game = processors.game(g, s)
+                    const game = processors.game(g, s, tourney)
                     if (g.winner) game.winner = s.players.indexOf(g.winner)
                     return game
                 }),
