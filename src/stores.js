@@ -104,7 +104,7 @@ class WritableTourney extends Tourney {
 
         // send data to db
         this.dbClient.updateData(dbUpdater)
-            .then(r => { if (r.series) newSeries.id = r.series })
+            .then(({ result }) => { if (result.series) newSeries.id = result.series })
             .catch(console.error)
 
         console.log("[log] Updating tourneyStore.", arguments)

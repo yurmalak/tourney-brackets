@@ -42,7 +42,7 @@
 		font-weight: bold;
 	}
 	@media (hover: hover) {
-		.warn:hover {
+		.warn:not(:disabled):hover {
 			background-color: var(--color-warn);
 		}
 	}

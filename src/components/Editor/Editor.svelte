@@ -190,7 +190,7 @@
 	const createEventHandler = (el) => eventHandler(el, changed, closeEditor, animateButtons);
 
 	setData();
-	const hasBothPlayers = selectedPlayers[0] && selectedPlayers[1];
+	$: hasBothPlayers = selectedPlayers[0] && selectedPlayers[1];
 </script>
 
 <editor-outer>

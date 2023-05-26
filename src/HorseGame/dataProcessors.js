@@ -53,7 +53,9 @@ function game(game, series, tourney) {
                 break
 
             case "replay":
-                gameData.replay = v1
+                if (v1.startsWith("https://www.youtube") || v1.startsWith("https://www.twitch")) {
+                    gameData.replay = v1
+                }
                 break
         }
     }
