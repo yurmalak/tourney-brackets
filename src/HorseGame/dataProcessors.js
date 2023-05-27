@@ -1,4 +1,5 @@
-
+import { validateUrl } from "../lib/utils"
+import kvOptions from "./adminParts/kvOptions"
 
 function series(series) {
 
@@ -52,10 +53,9 @@ function game(game, series, tourney) {
                 gameData.challenges[v1].push(v2)
                 break
 
-            case "replay":
-                if (v1.startsWith("https://www.youtube") || v1.startsWith("https://www.twitch")) {
-                    gameData.replay = v1
-                }
+            case "запись игры":
+                if (!validateUrl(v1, kvOptions.game["запись игры"])) break
+                gameData.replay = v1.replace(/^(https:\/\/)?(www\.)?/, "https://www.")
                 break
         }
     }

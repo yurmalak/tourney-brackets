@@ -52,3 +52,15 @@ export function calculateScore(games, players) {
         [0, 0]
     )
 }
+
+/**
+ * Checks if urls leads to correct `sites`
+ * @param {string} value 
+ * @param {string[]} sites 
+ */
+export function validateUrl(value, sites = []) {
+
+    const allowedString = sites.map((a) => a.replace(/\.|\\|\//g, '\\$&')).join('|');
+    const pat = new RegExp(`^(https:\\/\\/)?(www\\.)?(${allowedString})[\\S]+$`);
+    return !value || pat.test(value);
+}

@@ -113,21 +113,23 @@
 		</label>
 	</homm3-snippet>
 
-	<slot name="data-mapper" style="grid-column:span 3" />
+	<slot name="data-mapper" style="width: 100%" />
 	<slot name="kv-creator" />
 	<slot name="delete-button" />
 </editor-game>
 
 <style>
 	editor-game {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
 		padding: var(--space-m);
 		gap: var(--space-l);
 		padding: var(--space-m);
 	}
 
 	homm3-snippet {
+		width: 100%;
 		display: grid;
 		grid-template-columns: 1fr 46px auto 46px 1fr;
 		grid-template-rows: 1fr 1fr;
@@ -135,7 +137,6 @@
 			't0  t0pic  winner 	t1pic  t1'
 			's0	 s0pic  color	s1pic  s1';
 		gap: 0 var(--space-m);
-		grid-column: span 3;
 	}
 	:global(homm3-snippet > img) {
 		align-self: center;

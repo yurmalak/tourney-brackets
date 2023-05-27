@@ -8,7 +8,7 @@
 
 	export let GameEditor = DefaultGameEditor;
 	export let createGame = defaultCreateGame;
-	export let kvOptions = { series: [], game: [] };
+	export let kvOptions = { series: {}, game: {} };
 
 	setContext(configKey, { createGame, GameEditor, kvOptions });
 </script>

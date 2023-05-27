@@ -19,12 +19,6 @@ describe("Editor", () => {
      */
     function setup(componentProps = {}, storeProps = {}) {
 
-        let { kvOptions } = componentProps
-        if (!kvOptions) kvOptions = {
-            series: ["s1key", "s2key"],
-            game: ["g1key", "g2key"]
-        }
-
         const playersTotal = 8
         const participants = [
             "John",
@@ -37,24 +31,14 @@ describe("Editor", () => {
         series.players = participants.slice(0, 2)
 
         const game = createGame(series)
-        game.winner = "Jane"
-        game.kvMap = [
-            [kvOptions.game[0], "game-kv-single-value"],
-            [kvOptions.game[1], "game-kv-dual-value-1", "game-kv-dual-value-2"],
-        ]
-
         series.games.push(game)
-        series.kvMap = [
-            [kvOptions.series[0], "series-kv-single-value"],
-            [kvOptions.series[1], "series-kv-dual-value-1", "series-kv-dual-value-2"]
-        ]
-
+        game.winner = "Jane"
 
         setStore({ tourney: { participants, playersTotal }, sList: [series], ...storeProps })
-        const { component } = render(Editor, { series, kvOptions, ...componentProps })
+        const { component } = render(Editor, { series, ...componentProps })
 
         const selectorSearchArgs = { value: new RegExp(series.players.join("|")), name: /Player [12]/ }
-        return { series, selectorSearchArgs, playersTotal, component, kvOptions }
+        return { series, selectorSearchArgs, playersTotal, component }
     }
 
     /**
@@ -305,78 +289,15 @@ describe("Editor", () => {
         await checkButtons(true)    // it detects that game has been replaced
     })
 
-    it("updates key-value maps", async () => {
-
-        const { series, kvOptions } = setup()
-        const user = userEvent.setup()
-
-        // check key <select>
-        for (const options of Object.values(kvOptions)) {
-
-            const select = screen.getByDisplayValue(options[0])
-            expect(within(select).getAllByRole("option")).toHaveLength(3)   // 2 from kvOptions + empty one
-            await user.selectOptions(select, options[1])
-
-            // won't appear if no changes detected
-            await user.click(screen.getByRole("button", { name: /discard/i }))
-            expect(screen.getByRole("button", { name: /close/i })).toBeInTheDocument()
-        }
-
-        // check value inputs
-        // edit existing maps and check if they are recognized
-        const texts = [
-            series.kvMap[0][1], // value of single pair in series map
-            series.games[0].kvMap[1][2] // second value of dual pair in game map
-        ]
-
-        // these are contenteditables so check for textContent instaed of value
-        for (const str of texts) {
-            const field = screen.getByText(str)
-            await user.click(field)
-            await user.type(field, "q")
-            expect(field).toHaveTextContent(str + "q")
-
-            // won't appear if no changes detected
-            await user.click(screen.getByRole("button", { name: /discard/i }))
-            expect(screen.getByRole("button", { name: /close/i })).toBeInTheDocument()
-        }
-
-        // add new pairs to existing and new game
-        await user.click(screen.getByRole("button", { name: /add game/i }))
-        const games = screen.getAllByRole("listitem", { name: /^game/i })
-
-        // deal with new game first (just added so it's second in the list) since it's a change itself
-        // so it won't allow to check if new pair triggers it
-        await user.click(within(games[1]).getByRole("button", { name: /single/i }))     // new pair with single value
-        const f1 = within(games[1]).getByRole("definition")                             // value 'input'
-        await user.type(f1, "qwe")
-        expect(f1).toHaveTextContent("qwe")
-        await user.click(screen.getByRole("button", { name: /discard/i }))
-        expect(screen.getByRole("button", { name: /close/i })).toBeInTheDocument()
-
-        // now add new pair to game that already has map
-        await user.click(within(games[0]).getByRole("button", { name: /dual/i }))   // new pair with 2 values
-        const f0s = within(games[0]).getAllByRole("definition")                     // value 'input'
-        expect(f0s).toHaveLength(5)                                                 // 3 from setup and 2 from new pair
-        await user.type(f0s[4], "qwe")
-        expect(f0s[4]).toHaveTextContent("qwe")
-        await user.click(screen.getByRole("button", { name: /discard/i }))          // this time it's triggered by new pair
-        expect(screen.getByRole("button", { name: /close/i })).toBeInTheDocument()
-    })
-
     it("saves or discards changes when called", async () => {
 
-        const kvOptions = {
-            series: ["type", "hat"],
-            game: ["date", "starting gold"]
-        }
 
         // setup spies
         const dbClient = { updateData: () => Promise.resolve({}) }
         const dbSpy = vi.spyOn(dbClient, "updateData")
         const closeEditorSpy = vi.fn()
         const updateSpy = vi.spyOn(tourneyStore, "update")
-        const { selectorSearchArgs, component } = setup({ kvOptions }, { dbClient })
+        const { selectorSearchArgs, component } = setup({}, { dbClient })
         component.$on("toggleEditor", closeEditorSpy)
 
         const user = userEvent.setup()
@@ -405,30 +326,6 @@ describe("Editor", () => {
         await user.click(screen.getByRole("button", { name: /add game/i })) // new game
         await user.click(screen.getByRole("button", { name: /switcher/i })) // that John wins
 
-        // add empty kv fields
-        const newKvButtons = [
-            ...screen.getAllByRole("button", { name: /single/i }),          // single and dual fields
-            ...screen.getAllByRole("button", { name: /dual/i })             // for both game and series
-        ]
-        for (const button of newKvButtons) await user.click(button)
-
-        // type data
-        const selOption = async (...args) => user.selectOptions(...args)
-        const keys = screen.getAllByRole("combobox", { name: "key" })
-        const values = screen.getAllByRole("definition")
-        expect(keys).toHaveLength(4)
-        expect(values).toHaveLength(6)
-        await selOption(keys[0], "date")                        // game single key
-        await user.type(values[0], "January, 1st")              // game single value
-        await selOption(keys[1], "starting gold")               // game double key
-        await user.type(values[1], "500")                       // game double value 1
-        await user.type(values[2], "400")                       // game double value 2
-        await selOption(keys[2], "type")                        // same with series
-        await user.type(values[3], "bo3")
-        await selOption(keys[3], "hat")
-        await user.type(values[4], "cylinder")
-        await user.type(values[5], "beanie")
-
         // save and close
         const saveButton = screen.getByRole("button", { name: /save/i })
         await user.click(saveButton)
@@ -443,14 +340,6 @@ describe("Editor", () => {
         expect(args.series.players).toEqual(["John", "Jane"])
         expect(args.selectedPlayers).toEqual(["John", "Kate"])
         expect(args.seriesData.games[0].winner).toBe("John")
-        expect(args.seriesData.games[0].kvMap).toEqual([
-            ["date", "January, 1st"],
-            ["starting gold", "500", "400"]
-        ])
-        expect(args.seriesData.kvMap).toEqual([
-            ["type", "bo3"],
-            ["hat", "cylinder", "beanie"]
-        ])
     })
 
     it("tries to close on click outside", async () => {
