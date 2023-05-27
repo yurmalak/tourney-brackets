@@ -13,7 +13,7 @@
 	import PlayerSelector from './PlayerSelector.svelte';
 	import DataMapper from './DataMapper.svelte';
 	import eventHandler from './eventHandler';
-	import KvFieldCreators from './KvFieldCreators.svelte';
+	import KvFieldCreator from './KvFieldCreator.svelte';
 	import DeleteButton from './DeleteButton.svelte';
 
 	/** @type {boolean} */
@@ -218,17 +218,19 @@
 									slot="data-mapper"
 									label="Key-value map for game {i + 1}"
 									options={kvOptions.game}
+									players={selectedPlayers}
 								/>
-								<KvFieldCreators
+								<KvFieldCreator
 									bind:kvMap
-									slot="kv-creator"
+									let:style
+									{style}
 									className="button-no-bg"
-									newKeyFieldSeeker={(ev) => {
-										const selector = `editor-body li[aria-label="game"]:nth-of-type(${i + 1})`;
-										const gameLi = ev.target.closest(selector);
-										const newKeyField = gameLi.querySelector('select');
-										return newKeyField;
-									}}
+									slot="kv-creator"
+									options={kvOptions.game}
+									listSeeker={(element) =>
+										element
+											.closest('li[aria-label="game"]')
+											.querySelector('.data-mapper-container > dl')}
 								/>
 								<DeleteButton
 									slot="delete-button"
@@ -245,6 +247,7 @@
 				<DataMapper
 					bind:kvMap={seriesData.kvMap}
 					options={kvOptions.series}
+					players={selectedPlayers}
 					label="Key-value map for series"
 					style="width:100%"
 				/>
@@ -253,14 +256,15 @@
 
 		<editor-footer>
 			{#if hasBothPlayers}
-				<KvFieldCreators
-					className="button"
+				<KvFieldCreator
 					bind:kvMap={seriesData.kvMap}
-					newKeyFieldSeeker={(ev) => {
-						const editor = ev.target.closest('editor-inner');
-						const newKeyField = editor.querySelector('dl:last-of-type > dt:last-of-type > select');
-						return newKeyField;
-					}}
+					slot="kv-creator"
+					className="button"
+					options={kvOptions.series}
+					listSeeker={(element) =>
+						element
+							.closest('editor-inner')
+							.querySelector('editor-body > .data-mapper-container > dl')}
 				/>
 				<button type="button" class="button add-game" on:click={addGame}>Add game</button>
 			{:else}

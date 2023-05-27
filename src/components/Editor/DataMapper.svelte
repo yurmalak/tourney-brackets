@@ -1,55 +1,94 @@
 <script>
+	import { validateUrl } from '$lib/utils';
+
+	/** @type {import("../../types").KvMap}*/
 	export let kvMap;
+
+	/** @type {string?} */
 	export let label;
+
+	/** @type {object} */
 	export let options;
 
+	/** @type {string[]} */
+	export let players;
+
+	/** @type {string?} */
 	export let style = null;
+
+	/** @type {string?} */
 	export let className = null;
 </script>
 
-<data-mapper {style} class={className}>
+<div {style} class={'data-mapper-container ' + (className ?? '')}>
 	{#if kvMap.length > 0}
 		<dl aria-label={label}>
-			{#each kvMap as [key, v1, v2]}
-				<dt>
-					<select bind:value={key} aria-label="key">
-						<option value="" />
-						{#each options as value}
-							<option {value}>{value}</option>
-						{/each}
-					</select>
-				</dt>
+			{#each kvMap as fieldData}
+				{@const key = fieldData[0]}
+				{@const { fields } = options[key] || {}}
+				{#if fields}
+					<dt>{key}</dt>
 
-				{#if v2 === undefined}
-					<dd bind:textContent={v1} contenteditable aria-label="value" style:grid-column="span 2" />
-				{:else}
-					<dd bind:textContent={v1} contenteditable aria-label="value (1 of 2)" />
-					<dd bind:textContent={v2} contenteditable aria-label="value (2 of 2)" />
+					<dd>
+						{#each fields as { type }, i}
+							{#if type === 'text'}
+								<!-- conteneditable div -->
+								<div bind:textContent={fieldData[i + 1]} contenteditable class="text" />
+							{:else if type === 'url'}
+								<!-- input with warning -->
+								{@const validUrl = validateUrl(fieldData[i + 1], fields[i].allowed || [])}
+								<input
+									bind:value={fieldData[i + 1]}
+									type="text"
+									class="url {validUrl ? '' : 'invalid'}"
+									placeholder={fields[i].allowed ? fields[i].allowed.join('... / ') + '...' : null}
+								/>
+							{:else if type === 'playerSelect'}
+								<!-- select with 2 players as options -->
+								<select bind:value={fieldData[i + 1]}>
+									<option value="" />
+									{#each players as value}
+										<option {value}>{value}</option>
+									{/each}
+								</select>
+							{/if}
+						{/each}
+					</dd>
 				{/if}
 			{/each}
 		</dl>
 	{/if}
-</data-mapper>
+</div>
 
 <style>
-	data-mapper {
-		gap: var(--space-l);
-		display: grid;
-		grid-template-columns: 1fr 1fr auto;
-	}
 	dl {
 		margin: 0;
 		padding: 0;
-		grid-column: span 3;
 		display: grid;
 		gap: var(--space-m);
-		grid-template-columns: 20% 1fr 1fr;
+		grid-template-columns: auto 1fr;
 	}
 
 	dt {
 		margin-right: var(--space-m);
+		margin-top: calc(var(--space-m) + 1px); /* input/contenteditable padding + border*/
 	}
+
+	dd {
+		display: flex;
+		margin: 0;
+		gap: var(--space-m);
+	}
+	.text,
+	.url {
+		flex-grow: 1;
+	}
+
 	select {
-		width: 100%;
+		align-self: flex-start;
+	}
+
+	.invalid {
+		background-color: #ffc8c8;
 	}
 </style>

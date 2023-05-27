@@ -94,7 +94,7 @@ class WritableTourney extends Tourney {
             }
 
             // remove empty fields from maps and sort them
-            const mapFilter = entry => entry.some(Boolean)
+            const mapFilter = entry => entry.some((v, i) => (i > 0 && Boolean(v)))
             newSeries.kvMap = newSeries.kvMap.filter(mapFilter).sort(kvMapSorter)
             newSeries.games.forEach(g => g.kvMap = g.kvMap.filter(mapFilter).sort(kvMapSorter))
 
