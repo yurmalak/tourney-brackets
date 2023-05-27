@@ -54,7 +54,7 @@ function game(game, series, tourney) {
                 break
 
             case "запись игры":
-                if (!validateUrl(v1, kvOptions.game["запись игры"])) break
+                if (!validateUrl(v1, kvOptions.game["запись игры"].fields[0].allowed)) break
                 gameData.replay = v1.replace(/^(https:\/\/)?(www\.)?/, "https://www.")
                 break
         }
