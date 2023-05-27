@@ -70,6 +70,7 @@
 
 <div id="root">
 	<header>
+		<a href="/" id="home-link">Home</a>
 		<BuildRequester />
 	</header>
 
@@ -188,8 +189,15 @@
 		position: relative;
 		flex-grow: 1;
 	}
+
 	header {
-		display: flex;
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
 		justify-content: center;
+		align-items: center;
+	}
+	#home-link {
+		justify-self: end;
+		margin-right: 3em;
 	}
 </style>

@@ -7,7 +7,7 @@
 	import Admin from '../../components/Admin.svelte';
 
 	// redirect unauthorized users away
-	let initialized = false;
+	let initialized = Boolean(netlifyIdentity.currentUser());
 	onMount(async () => {
 		netlifyIdentity.on('init', (user) => {
 			if (user) initialized = true;

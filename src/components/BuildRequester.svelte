@@ -40,20 +40,33 @@
 		localStorage.setItem('last-build-request', Date.now());
 		timeoutHandle = setTimeout(() => (buildOnCd = false), CD * 1000);
 
-		netlifyFetch('triggerRebuild', { method: 'POST' })
-			.then(() => {
+		// production
+		if (!localStorage.getItem('fauna--publishing-disabled')) {
+			return netlifyFetch('triggerRebuild', { method: 'POST' })
+				.then(() => {
+					buildOnCd = true;
+					responseStatus = 'ok';
+				})
+				.catch((err) => {
+					error = err;
+					responseStatus = 'error';
+					localStorage.removeItem('last-build-request');
+					console.error('Build request rejected', err);
+
+					clearTimeout(timeoutHandle);
+					buildOnCd = false;
+				});
+		}
+
+		// dev
+		return new Promise((resolve) => {
+			console.log('Publishing disabled');
+			setTimeout(() => {
 				buildOnCd = true;
 				responseStatus = 'ok';
-			})
-			.catch((err) => {
-				error = err;
-				responseStatus = 'error';
-				localStorage.removeItem('last-build-request');
-				console.error('Build request rejected', err);
-
-				clearTimeout(timeoutHandle);
-				buildOnCd = false;
-			});
+				resolve();
+			}, 1000);
+		});
 	}
 </script>
 
