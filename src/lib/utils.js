@@ -59,8 +59,12 @@ export function calculateScore(games, players) {
  * @param {string[]} sites 
  */
 export function validateUrl(value, sites = []) {
-
     const allowedString = sites.map((a) => a.replace(/\.|\\|\//g, '\\$&')).join('|');
     const pat = new RegExp(`^(https:\\/\\/)?(www\\.)?(${allowedString})[\\S]+$`);
     return !value || pat.test(value);
 }
+
+
+export const tabbableSelector = ['a', 'button', 'input', 'select', '[contenteditable]']
+    .reduce((selector, tag) => selector + tag + ':not(:disabled, [tabindex="-1"]),', '')
+    .slice(0, -1);

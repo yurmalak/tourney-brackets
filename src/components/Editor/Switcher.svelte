@@ -5,10 +5,11 @@
 	export let value;
 	export let style = null;
 	export let className = null;
+	export let buttonProps = {};
 </script>
 
 <label {style} class={className} {...$$restProps}>
-	<button type="button" on:click class="state-{value}" />
+	<button type="button" on:click class="state-{value}" {...buttonProps} />
 	{label}
 </label>
 

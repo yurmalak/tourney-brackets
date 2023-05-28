@@ -1,5 +1,6 @@
 <script>
 	import { tick } from 'svelte';
+	import { tabbableSelector } from '$lib/utils';
 
 	/** @type {import("../../types").KvMap}*/
 	export let kvMap;
@@ -33,11 +34,6 @@
 		const list = listSeeker(ev.target);
 		if (!list) return console.log("Couldn't find list to focus");
 
-		const tags = ['a', 'button', 'input', 'select', '[contenteditable]'];
-		const tabbableSelector = tags
-			.reduce((selector, tag) => selector + tag + ':not(:disabled):not([tabindex="-1"]),', '')
-			.slice(0, -1);
-
 		const dd = list.querySelector(`dd:nth-of-type(${kvMap.length})`);
 		const element = dd?.querySelector(tabbableSelector);
 		if (!element) return console.log("Couldn't find element to focus");
@@ -47,8 +43,8 @@
 	$: usedKeys = new Set(kvMap.map(([key]) => key));
 </script>
 
-<select on:change={createField} {style} class={className}>
-	<option value="" style:display="none" aria-label="add field">Add field</option>
+<select on:change={createField} {style} class={className} aria-label="add data field">
+	<option value="" style:display="none">Add field</option>
 	{#each Object.entries(options) as [value, { unique }]}
 		{#if !unique || !usedKeys.has(value)}
 			<option {value}>

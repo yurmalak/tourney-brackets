@@ -11,7 +11,7 @@
 	 * so simply mute the warning here
 	 * @type {object}
 	 */
-	export let data;
+	export let data = null;
 	data;
 
 	/** @type {string?} */
@@ -29,9 +29,12 @@
 	<Switcher
 		on:click={switchWinner}
 		value={winner === undefined ? undefined : players.indexOf(winner)}
-		aria-label="Winner switcher. Current winner - {winner}."
 		label="Winner"
 		style="align-self: center"
+		buttonProps={{
+			'aria-label': 'Winner switcher',
+			'aria-description': `Current winner - ${winner ?? 'none'}`
+		}}
 	/>
 	<slot name="data-mapper" />
 	<slot name="kv-creator" />

@@ -95,11 +95,14 @@
 		{/each}
 
 		<Switcher
+			on:click={switchWinner}
 			label="Winner"
 			style="grid-area:winner"
-			aria-label="Winner switcher. Current winner - {winner}."
 			value={winner === undefined ? undefined : players.indexOf(winner)}
-			on:click={switchWinner}
+			buttonProps={{
+				'aria-label': 'Winner switcher',
+				'aria-description': `Current winner - ${winner ?? 'none'}`
+			}}
 		/>
 		<label
 			class="swap-color"

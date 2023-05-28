@@ -30,7 +30,7 @@
 	class:warn={clicked}
 	bind:this={element}
 	on:click={askConfirmation}
-	aria-label="Delete game, requires second click for confirmation"
+	aria-description="Requires second click for confirmation"
 >
 	{#if clicked}<slot name="clicked" />
 	{:else}<slot name="normal" />{/if}

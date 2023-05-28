@@ -216,7 +216,7 @@
 									{className}
 									bind:kvMap
 									slot="data-mapper"
-									label="Key-value map for game {i + 1}"
+									ariaLabel="Key-value map for game {i + 1}"
 									options={kvOptions.game}
 									players={selectedPlayers}
 								/>
@@ -248,7 +248,7 @@
 					bind:kvMap={seriesData.kvMap}
 					options={kvOptions.series}
 					players={selectedPlayers}
-					label="Key-value map for series"
+					ariaLabel="Key-value map for series"
 					style="width:100%"
 				/>
 			{/if}

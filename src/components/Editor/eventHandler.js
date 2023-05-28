@@ -1,3 +1,5 @@
+import { tabbableSelector } from "$lib/utils"
+
 /**
  * Usage:
  * ```
@@ -45,10 +47,6 @@ export default function eventHandler(editor, changed, closeEditor, animateButton
 
             // lock focus inside
             case 'Tab': {
-                const tags = ['a', 'button', 'input', 'select', '[contenteditable]'];
-                const tabbableSelector = tags
-                    .reduce((selector, tag) => selector + tag + ':not(:disabled),', '')
-                    .slice(0, -1);
                 const tabbables = Array.from(editor.querySelectorAll(tabbableSelector));
                 const index = tabbables.indexOf(ev.target);
                 const nextIndex = index + (ev.shiftKey ? -1 : 1);
@@ -56,7 +54,7 @@ export default function eventHandler(editor, changed, closeEditor, animateButton
 
                 let ignore = false;
                 if (nextIndex === length) tabbables[0].focus();
-                else if (index === -1) tabbables[length - 1].focus();
+                else if (nextIndex === -1) tabbables[length - 1].focus();
                 else ignore = true;
 
                 if (!ignore) {

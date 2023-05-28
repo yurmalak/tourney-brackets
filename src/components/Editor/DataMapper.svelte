@@ -5,7 +5,7 @@
 	export let kvMap;
 
 	/** @type {string?} */
-	export let label;
+	export let ariaLabel = '';
 
 	/** @type {object} */
 	export let options;
@@ -21,43 +21,46 @@
 </script>
 
 <div {style} class={'data-mapper-container ' + (className ?? '')}>
-	{#if kvMap.length > 0}
-		<dl aria-label={label}>
-			{#each kvMap as fieldData}
-				{@const key = fieldData[0]}
-				{@const { fields } = options[key] || {}}
-				{#if fields}
-					<dt>{key}</dt>
+	<dl aria-label={ariaLabel}>
+		{#each kvMap as fieldData}
+			{@const key = fieldData[0]}
+			{@const { fields } = options[key] || {}}
+			{#if fields}
+				<dt>{key}</dt>
 
-					<dd>
-						{#each fields as { type }, i}
-							{#if type === 'text'}
-								<!-- conteneditable div -->
-								<div bind:textContent={fieldData[i + 1]} contenteditable class="text" />
-							{:else if type === 'url'}
-								<!-- input with warning -->
-								{@const validUrl = validateUrl(fieldData[i + 1], fields[i].allowed || [])}
-								<input
-									bind:value={fieldData[i + 1]}
-									type="text"
-									class="url {validUrl ? '' : 'invalid'}"
-									placeholder={fields[i].allowed ? fields[i].allowed.join('... / ') + '...' : null}
-								/>
-							{:else if type === 'playerSelect'}
-								<!-- select with 2 players as options -->
-								<select bind:value={fieldData[i + 1]}>
-									<option value="" />
-									{#each players as value}
-										<option {value}>{value}</option>
-									{/each}
-								</select>
-							{/if}
-						{/each}
-					</dd>
-				{/if}
-			{/each}
-		</dl>
-	{/if}
+				<dd>
+					{#each fields as { type }, i}
+						{#if type === 'text'}
+							<!-- conteneditable div -->
+							<div
+								bind:textContent={fieldData[i + 1]}
+								contenteditable
+								class="text"
+								role="textbox"
+							/>
+						{:else if type === 'url'}
+							<!-- input with warning -->
+							{@const validUrl = validateUrl(fieldData[i + 1], fields[i].allowed || [])}
+							<input
+								bind:value={fieldData[i + 1]}
+								type="text"
+								class="url {validUrl ? '' : 'invalid'}"
+								placeholder={fields[i].allowed ? fields[i].allowed.join('... / ') + '...' : null}
+							/>
+						{:else if type === 'playerSelect'}
+							<!-- select with 2 players as options -->
+							<select bind:value={fieldData[i + 1]}>
+								<option value="" />
+								{#each players as value}
+									<option {value}>{value}</option>
+								{/each}
+							</select>
+						{/if}
+					{/each}
+				</dd>
+			{/if}
+		{/each}
+	</dl>
 </div>
 
 <style>

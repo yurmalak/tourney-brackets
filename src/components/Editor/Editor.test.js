@@ -1,363 +1,242 @@
-import { render, screen, within } from '@testing-library/svelte';
+import clone from "rfdc/default"
 import userEvent from "@testing-library/user-event"
-import { get } from 'svelte/store';
-import { afterEach, vi } from "vitest"
-
-import { setStore } from '../../../tests/testUtils';
+import EditorAssistant from "./testAssistants/TaEditor.svelte"
+import { render, screen, within, cleanup } from '@testing-library/svelte';
 import { createGame, createSeries } from '$lib/utils';
 import { tourneyStore } from '../../stores';
-import Editor from './EditorTestAssistant.svelte';
+import { vi } from 'vitest';
 
 
-describe("Editor", () => {
 
-    afterEach(() => { vi.clearAllMocks() })
+function setupEditor(dbClient) {
 
-    /**
-     * @param {object} componentProps - object passed to rendered Editor
-     * @param {object} storeProps - object passed to {@link tourneyStore.set}
-     */
-    function setup(componentProps = {}, storeProps = {}) {
+    const playersTotal = 8
+    const participants = [
+        "John",
+        "Jane",
+        ...Array(playersTotal - 2).fill(""), // make Kate idle
+        "Kate",
+    ]
 
-        const playersTotal = 8
-        const participants = [
-            "John",
-            "Jane",
-            ...Array(playersTotal - 2).fill(""), // make Kate idle
-            "Kate",
-        ]
+    const series = createSeries(0, 0)
+    series.players = participants.slice(0, 2)
+    series.id = "1233215674567"
 
-        const series = createSeries(0, 0)
-        series.players = participants.slice(0, 2)
+    const game = createGame(series)
+    series.games.push(game)
+    game.winner = "Jane"
+    game.kvMap.push(["starting gold", "100"])
 
-        const game = createGame(series)
-        series.games.push(game)
-        game.winner = "Jane"
+    tourneyStore.set({
+        tourney: {
+            withTop3: true,
+            participants: [...participants],
+            playersTotal,
+            templateCode: "powersOf2",
+        },
+        sList: [clone(series)],
+        dbClient
+    })
 
-        setStore({ tourney: { participants, playersTotal }, sList: [series], ...storeProps })
-        const { component } = render(Editor, { series, ...componentProps })
-
-        const selectorSearchArgs = { value: new RegExp(series.players.join("|")), name: /Player [12]/ }
-        return { series, selectorSearchArgs, playersTotal, component }
+    const kvOptions = {
+        series: {
+            "group": { fields: [{ type: "text" }] }
+        },
+        game: {
+            "starting gold": { fields: [{ type: "text" }] },
+            "map": { fields: [{ type: "text" }] }
+        }
     }
+    const { component } = render(EditorAssistant, { series, kvOptions })
 
-    /**
-     * If `buttonsAppearance` is boolean checks if temp data differs from saved
-     * (true - Save and Discard buttons visible, false - close one).
-     * If object, looks for buttons with same names as keys.
-     * Expects them to be in the document if value is true and missing if false. 
-     * @param {boolean|{ [key: string]: boolean }} buttonsAppearance 
-     */
-    async function checkButtons(buttonsAppearance) {
+    const searchArgs = { value: new RegExp(series.players.join("|")), name: /Player [12]/ }
+    const playerSelectors = screen.getAllByRole("combobox", searchArgs)
 
-        if (typeof buttonsAppearance === "boolean") {
-            return checkButtons({
-                save: buttonsAppearance,
-                discard: buttonsAppearance,
-                close: !buttonsAppearance
-            })
+    return { component, series, playerSelectors, participants }
+}
+
+it("reflects changes", async () => {
+
+    const { playerSelectors } = setupEditor()
+    const user = userEvent.setup()
+
+    // speed up checks by looking withing footer
+    const footer = screen.getByRole("button", { name: /close/i }).parentNode
+
+    /** @param {boolean} changed */
+    function checkChanged(changed) {
+
+        // discard and save should be visible
+        if (changed) {
+            expect(within(footer).getByRole("button", { name: /discard/i })).toBeInTheDocument()
+            expect(within(footer).getByRole("button", { name: /save/i })).toBeInTheDocument()
         }
 
-        return Promise.all(Object.entries(buttonsAppearance).map(async ([key, value]) => {
-
-            const options = { name: new RegExp(key, "i") }
-
-            if (value === true) return screen.findByRole("button", options)
-
-            const button = screen.queryByRole("button", { name })
-            expect(button).toBeNull()
-        }))
-    }
-
-    /**
-     * Checks score by both label and visible part. 
-     * @param {number} a
-     * @param {number} b
-     */
-    async function checkScore(a, b) {
-        const labelPattern = new RegExp(`score ${a}.{1,3}${b}`, "i")
-        const score = await screen.findByLabelText(labelPattern)
-
-        const visiblePattern = new RegExp(`${a}.{1,3}${b}`)
-        expect(score).toHaveTextContent(visiblePattern)
-    }
-
-    /** 
-     * Expects number of games in series to be equal to `n`. 
-     * @param {number} n
-     */
-    async function expectNGames(n) {
-
-        if (n === 0) {
-            const game = screen.queryByRole("listitem", { name: /^game/i })
-            expect(game).toBe(null)
-            return null
-        }
+        // close should be visible
         else {
-            const games = await screen.findAllByRole("listitem", { name: /^game/i })
-            expect(games.length).toBe(n)
-            return games
+            expect(within(footer).getByRole("button", { name: /close/i })).toBeInTheDocument()
         }
     }
 
+    async function discard() {
+        const discardButton = within(footer).getByRole("button", { name: /discard/i })
+        return user.click(discardButton)
+    }
 
-    it("renders correctly with minimal props", async () => {
+    async function checkAndDiscard() {
+        checkChanged(true)
+        await discard()
+        checkChanged(false)
+    }
 
-        setStore()
-        const { rerender } = render(Editor, { series: createSeries(0, 0) })
-        const selects = screen.getAllByRole("combobox", { value: undefined, name: /Player [12]/ })
-
-
-        expect(selects).toHaveLength(2)
-        await checkScore(0, 0)
-
-        // no changes have been made - only Close visible
-        // can't add games without players either
-        await checkButtons(false)
-        await checkButtons({ "add game": false })
-
-        // check next round
-        rerender({ series: createSeries(1, 0) })
-
-        // players can only be changed at first round
-        const disabledSelects = screen.queryAllByRole("combobox", { value: undefined, name: /Player [12]/ })
-        disabledSelects.forEach(s => expect(s).toBeDisabled())
-        expect(selects).toHaveLength(2)
-    })
-
-    it("renders correctly with normal props", async () => {
-
-        const { series, selectorSearchArgs } = setup()
-        const selects = screen.getAllByRole("combobox", selectorSearchArgs)
-
-        series.players.forEach((name, i) => expect(selects[i]).toHaveValue(name))
-        selects.forEach(el => {
-            const options = within(el).getAllByRole("option")
-
-            // de-select
-            expect(options[0]).toHaveValue("")
-
-            // idlers first
-            expect(options[1]).toHaveValue("Kate")
-            expect(options[1]).toHaveClass("idle")
-
-            // then sorted by name
-            expect(options[2]).toHaveValue("Jane")
-            expect(options[3]).toHaveValue("John")
-        })
-
-        // 0 - 1 (second player won during setup)
-        await checkScore(0, 1)
-        await checkButtons({ "delete game": true, "winner": true, "add game": true })
-
-        // switcher should also have winner's name on it (Jane, second player)
-        const winnerSwitcher = screen.getByLabelText(/current.+winner.+Jane/i)
-        expect(winnerSwitcher).toBeInTheDocument()
-    })
-
-    it("selects and de-selects players", async () => {
-
-        const user = userEvent.setup()
-        const { playersTotal, selectorSearchArgs } = setup()
-        const selects = screen.getAllByRole("combobox", selectorSearchArgs)
+    checkChanged(false)
 
 
-        // let's place Kate instead of John in this series
-        await user.selectOptions(selects[0], "Kate")
-        expect(selects[0].value).toBe("Kate")
+    // change players
+    await user.selectOptions(playerSelectors[0], "Kate")
+    expect(playerSelectors[0]).toHaveValue("Kate")
+    await checkAndDiscard()
 
-        // game should disappear since there is no game with Kate and Jane
-        await expectNGames(0)
+    // swap players
+    await user.selectOptions(playerSelectors[0], "Jane")
+    expect(playerSelectors[0]).toHaveValue("Jane")
+    expect(playerSelectors[1]).toHaveValue("John")
+    await checkAndDiscard()
 
-        // but add game button still present
-        const addGameButton = screen.getByRole("button", { name: /add game/i })
-        expect(addGameButton).toBeInTheDocument()
+    // add kv field to series data
+    const sFieldAdder = within(footer).getByRole("combobox", { name: /add.+field/i })
+    await user.selectOptions(sFieldAdder, "group")
+    await checkAndDiscard()
 
-        // score set to 0-0
-        await checkScore(0, 0)
+    // add game
+    expect(screen.getAllByLabelText("game")).toHaveLength(1)
+    const addGameButton = within(footer).getByRole("button", { name: /game/i })
+    await user.click(addGameButton)
+    expect(screen.getAllByLabelText("game")).toHaveLength(2)
+    await checkAndDiscard()
+    expect(screen.getAllByLabelText("game")).toHaveLength(1)
 
-        // select options should update
-        selects.forEach(el => {
-            const options = within(el).getAllByRole("option")
+    // edit game winner
+    const score = screen.getByLabelText(/score/i)
+    const game = screen.getByLabelText("game")
+    const switcher = within(game).getByRole("button", { name: /winner/i })
+    expect(/winner.+Jane/i.test(switcher.getAttribute("aria-description"))).toBeTruthy()
+    expect(score).toHaveTextContent(/0.+1/)
+    await user.click(switcher)
+    expect(/winner.+John/i.test(switcher.getAttribute("aria-description"))).toBeTruthy()
+    expect(score).toHaveTextContent(/1.+0/)
+    await checkAndDiscard()
 
-            // de-select
-            expect(options[0]).toHaveValue("")
-            expect(options[0]).toHaveClass("idle")
+    // add kv field to game data
+    const gFieldAdder = within(game).getByRole("combobox", { name: /add.+field/i })
+    expect(within(game).getAllByRole("textbox")).toHaveLength(1)
+    await user.selectOptions(gFieldAdder, "map")
+    expect(within(game).getAllByRole("textbox")).toHaveLength(2)
+    await checkAndDiscard()
 
-            // John is now idle and moved up
-            expect(options[1]).toHaveValue("John")
-            expect(options[1]).toHaveClass("idle")
+    // edit game's kv field
+    const valueField = within(game).getByRole("textbox")
+    expect(valueField).toHaveTextContent("100")  // contenteditable
+    await user.type(valueField, "500")
+    expect(valueField).toHaveTextContent("100500")
+    await checkAndDiscard()
 
-            // Kate is no longe idle
-            expect(options[3]).toHaveValue("Kate")
-            expect(options[3]).not.toHaveClass("idle")
-        })
+    // delete game
+    expect(game).toBeInTheDocument()
+    const deleteButton = within(game).getByRole("button", { name: /delete/i })
+    await user.click(deleteButton)
+    await user.click(deleteButton)  // second click to confirm
+    expect(game).not.toBeInTheDocument()
+    await checkAndDiscard()
+})
 
-        // save and discard buttons should replace the Close one
-        await checkButtons(true)
+it("saves with correct args", async () => {
 
-        // but store should be unaffected
-        const store = get(tourneyStore)
-        expect(store.data.participants.indexOf("Kate")).toBe(playersTotal)
-        expect(store.data.participants.indexOf("John")).toBe(0)
+    const dbClient = { updateData: () => Promise.resolve({ result: {} }) }
+    const dbSpy = vi.spyOn(dbClient, "updateData")
+    const closeEditorSpy = vi.fn()
+    const updateSpy = vi.spyOn(tourneyStore, "update")
 
-        // select John back and check that nothing has changed
-        await user.selectOptions(selects[0], "John")
-        await expectNGames(1)
-        await checkButtons(false)
-
-        // swap John and Jane - game should be still present
-        await user.selectOptions(selects[0], "Jane")
-        expect(selects[0].value).toBe("Jane")
-        expect(selects[1].value).toBe("John")
-        await expectNGames(1)
-
-        // but buttons should reflect that changes have been made
-        await checkButtons(true)
-
-        // de-select both
-        await user.selectOptions(selects[0], "")
-        await user.selectOptions(selects[1], "")
-        await checkButtons(true)
-    })
-
-    it("updates game list", async () => {
-
-        const user = userEvent.setup()
-        setup()
-
-        const addGame = screen.queryByRole("button", { name: /add game/i })
-        await expectNGames(1)
-
-        await user.click(addGame)
-        await expectNGames(2)
-        await checkButtons(true)
-
-        await user.click(addGame)
-        await user.click(addGame)
-        await user.click(addGame)
-        await user.click(addGame)
-        const games = await expectNGames(6)
+    const user = userEvent.setup()
+    let { playerSelectors, component, participants } = setupEditor(dbClient)
+    component.$on("toggleEditor", closeEditorSpy)
 
 
-        const switcherClick = game => {
-            const switcher = within(game).getByRole("button", { name: /switcher/i })
-            return user.click(switcher)
-        }
-
-        // odd clicks - first player is the winner, even - second
-        // second player won first game during setup
-        // first player won 2nd, 3rd and 4th games
-        await switcherClick(games[1])
-        await switcherClick(games[2])
-        await switcherClick(games[2])   // woops! accidentially clicked it twice
-        await switcherClick(games[2])   // let's fix this
-        await switcherClick(games[3])
-
-        // second player won 5th
-        await switcherClick(games[4])
-        await switcherClick(games[4])
-
-        // 6th is still on, let's check the score for now
-        await checkScore(3, 2)
-
-        // according to the store, nothing is going on
-        const store = get(tourneyStore)
-        const storedSeries = store.getSeries(0, ["John", "Jane"])
-        expect(storedSeries.games.length).toBe(1)
-        expect(storedSeries.games[0].winner).toBe("Jane")
-
-        // well, if it says so...
-        for (let i = 1; i < games.length; i++) {
-
-            const deleteButton = within(games[i]).getByRole("button", { name: /delete game/i })
-            await user.click(deleteButton)
-
-            // deletion requires confirmation
-            expect(deleteButton.textContent).toBe("Confirm")
-            await user.click(deleteButton)
-        }
-
-        // as if nothing happened
-        await checkButtons(false)
-
-        // let's at least replace first game
-        const deleteButton = within(games[0]).getByRole("button", { name: /delete game/i })
-        await user.click(deleteButton)
-        await user.click(deleteButton)  // confirm
-        await user.click(addGame)
-        await checkButtons(true)    // it detects that game has been replaced
-    })
-
-    it("saves or discards changes when called", async () => {
+    // save swapped players - only players should change
+    await user.selectOptions(playerSelectors[0], "Jane")
+    await user.click(screen.getByRole("button", { name: /save/i }))
+    expect(closeEditorSpy).toHaveBeenCalled()
+    expect(updateSpy.mock.lastCall[0].changed).toEqual({ players: true, series: false })
+    expect(dbSpy.mock.lastCall[0]).not.toHaveProperty("series")
+    expect(dbSpy.mock.lastCall[0]).toHaveProperty("tourney")
+    expect(dbSpy.mock.lastCall[0].tourney.participants).toEqual([
+        ...participants.slice(0, 2).reverse(),
+        ...participants.slice(2)
+    ])
 
 
-        // setup spies
-        const dbClient = { updateData: () => Promise.resolve({}) }
-        const dbSpy = vi.spyOn(dbClient, "updateData")
-        const closeEditorSpy = vi.fn()
-        const updateSpy = vi.spyOn(tourneyStore, "update")
-        const { selectorSearchArgs, component } = setup({}, { dbClient })
-        component.$on("toggleEditor", closeEditorSpy)
+    // change series only
+    cleanup();
+    ({ playerSelectors, component } = setupEditor(dbClient))
+    await user.click(screen.getByRole("button", { name: /add game/i }))
+    await user.click(screen.getByRole("button", { name: /save/i }))
+    expect(updateSpy.mock.lastCall[0].changed).toEqual({ players: false, series: true })
+    expect(dbSpy.mock.lastCall[0]).toHaveProperty("series")
+    expect(dbSpy.mock.lastCall[0]).not.toHaveProperty("tourney")
+    expect(dbSpy.mock.lastCall[0].series.games).toHaveLength(2)
+    expect(dbSpy.mock.lastCall[0].series.games[1].winner).toBeUndefined()
 
-        const user = userEvent.setup()
-        const selects = screen.getAllByRole("combobox", selectorSearchArgs)
-        const addGameButton = screen.getByRole("button", { name: /add game/i })
 
+    // both
+    cleanup();
+    ({ playerSelectors, component } = setupEditor(dbClient))
+    await user.selectOptions(playerSelectors[0], "Kate")
+    await user.click(screen.getByRole("button", { name: /add game/i }))
+    await user.click(screen.getByRole("button", { name: /winner/i }))
+    await user.click(screen.getByRole("button", { name: /save/i }))
+    expect(updateSpy.mock.lastCall[0].changed).toEqual({ players: true, series: true })
+    expect(dbSpy.mock.lastCall[0].series.games[0].winner).toBe("Kate")
 
-        // change player, add game
-        await user.selectOptions(selects[0], "Kate")
-        expect(selects[0].value).toBe("Kate")
-        await expectNGames(0)
-        await user.click(addGameButton)
-        await user.click(addGameButton)
-        await expectNGames(2)
-        await checkButtons(true)
+    const newParticipants = dbSpy.mock.lastCall[0].tourney.participants
+    expect(newParticipants[0]).toBe("Kate")
+    expect(newParticipants[1]).toBe("Jane")
+    expect(newParticipants.pop()).toBe("John")
+})
 
-        // discard
-        const discardButton = screen.getByRole("button", { name: /discard/i })
-        await user.click(discardButton)
-        await expectNGames(1)
-        expect(selects[0].value).toBe("John")
-        await checkButtons(false)
+it("handles 'Close' event correctly", async () => {
 
-        // change everything that can be changed
-        await user.selectOptions(selects[1], "Kate")                        // John + Kate: 0 games, 0 kv fields
-        await user.click(screen.getByRole("button", { name: /add game/i })) // new game
-        await user.click(screen.getByRole("button", { name: /switcher/i })) // that John wins
+    const user = userEvent.setup()
+    const { component } = setupEditor()
+    const closeEditorSpy = vi.fn()
 
-        // save and close
-        const saveButton = screen.getByRole("button", { name: /save/i })
-        await user.click(saveButton)
-        expect(updateSpy).toHaveBeenCalledTimes(1)
-        expect(closeEditorSpy).toHaveBeenCalledTimes(1)
-        expect(dbSpy).toHaveBeenCalledTimes(1)
+    // click outside
+    component.$on("toggleEditor", closeEditorSpy)
+    window.document.body.dispatchEvent(new Event('click'))
+    expect(closeEditorSpy).toHaveBeenCalledTimes(1)
 
-        // check that it saved with correct data
-        const args = updateSpy.mock.lastCall[0]
-        expect(args.changed.players).toBe(true)
-        expect(args.changed.series).toBe(true)
-        expect(args.series.players).toEqual(["John", "Jane"])
-        expect(args.selectedPlayers).toEqual(["John", "Kate"])
-        expect(args.seriesData.games[0].winner).toBe("John")
-    })
+    // Escape
+    await user.keyboard("{Escape}")
+    expect(closeEditorSpy).toHaveBeenCalledTimes(2)
 
-    it("tries to close on click outside", async () => {
+    // changes prevent window from closing
+    const winnerSwitcher = screen.getByRole("button", { name: /switcher/i })
+    await user.click(winnerSwitcher)
+    window.document.body.dispatchEvent(new Event('click'))
+    expect(closeEditorSpy).toHaveBeenCalledTimes(2)  // still 1
+})
 
-        const user = userEvent.setup()
-        const { component } = setup()
-        const closeEditorSpy = vi.fn()
+it("locks focus within", async () => {
 
-        // success
-        component.$on("toggleEditor", closeEditorSpy)
-        window.document.body.dispatchEvent(new Event('click'))
-        expect(closeEditorSpy).toHaveBeenCalledTimes(1)
+    const user = userEvent.setup()
+    const { playerSelectors: [firstSelector] } = setupEditor()
+    const closeButton = screen.getByRole("button", { name: /close/i })
 
-        // changes prevent window from closing
-        const winnerSwitcher = screen.getByRole("button", { name: /switcher/i })
-        await user.click(winnerSwitcher)
-        await checkButtons(true)
-        window.document.body.dispatchEvent(new Event('click'))
-        expect(closeEditorSpy).toHaveBeenCalledTimes(1)  // still 1
-    })
+    closeButton.focus()
+    expect(closeButton).toHaveFocus()
+
+    await user.keyboard("{Tab}")
+    expect(firstSelector).toHaveFocus()
+
+    await user.keyboard("{Shift>}{Tab}{/Shift}")
+    expect(closeButton).toHaveFocus()
 })
