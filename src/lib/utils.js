@@ -13,7 +13,8 @@ export function createGame() {
     return {
         id: uniqueNumber(),
         kvMap: [],
-        data: {}
+        data: {},
+        winner: ""
     }
 }
 

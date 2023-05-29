@@ -30,6 +30,7 @@
 
 				<dd>
 					{#each fields as { type }, i}
+						{@const ariaLabel = fields.length < 2 ? key : `${key}-${i + 1}`}
 						{#if type === 'text'}
 							<!-- conteneditable div -->
 							<div
@@ -37,6 +38,7 @@
 								contenteditable
 								class="text"
 								role="textbox"
+								aria-label={ariaLabel}
 							/>
 						{:else if type === 'url'}
 							<!-- input with warning -->
@@ -46,15 +48,19 @@
 								type="text"
 								class="url {validUrl ? '' : 'invalid'}"
 								placeholder={fields[i].allowed ? fields[i].allowed.join('... / ') + '...' : null}
+								aria-label={ariaLabel}
 							/>
 						{:else if type === 'playerSelect'}
 							<!-- select with 2 players as options -->
-							<select bind:value={fieldData[i + 1]}>
+							<select bind:value={fieldData[i + 1]} aria-label={ariaLabel}>
 								<option value="" />
 								{#each players as value}
 									<option {value}>{value}</option>
 								{/each}
 							</select>
+						{:else if type === 'datetime'}
+							<!-- date-time input -->
+							<input type="datetime-local" bind:value={fieldData[i + 1]} aria-label={ariaLabel} />
 						{/if}
 					{/each}
 				</dd>
@@ -83,7 +89,7 @@
 		gap: var(--space-m);
 	}
 	.text,
-	.url {
+	input {
 		flex-grow: 1;
 	}
 

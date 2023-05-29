@@ -1,16 +1,25 @@
 import { validateUrl } from "../lib/utils"
 import kvOptions from "./adminParts/kvOptions"
 
-function series(series) {
+function series({ series }) {
 
     const data = { hide: {} }
 
     for (const [key, v1, /*v2*/] of series.kvMap) {
         switch (key) {
             // render clock icon to tell that game date has been defined
-            case "начало":
-                if (!series.games.length) data.start = v1
+            case "начало": {
+                if (series.games.length > 0) break
+
+                // extract from "YYYY-MM-DDThh:mm"
+                const parts = /\d{4}-(\d{2})-(\d{2})T(\d{2}:\d{2})/.exec(v1)
+                if (!parts) break
+
+                const [, m, d, t] = parts
+                data.start = `${d}.${m} в ${t}`
                 break
+            }
+
 
             // hide nodes that currently overlap with static text on the image
             case "hide":
@@ -29,7 +38,7 @@ function series(series) {
     return data
 }
 
-function game(game, series, tourney) {
+function game({ game, series, tourney }) {
 
     const gameData = { roulette: [] }
 

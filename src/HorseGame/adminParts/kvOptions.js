@@ -21,7 +21,10 @@ export default {
     series: {
         "начало": {
             fields: [
-                { type: "text" }
+                {
+                    type: "datetime",
+                    initialTime: "22:00"
+                }
             ],
             unique: true
         }

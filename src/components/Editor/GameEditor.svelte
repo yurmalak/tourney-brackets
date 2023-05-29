@@ -28,7 +28,7 @@
 <editor-game>
 	<Switcher
 		on:click={switchWinner}
-		value={winner === undefined ? undefined : players.indexOf(winner)}
+		value={winner === '' ? undefined : players.indexOf(winner)}
 		label="Winner"
 		style="align-self: center"
 		buttonProps={{

@@ -2,6 +2,7 @@ import faunadb from "faunadb"
 import { Tourney } from "../lib/Tourney";
 import { calculateScore } from "../lib/utils";
 import bundleSeries from "../components/brackets/PowersOf2/bundleSeries";
+
 import anchors from "../HorseGame/data/anchors.json"
 import processors from "../HorseGame/dataProcessors"
 import staticData from "../HorseGame/staticData.json"
@@ -59,11 +60,15 @@ export async function load() {
             const series = {
                 players,
                 nodeLeftTop: anchors.coordinates[round][sIndex],
-                data: processors.series(s, tourney),
+                data: processors.series({ series: s, tourney }),
                 score: calculateScore(s.games, s.players),
                 games: s.games.map(g => {
 
-                    const game = processors.game(g, s, tourney)
+                    const game = processors.game({
+                        game: g,
+                        series: s,
+                        tourney
+                    })
                     if (g.winner) game.winner = s.players.indexOf(g.winner)
                     return game
                 }),

@@ -184,7 +184,7 @@ it("saves with correct args", async () => {
     expect(dbSpy.mock.lastCall[0]).toHaveProperty("series")
     expect(dbSpy.mock.lastCall[0]).not.toHaveProperty("tourney")
     expect(dbSpy.mock.lastCall[0].series.games).toHaveLength(2)
-    expect(dbSpy.mock.lastCall[0].series.games[1].winner).toBeUndefined()
+    expect(dbSpy.mock.lastCall[0].series.games[1].winner).toBe("")
 
 
     // both

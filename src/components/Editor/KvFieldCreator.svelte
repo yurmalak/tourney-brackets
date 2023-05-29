@@ -26,7 +26,47 @@
 		if (key === '') return;
 
 		const { fields } = options[key];
-		kvMap = [...kvMap, [key, ...fields.map(() => '')]];
+		const values = fields.map((data) => {
+			switch (data.type) {
+				// input[type="datetime-local"] expects "YYYY-MM-DDThh:mm" format
+				case 'datetime': {
+					const now = new Date();
+
+					let date = data.initialDate,
+						time = data.initialTime;
+
+					if (!date || !/\d{4}-\d{2}-\d{2}/.test(date)) {
+						const y = now.getFullYear();
+
+						let m = now.getMonth() + 1;
+						if (m < 10) m = '0' + m;
+
+						let d = now.getDate();
+						if (d < 10) d = '0' + d;
+
+						date = `${y}-${m}-${d}`;
+					}
+
+					if (!time || !/\d{2}:\d{2}/.test(time)) {
+						let h = now.getHours();
+						if (h < 10) h = '0' + h;
+
+						let m = now.getMinutes();
+						if (m < 10) m = '0' + m;
+
+						time = `${h}:${m}`;
+					}
+
+					return `${date}T${time}`;
+				}
+
+				default:
+					return '';
+			}
+		});
+		kvMap = [...kvMap, [key, ...values]];
+
+		// keep this one always unselected
 		ev.target.value = '';
 
 		// focus newly created field

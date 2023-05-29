@@ -98,7 +98,7 @@
 			on:click={switchWinner}
 			label="Winner"
 			style="grid-area:winner"
-			value={winner === undefined ? undefined : players.indexOf(winner)}
+			value={winner === '' ? undefined : players.indexOf(winner)}
 			buttonProps={{
 				'aria-label': 'Winner switcher',
 				'aria-description': `Current winner - ${winner ?? 'none'}`

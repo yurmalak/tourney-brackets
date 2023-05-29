@@ -29,6 +29,7 @@ it("handles 'text' type field", async () => {
     expect(kvMap[0][1]).toBe("north-east")
     expect(textField).toHaveTextContent("north-east")
 })
+
 it("handles 'url' type field", async () => {
 
     const kvMap = [["pages", "", "com.google/blah/blah/blah"]]
@@ -63,6 +64,7 @@ it("handles 'url' type field", async () => {
 
     expect(kvMap[0]).toEqual(["pages", text, "somesite.org/some/path/post123"])
 })
+
 it("handles 'playerSelect' type field", async () => {
 
     const players = ["Annick", "Bennick"]
@@ -84,3 +86,7 @@ it("handles 'playerSelect' type field", async () => {
     expect(selector).toHaveValue("")
     expect(kvMap).toEqual([["first goal", ""]])
 })
+
+// couldn't find way to change its value with testing-library
+// leave it to e2e perhaps?
+// it("handles 'datetime' type field", async () => {})
