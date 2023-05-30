@@ -60,11 +60,11 @@
 				{#if data.hide !== true && data.hide !== name}
 					<text
 						x="50%"
-						y="55%"
+						y="{55 + (i ? 25 : -25)}%"
 						text-anchor="middle"
 						dominant-baseline="middle"
-						baseline-shift={i ? '-75%' : '75%'}
 						textLength="{length > 8 ? 100 : 40 + length * 5}%"
+						lengthAdjust="spacingAndGlyphs"
 					>
 						{name}
 					</text>
