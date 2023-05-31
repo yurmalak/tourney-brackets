@@ -24,13 +24,8 @@ function series({ series }) {
             // hide nodes that currently overlap with static text on the image
             case "hide":
 
-                // hide both if only the key has been provided
-                if (!v1) {
-                    data.hide = true
-                }
-                else {
-                    data.hide = v1
-                }
+                // hide both if only one of them
+                data.hide = !v1 || v1 === "+" ? true : v1
                 break
         }
     }
