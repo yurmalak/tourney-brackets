@@ -13,11 +13,3 @@
 		netlifyIdentity.off('login', handler);
 	});
 </script>
-
-<svelte:head>
-	<style>
-		body {
-			background-color: #5d686d;
-		}
-	</style>
-</svelte:head>

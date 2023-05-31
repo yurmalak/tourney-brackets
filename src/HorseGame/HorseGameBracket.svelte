@@ -135,14 +135,8 @@
 
 <svelte:head>
 	<style>
-		body {
-			height: 100vh;
-			background: linear-gradient(360deg, hsl(47 40% 5% / 1), hsl(0deg 0% 0% / 34%)),
-				linear-gradient(217deg, hsl(30 100% 9% / 1), hsl(71 46% 9% / 1));
-		}
 		main {
 			overflow: auto;
-			height: 100vh;
 		}
 	</style>
 </svelte:head>

@@ -101,7 +101,7 @@
 		padding: 7px;
 		margin-bottom: 4px;
 		box-shadow: 0 1px 1px 0 rgba(128, 128, 128, 0.63);
-		font-family: cursive;
+		font-family: sans-serif;
 	}
 	.player-link {
 		text-align: center;

@@ -1,8 +1,8 @@
 <script>
 	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import HorseGame from '../HorseGame/HorseGameBracket.svelte';
-	import SvgDefs from '../HorseGame/SvgDefs.svelte';
+	import HorseGame from '../../HorseGame/HorseGameBracket.svelte';
+	import SvgDefs from '../../HorseGame/SvgDefs.svelte';
 
 	export let data;
 
@@ -42,3 +42,9 @@
 		src="https://identity.netlify.com/v1/netlify-identity-widget.js"
 	></script>
 </svelte:head>
+
+<style>
+	:global(#root#root) {
+		grid-template-rows: var(--header-height) calc(100vh - var(--header-height));
+	}
+</style>

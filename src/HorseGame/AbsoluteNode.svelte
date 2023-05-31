@@ -63,7 +63,7 @@
 						y="{55 + (i ? 25 : -25)}%"
 						text-anchor="middle"
 						dominant-baseline="middle"
-						textLength="{length > 8 ? 100 : 40 + length * 5}%"
+						textLength="{length > 10 ? 100 : 20 + length * 5}%"
 						lengthAdjust="spacingAndGlyphs"
 					>
 						{name}
@@ -82,6 +82,8 @@
 </button>
 
 <style>
+	@import url('https://fonts.googleapis.com/css2?family=PT+Sans+Narrow&display=swap');
+
 	button {
 		--bg: radial-gradient(#ffffff20, #ffffff15);
 		position: absolute;
@@ -125,6 +127,6 @@
 	svg {
 		flex-grow: 1;
 		overflow: visible;
-		font-family: cursive;
+		font-family: 'PT Sans Narrow', sans-serif;
 	}
 </style>

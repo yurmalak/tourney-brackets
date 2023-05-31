@@ -24,10 +24,12 @@
 	// restrict image width if screen is too wide to fit whole image by height
 	let style;
 	function handleAspectRatio() {
-		const { innerWidth, innerHeight } = window;
-		if (innerWidth < 1000) return (style = null);
+		const { innerWidth } = window;
+		if (innerWidth < 800) return (style = null);
 
-		const currentRatio = innerWidth / innerHeight;
+		const root = imgRef.parentNode.parentNode;
+		const height = root.getBoundingClientRect().height;
+		const currentRatio = innerWidth / height;
 		if (currentRatio < aRatio) style = null;
 		else style = `max-width: ${(100 / currentRatio) * aRatio}vw`;
 	}
@@ -70,7 +72,7 @@
 	@media (max-width: 800px) {
 		image-wrapper,
 		img {
-			width: 1200px;
+			width: 1100px;
 		}
 	}
 </style>
