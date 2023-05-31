@@ -28,6 +28,10 @@
 	<slot />
 </div>
 
+<svelte:head>
+	<script async data-id="101411682" src="//static.getclicky.com/js"></script>
+</svelte:head>
+
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Kelly+Slab&display=swap');
 
