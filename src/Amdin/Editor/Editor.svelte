@@ -5,23 +5,31 @@
 
 	import equal from 'fast-deep-equal';
 	import clone from 'rfdc/default';
-	import { createEventDispatcher, onDestroy, getContext } from 'svelte';
-	import { configKey } from '$lib/context';
-	import { calculateScore } from '$lib/utils';
-	import { playerSorter } from '$lib/Tourney';
+	import { createEventDispatcher, onDestroy } from 'svelte';
+	import { calculateScore, createGame } from '../../lib/utils';
+	import { playerSorter } from '../../lib/Tourney';
 	import { tourneyStore } from '../stores';
 	import PlayerSelector from './PlayerSelector.svelte';
 	import DataMapper from './DataMapper.svelte';
 	import eventHandler from './eventHandler';
 	import KvFieldCreator from './KvFieldCreator.svelte';
 	import DeleteButton from './DeleteButton.svelte';
+	import DefaultGameEditor from './GameEditor.svelte';
+
+	/** @type {{ series: object, game: object }} */
+	export let kvOptions = { series: {}, game: {} };
+
+	/** Optional replacement for DefaultGameEditor */
+	export let GameEditor = DefaultGameEditor;
+
+	/** @type {((game: Game, series: Series) => Game) | null}*/
+	export let adjustNewGame = null;
 
 	/** @type {boolean} */
 	export let blocked = false;
 
 	/** @type {Series}*/
 	export let series;
-	const { GameEditor, createGame, kvOptions } = getContext(configKey);
 
 	/**
 	 * List of all players participating in the tourney.
@@ -131,7 +139,8 @@
 
 	/** */
 	function addGame() {
-		const game = createGame({ ...series, players: selectedPlayers });
+		let game = createGame();
+		if (adjustNewGame) game = adjustNewGame(game, { ...series, players: selectedPlayers });
 		seriesData.games = [...seriesData.games, game];
 	}
 

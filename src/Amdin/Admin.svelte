@@ -1,14 +1,20 @@
 <script>
-	/** @typedef {import('../../types.ts').Series} Series */
-	/** @typedef {import('../../types.ts').TourneyData} TourneyData */
-	import { onMount, getContext } from 'svelte';
-	import { configKey } from '$lib/context';
+	/** @typedef {import('../types').Game} Game */
+	/** @typedef {import('../types.ts').Series} Series */
+	/** @typedef {import('../types.ts').TourneyData} TourneyData */
+
+	import { onMount } from 'svelte';
 	import { tourneyStore } from './stores';
 	import { setupDbClient } from './setupDbClient';
 	import Bracket from '../brackets/Base.svelte';
 	import Editor from './Editor/Editor.svelte';
 	import LoadingIcon from './LoadingIcon.svelte';
 	import BuildRequester from './BuildRequester.svelte';
+
+	// game specific stuff to pass to Editor
+	export let kvOptions;
+	export let GameEditor;
+	export let adjustNewGame;
 
 	/** Only false until data is fetched, regardless of the outcome */
 	let ready = false;
@@ -22,16 +28,6 @@
 		error = err;
 	};
 	const dbClient = setupDbClient(setTaskStatus);
-
-	// ensure contexts has all necessary parts
-	const gameContext = getContext(configKey);
-	const requiredKeys = ['createGame', 'GameEditor', 'kvOptions'];
-	for (const key of requiredKeys) {
-		if (!(key in gameContext)) {
-			error = new Error(`Crucial part missing: "${key}".`);
-			console.error(error);
-		}
-	}
 
 	// fetch list of tourneys and data for latest one
 	onMount(async () => {
@@ -102,7 +98,14 @@
 </div>
 
 {#if editableSeries}
-	<Editor blocked={status !== 'ok'} series={editableSeries} on:toggleEditor={toggleEditor} />
+	<Editor
+		{kvOptions}
+		{GameEditor}
+		{adjustNewGame}
+		blocked={status !== 'ok'}
+		series={editableSeries}
+		on:toggleEditor={toggleEditor}
+	/>
 {/if}
 
 <svelte:head>

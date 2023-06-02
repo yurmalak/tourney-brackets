@@ -1,15 +1,13 @@
 /** @typedef {import("../../types").Game} Game */
-import { createGame as defaultCreateGame } from "$lib/utils"
+/** @typedef {import("../../types").Series} Series */
 
 
 /**
  * Creates Game specific to Homm3
+ * @param {Game}
  * @param {Series}
  */
-export default function createGame(series) {
-
-    /** @type {Game} */
-    const game = defaultCreateGame(series)
+export default function adjustNewGame(game, series) {
 
     let i = 0
     game.data = {}
