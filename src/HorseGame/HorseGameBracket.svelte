@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import WideBgImage from './WideBgImage.svelte';
-	import Modal from '../components/Modal.svelte';
+	import Modal from './Modal.svelte';
 	import AbsoluteNode from './AbsoluteNode.svelte';
 	import Card from './Card.svelte';
 

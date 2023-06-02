@@ -9,7 +9,7 @@
 	import { configKey } from '$lib/context';
 	import { calculateScore } from '$lib/utils';
 	import { playerSorter } from '$lib/Tourney';
-	import { tourneyStore } from '../../stores';
+	import { tourneyStore } from '../stores';
 	import PlayerSelector from './PlayerSelector.svelte';
 	import DataMapper from './DataMapper.svelte';
 	import eventHandler from './eventHandler';

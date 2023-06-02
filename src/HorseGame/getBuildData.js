@@ -1,9 +1,9 @@
 import faunadb from "faunadb"
 import { Tourney } from "../lib/Tourney";
 import { calculateScore } from "../lib/utils";
-import bundleSeries from "../components/brackets/PowersOf2/bundleSeries";
+import bundleSeries from "../brackets/PowersOf2/bundleSeries";
 
-import anchors from "./data/anchors.json"
+import anchors from "./anchors.json"
 import staticData from "./staticData.json"
 import processors from "./dataProcessors"
 

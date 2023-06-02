@@ -1,9 +1,9 @@
 <script>
-	/** @typedef {import("../../../types").Series} Series*/
+	/** @typedef {import("../../types").Series} Series*/
 
 	import Node from '../Node.svelte';
 	import Joiner from '../Joiner.svelte';
-	import { tourneyStore } from '../../../stores';
+	import { tourneyStore } from '../../Amdin/stores';
 	import bundleSeries from './bundleSeries';
 
 	const { playersTotal, withTop3 } = $tourneyStore.data;

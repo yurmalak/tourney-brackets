@@ -1,8 +1,26 @@
-import PowersOf2 from '../../src/components/brackets/PowersOf2/PowersOf2.svelte';
 import { render, screen } from '@testing-library/svelte';
-import { setStore } from '../testUtils';
+import { tourneyStore } from "../../Amdin/stores";
+import PowersOf2 from './PowersOf2.svelte';
 
 
+/** @param {import("../../types").TourneyData} options */
+function setStore({ tourney = {}, sList = [], ...other } = {}) {
+
+    tourneyStore.set({
+        tourney: {
+
+            withTop3: false,
+            playersTotal: 8,
+            participants: [],
+            templateCode: "powersOf2",
+            ...tourney
+        },
+        sList: [
+            ...sList
+        ],
+        ...other
+    })
+}
 
 describe('Bracket PowersOf2', () => {
 

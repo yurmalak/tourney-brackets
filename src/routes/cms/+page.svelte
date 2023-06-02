@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 
 	import AdminContextProvider from '../../HorseGame/adminParts/AdminContextProvider.svelte';
-	import Admin from '../../components/Admin.svelte';
+	import Admin from '../../Amdin/Admin.svelte';
 
 	// redirect unauthorized users away
 	let initialized = Boolean(netlifyIdentity.currentUser());

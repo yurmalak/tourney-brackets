@@ -1,8 +1,9 @@
 
 import { createSeries, calculateScore } from '$lib/utils';
 
-/** @typedef {import("../../../types").Series} Series */
-/** @typedef {import("../../../lib/Tourney").Tourney} TourneyStore */
+/** @typedef {import("../../types").Series} Series */
+/** @typedef {import("../../lib/Tourney").Tourney} TourneyStore */
+/** @typedef {import("../../lib/Tourney").Tourney} TourneyStore */
 
 
 /**

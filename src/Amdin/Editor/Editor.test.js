@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import EditorAssistant from "./testAssistants/TaEditor.svelte"
 import { render, screen, within, cleanup } from '@testing-library/svelte';
 import { createGame, createSeries } from '$lib/utils';
-import { tourneyStore } from '../../stores';
+import { tourneyStore } from "../stores";
 import { vi } from 'vitest';
 
 

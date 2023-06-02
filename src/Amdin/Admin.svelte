@@ -3,9 +3,9 @@
 	/** @typedef {import('../../types.ts').TourneyData} TourneyData */
 	import { onMount, getContext } from 'svelte';
 	import { configKey } from '$lib/context';
-	import { tourneyStore } from '../stores';
-	import { setupDbClient } from '../lib/setupDbClient';
-	import Bracket from './brackets/Base.svelte';
+	import { tourneyStore } from './stores';
+	import { setupDbClient } from './setupDbClient';
+	import Bracket from '../brackets/Base.svelte';
 	import Editor from './Editor/Editor.svelte';
 	import LoadingIcon from './LoadingIcon.svelte';
 	import BuildRequester from './BuildRequester.svelte';

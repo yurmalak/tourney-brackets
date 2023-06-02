@@ -1,6 +1,6 @@
 <script>
 	import { onDestroy, onMount } from 'svelte';
-	import { netlifyFetch } from '../lib/setupDbClient';
+	import { netlifyFetch } from './setupDbClient';
 	import LoadingIcon from './LoadingIcon.svelte';
 
 	/** Delay in seconds between requests to rebuild the site */

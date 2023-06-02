@@ -1,7 +1,7 @@
 <script>
-	import Switcher from '../../components/Editor/Switcher.svelte';
+	import Switcher from '../../components/Switcher.svelte';
 	import GamePicture from '../GamePicture.svelte';
-	import { heroList } from '../data/h3Data';
+	import { heroList } from './h3Data';
 
 	/** @type {object} */
 	export let data;
