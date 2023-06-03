@@ -2,7 +2,7 @@
 	/** @type {number} */
 	export let pIndex;
 
-	/** @type {import("../types").FrontSeries} */
+	/** @type {import("./types").FrontSeries} */
 	export let series;
 
 	const { games, players } = series;

@@ -1,11 +1,17 @@
 <script>
+	/** @type {HTMLElement} */
 	export let root;
+
+	/** @type {HTMLElement} */
 	export let anchor;
+
+	/** @type {number} */
 	export let width;
-	export let style = null;
+
+	/** @type {undefined} */
 	export let ref = null;
 
-	let top, left, transform, container, opacity;
+	let top, left, transX, transY, container, opacity;
 	$: placeModal(root, anchor);
 
 	/**
@@ -18,16 +24,17 @@
 		// right
 		if (anchorRect.right + width + 10 < window.innerWidth) {
 			left = ((anchorRect.right - rootRect.left) / rootRect.width) * 100 + '%';
+			transX = '0';
 		}
 		// left
 		else if (anchorRect.left - width - 10 > 0) {
-			const n = ((anchorRect.left - rootRect.left - 8) / rootRect.width) * 100;
-			left = `calc(${n}% - ${width}px)`;
+			left = ((anchorRect.left - rootRect.left) / rootRect.width) * 100 + '%';
+			transX = '-100%';
 		}
 		// center
 		else {
-			const n = ((innerWidth / 2 - rootRect.left - 2) / rootRect.width) * 100;
-			left = `calc(${n}% - ${width / 2}px)`;
+			left = ((innerWidth / 2 - rootRect.left - 2) / rootRect.width) * 100 + '%';
+			transX = '-50%';
 		}
 	}
 
@@ -42,7 +49,7 @@
 		// place in the middle and make transparent to measure it
 		if (!container) {
 			top = (innerHeight / 2 - rootRect.top) / rootRect.height;
-			transform = 'translateY(-50%)';
+			transY = '-50%';
 			opacity = 0;
 			return;
 		}
@@ -56,12 +63,17 @@
 		const currentTop = center - height / 2;
 		const currentBottom = center + height / 2;
 
+		// stick to window's bottom
 		if (currentBottom > innerHeight) {
-			transform = `translateY(calc(-50% - ${currentBottom - innerHeight + 20}px))`;
-		} else if (currentTop < 0) {
-			transform = `translateY(calc(-50% + ${-1 * currentTop + 10}px))`;
-		} else {
-			transform = 'translateY(-50%)';
+			transY = `calc(-50% - ${currentBottom - innerHeight}px)`;
+			return;
+		}
+
+		// stick to window's top (or root's parent if it's lower)
+		const parentRect = root.parentNode.getBoundingClientRect();
+		const boundary = Math.max(0, parentRect.top);
+		if (currentTop < boundary) {
+			transY = `calc(-50% + ${boundary - currentTop}px)`;
 		}
 	}
 
@@ -83,7 +95,15 @@
 	}
 </script>
 
-<div {style} bind:this={ref} style:top style:left style:transform style:opacity use:setupObserver>
+<div
+	bind:this={ref}
+	use:setupObserver
+	style:opacity
+	style:top
+	style:left
+	style:width="{width}px"
+	style:transform="translate({transX},{transY})"
+>
 	<slot />
 </div>
 
@@ -91,15 +111,10 @@
 	div {
 		position: absolute;
 		display: block;
-		width: 360px;
-		max-height: min(80vh, 80%);
+		max-width: 94vw;
+		max-height: 60vh;
 		top: 0;
 		left: 50%;
-		overflow: auto;
 		z-index: 999;
-
-		background-color: white;
-		border: 2px solid gray;
-		box-shadow: 1px 1px 3px gray;
 	}
 </style>

@@ -4,12 +4,12 @@
 	import { onMount } from 'svelte';
 
 	/**
-	 * @type {(width: number) => string }
+	 * @type {(width: number) => string}
 	 * @returns url to an image with specified width
 	 */
 	export let getImgSrc;
 
-	/** Pass reference to <img> to component's parent */
+	/** Pass reference to component's parent */
 	export let imgRef;
 
 	/** @type { width: number, height: number, widths: number[] } */
@@ -27,7 +27,7 @@
 		const { innerWidth } = window;
 		if (innerWidth < 800) return (style = null);
 
-		const root = imgRef.parentNode.parentNode;
+		const root = imgRef.parentNode;
 		const height = root.getBoundingClientRect().height;
 		const currentRatio = innerWidth / height;
 		if (currentRatio < aRatio) style = null;
@@ -39,9 +39,8 @@
 
 <svelte:window on:resize={handleAspectRatio} />
 
-<image-wrapper {style}>
+<image-wrapper {style} bind:this={imgRef}>
 	<img
-		bind:this={imgRef}
 		src={getImgSrc(1920)}
 		{srcset}
 		{width}
