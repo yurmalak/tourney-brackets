@@ -4,7 +4,7 @@
 
 <main>
 	<h1 aria-labelledby="h1">
-		<svg viewBox="0 0 110 12" width="320" height="50" preserveAspectRatio="xMidYMid meet">
+		<svg viewBox="0 0 115 12" width="320" height="50" preserveAspectRatio="xMidYMid meet">
 			<text x="0" y="0" dominant-baseline="hanging" id="h1">Расписание</text>
 		</svg>
 	</h1>

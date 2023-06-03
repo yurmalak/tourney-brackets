@@ -1,8 +1,8 @@
-/** @typedef {import('./types.ts').Game} Game */
-/** @typedef {import('./types.ts').KvMap} KvMap */
+/** @typedef {import('../types').Game} Game */
+/** @typedef {import('../types').KvMap} KvMap */
 
 import { writable } from 'svelte/store';
-import { Tourney, playerSorter, kvMapSorter } from './lib/Tourney';
+import { Tourney, playerSorter, kvMapSorter } from '../lib/Tourney';
 
 
 class WritableTourney extends Tourney {
@@ -16,7 +16,7 @@ class WritableTourney extends Tourney {
      * @param {{ 
      *  changed: { players: boolean, series: boolean },
      *  selectedPlayers: [string, string],
-     *  series: import("./types").Series
+     *  series: import("../types").Series
      *  seriesData: { games: Game[], kvMap: KvMap }
      * }} args 
      */

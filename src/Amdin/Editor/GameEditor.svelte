@@ -4,7 +4,7 @@
 -->
 
 <script>
-	import Switcher from './Switcher.svelte';
+	import Switcher from '../../components/Switcher.svelte';
 
 	/**
 	 * data is game-specific and only used by custom component replacing this one

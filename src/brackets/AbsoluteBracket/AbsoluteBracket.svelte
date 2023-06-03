@@ -1,26 +1,29 @@
 <script>
-	import { onMount } from 'svelte';
 	import WideBgImage from './WideBgImage.svelte';
-	import Modal from '../components/Modal.svelte';
 	import AbsoluteNode from './AbsoluteNode.svelte';
-	import Card from './Card.svelte';
+	import Modal from './Modal.svelte';
 
-	/** @type {{ processedSeries: FrontSeries[][], width: number, height: number }} */
-	export let data;
-	const { processedSeries, width, height } = data;
+	/** @type {(width:number) => string}*/
+	export let getImgSrc;
 
-	// utilize ImageKit transformations
-	const endpoint = 'https://ik.imagekit.io/dobdk1ymwif';
-	const imagePath = 'tourney_brackets/horse_game_bracket_3920.png';
-	const getImgSrc = (width) => `${endpoint}/tr:w-${width}/${imagePath}`;
+	/** @type {{ width: number, height: number, widths: number[] }}*/
+	export let imgStats;
 
-	const imgStats = { width: 1920, height: 1080, widths: [1400, 1920, 3920] };
+	/** @type {{ width: string, height: string, coordinates: [number,number][][] }}*/
+	export let anchorsData;
+
+	/** @type {import("../../types").Series[][]} */
+	export let processedSeries;
+
+	// components
+	export let NodeContent;
+	export let CardContent;
 
 	// related to Card
 	let cardData, imgRef, cardRef;
 	let locked = false,
 		hoverBlocked = false;
-	const nodeClassName = 'bracket-node';
+	const nodeClass = 'bracket-node';
 
 	/**
 	 * Toggle modal {@link Card}.
@@ -38,7 +41,7 @@
 			return;
 		}
 
-		const node = ev.target.closest('.' + nodeClassName);
+		const node = ev.target.closest('.' + nodeClass);
 
 		/** @type {{ round: string, sIndex: string }}*/
 		const { round, sIndex } = node?.dataset || {};
@@ -71,7 +74,7 @@
 		// keep open on hovering over the Card
 		if (cardRef?.contains(ev.target)) return;
 
-		const node = ev.target.closest('.' + nodeClassName);
+		const node = ev.target.closest('.' + nodeClass);
 		if (!node || node.disabled) {
 			cardData = null;
 		} else if (!hoverBlocked && cardData?.node !== node) {
@@ -88,17 +91,6 @@
 				break;
 		}
 	}
-
-	// prefetch images for towns and heroes
-	let imgList = [];
-	onMount(() => {
-		const list = new Set();
-		for (const roundSeries of processedSeries)
-			for (const series of roundSeries)
-				for (const game of series.games)
-					for (const key of ['towns', 'starters']) for (const name of game[key]) list.add(name);
-		imgList = [...list];
-	});
 </script>
 
 <svelte:body on:click={clickHandler} on:keydown={keyHandler} on:mouseover={mouseOverHandler} />
@@ -108,35 +100,33 @@
 		{#each processedSeries as roundSeries, round}
 			{#each roundSeries as series, index}
 				{#if series.players}
-					<AbsoluteNode {round} {index} {series} {width} {height} className={nodeClassName} />
+					{@const id = `node-${round}-${index}`}
+					<AbsoluteNode
+						{anchorsData}
+						{round}
+						{index}
+						labelledby={id}
+						className={nodeClass}
+						disabled={!series.players.every(Boolean)}
+					>
+						<svelte:component this={NodeContent} {series} {id} />
+					</AbsoluteNode>
 				{/if}
 			{/each}
 		{/each}
 		{#if cardData}
-			<Modal
-				bind:ref={cardRef}
-				root={imgRef}
-				anchor={cardData.node}
-				width={360}
-				style="
-					border: 4px solid #624627;
-					box-shadow: 0px 0px 2px 1px black;
-					display: flex;
-					"
-			>
-				<Card series={processedSeries[cardData.round][cardData.sIndex]} />
+			<Modal bind:ref={cardRef} root={imgRef} anchor={cardData.node} width={360}>
+				<svelte:component
+					this={CardContent}
+					series={processedSeries[cardData.round][cardData.sIndex]}
+				/>
 			</Modal>
 		{/if}
 	</WideBgImage>
-	{#each imgList as name}
-		<link rel="preload" as="image" href="pictures/{name}.gif" />
-	{/each}
 </main>
 
-<svelte:head>
-	<style>
-		main {
-			overflow: auto;
-		}
-	</style>
-</svelte:head>
+<style>
+	main {
+		overflow: auto;
+	}
+</style>

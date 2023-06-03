@@ -3,8 +3,10 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	import AdminContextProvider from '../../HorseGame/adminParts/AdminContextProvider.svelte';
-	import Admin from '../../components/Admin.svelte';
+	import GameEditor from '../../HorseGame/adminParts/GameEditor.svelte';
+	import adjustNewGame from '../../HorseGame/adminParts/adjustNewGame';
+	import kvOptions from '../../HorseGame/adminParts/kvOptions';
+	import Admin from '../../Amdin/Admin.svelte';
 
 	// redirect unauthorized users away
 	let initialized = Boolean(netlifyIdentity.currentUser());
@@ -21,9 +23,7 @@
 </script>
 
 {#if initialized}
-	<AdminContextProvider>
-		<Admin />
-	</AdminContextProvider>
+	<Admin {GameEditor} {adjustNewGame} {kvOptions} />
 {/if}
 
 <svelte:head>
