@@ -85,10 +85,10 @@
 
 <select on:change={createField} {style} class={className} aria-label="add data field">
 	<option value="" style:display="none">Add field</option>
-	{#each Object.entries(options) as [value, { unique }]}
+	{#each Object.entries(options) as [value, { label, unique }]}
 		{#if !unique || !usedKeys.has(value)}
 			<option {value}>
-				{value}
+				{label}
 			</option>
 		{/if}
 	{/each}

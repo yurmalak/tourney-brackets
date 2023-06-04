@@ -1,17 +1,20 @@
 export default {
     game: {
         "рулетка": {
+            label: "Рулетка",
             fields: [
                 { type: "text" }
             ]
         },
         "челлендж": {
+            label: "Челлендж",
             fields: [
                 { type: "playerSelect" },
                 { type: "text" }
             ]
         },
         "запись игры": {
+            label: "Запись игры",
             fields: [
                 { type: "url", allowed: ["youtube.com", "twitch.tv"] }
             ],
@@ -20,6 +23,7 @@ export default {
     },
     series: {
         "начало": {
+            label: "Время игры",
             fields: [
                 {
                     type: "datetime",

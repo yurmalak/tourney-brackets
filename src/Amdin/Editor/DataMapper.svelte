@@ -24,9 +24,9 @@
 	<dl aria-label={ariaLabel}>
 		{#each kvMap as fieldData}
 			{@const key = fieldData[0]}
-			{@const { fields } = options[key] || {}}
+			{@const { fields, label } = options[key] || {}}
 			{#if fields}
-				<dt>{key}</dt>
+				<dt>{label}</dt>
 
 				<dd>
 					{#each fields as { type }, i}
