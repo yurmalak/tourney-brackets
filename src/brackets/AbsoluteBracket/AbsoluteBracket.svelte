@@ -1,7 +1,6 @@
 <script>
 	import WideBgImage from './WideBgImage.svelte';
 	import AbsoluteNode from './AbsoluteNode.svelte';
-	import Modal from './Modal.svelte';
 
 	/** @type {(width:number) => string}*/
 	export let getImgSrc;
@@ -17,13 +16,14 @@
 
 	// components
 	export let NodeContent;
-	export let CardContent;
+	export let Card;
 
 	// related to Card
 	let cardData, imgRef, cardRef;
 	let locked = false,
 		hoverBlocked = false;
 	const nodeClass = 'bracket-node';
+	const setRef = (ref) => (cardRef = ref);
 
 	/**
 	 * Toggle modal {@link Card}.
@@ -95,7 +95,7 @@
 
 <svelte:body on:click={clickHandler} on:keydown={keyHandler} on:mouseover={mouseOverHandler} />
 
-<main>
+<main style:overflow={cardData ? 'hidden' : 'auto'}>
 	<WideBgImage {imgStats} {getImgSrc} bind:imgRef>
 		{#each processedSeries as roundSeries, round}
 			{#each roundSeries as series, index}
@@ -115,18 +115,14 @@
 			{/each}
 		{/each}
 		{#if cardData}
-			<Modal bind:ref={cardRef} root={imgRef} anchor={cardData.node} width={360}>
-				<svelte:component
-					this={CardContent}
-					series={processedSeries[cardData.round][cardData.sIndex]}
-				/>
-			</Modal>
+			<svelte:component
+				this={Card}
+				series={processedSeries[cardData.round][cardData.sIndex]}
+				root={imgRef}
+				anchor={cardData.node}
+				width={360}
+				{setRef}
+			/>
 		{/if}
 	</WideBgImage>
 </main>
-
-<style>
-	main {
-		overflow: auto;
-	}
-</style>

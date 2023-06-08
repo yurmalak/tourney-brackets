@@ -58,24 +58,25 @@ export default function bundleSeries(tourneyStore) {
     // fill series with data
     seriesByRound.forEach((arr, round) => {
 
-        // finals and loser finals are bo3, other bo1
-        const bestOf = round < roundsTotal - 1 ? 1 : 2;
-
         // figure out which players played it based on previous rounds
         const populate = round === 0
             ? s => s.players = participants.slice(s.index * 2, s.index * 2 + 2)
             : s => populateSeries(s, roundsTotal, seriesByRound)
 
         //  participants are ordered the way they should be displayed
-        arr.forEach(series => {
+        arr.forEach((series, sIndex) => {
 
             populate(series)
             const data = tourneyStore.getSeries(round, series.players)
             Object.assign(series, data)
-
             series.score = calculateScore(series.games, series.players);
-            const maxScore = Math.max(...series.score);
-            const seriesFinished = maxScore >= bestOf;
+
+            // not all games finished
+            if (series.games.some(g => !g.winner)) return
+
+            const [a, b] = series.score
+            const maxScore = Math.max(a, b);
+            const seriesFinished = a !== b && maxScore >= tourneyStore.winsRequired(round, sIndex)
             if (seriesFinished) {
                 const wIndex = series.score.indexOf(maxScore)
                 series.winner = series.players[wIndex];

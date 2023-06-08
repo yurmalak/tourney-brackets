@@ -8,8 +8,11 @@
 	/** @type {number} */
 	export let width;
 
-	/** @type {undefined} */
-	export let ref = null;
+	/** @type {(element: HTMLElement) => void} */
+	export let setRef = null;
+
+	/** @type {string} */
+	export let style = null;
 
 	let top, left, transX, transY, container, opacity;
 	$: placeModal(root, anchor);
@@ -78,13 +81,12 @@
 	}
 
 	/** @param {HTMLElement} el */
-	function setupObserver(el) {
+	function setup(el) {
 		container = el;
+		placeModal(root, anchor);
 
-		const observer = new IntersectionObserver(() => placeModal(root, anchor), { threshold: 1 });
-		observer.observe(el);
-
-		return { destroy: () => observer.disconnect() };
+		// pass container to parent component
+		if (setRef) setRef(container);
 	}
 
 	function placeModal(root, anchor) {
@@ -96,8 +98,8 @@
 </script>
 
 <div
-	bind:this={ref}
-	use:setupObserver
+	use:setup
+	{style}
 	style:opacity
 	style:top
 	style:left
@@ -110,9 +112,9 @@
 <style>
 	div {
 		position: absolute;
-		display: block;
 		max-width: 94vw;
 		max-height: 60vh;
+		overflow: auto;
 		top: 0;
 		left: 50%;
 		z-index: 999;

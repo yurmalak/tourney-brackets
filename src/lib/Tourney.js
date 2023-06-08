@@ -80,4 +80,11 @@ export class Tourney {
 
         return keys.reduce((map, key) => map?.get(key), this.tree) || new Container()
     }
+
+    /**
+     * @returns {number} how much games have to be won in order to win series
+     */
+    winsRequired(round, sIndex) {
+        return this.data.winsRequired[round][sIndex]
+    }
 }

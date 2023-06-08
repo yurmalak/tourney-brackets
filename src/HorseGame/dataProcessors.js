@@ -1,6 +1,14 @@
 import { validateUrl } from "../lib/utils"
 import kvOptions from "./adminParts/kvOptions"
 
+/**
+ * @param {{
+ *  series: import("../types").Series,
+ *  tourney: import("../lib/Tourney").Tourney,
+ *  round: number,
+ *  sIndex: number
+ * }} args
+ */
 function series({ series }) {
 
     const data = { hide: {} }
@@ -9,11 +17,15 @@ function series({ series }) {
         switch (key) {
             // render clock icon to tell that game date has been defined
             case "начало": {
-                if (series.games.length > 0) break
-
                 // extract from "YYYY-MM-DDThh:mm"
                 const parts = /\d{4}-(\d{2})-(\d{2})T(\d{2}:\d{2})/.exec(v1)
                 if (!parts) break
+
+                // ignore if series is over
+                if (series.winner) break
+
+                // or if game is being played
+                if (series.games.some(g => !g.winner)) break
 
                 const [, m, d, t] = parts
                 data.start = `${d}.${m} в ${t}`

@@ -28,7 +28,7 @@
 					y="{55 + (i ? 25 : -25)}%"
 					text-anchor="middle"
 					dominant-baseline="middle"
-					textLength="{length > 10 ? 100 : 20 + length * 5}%"
+					textLength="{length > 10 ? 95 : 20 + length * 5}%"
 					lengthAdjust="spacingAndGlyphs"
 				>
 					{name}

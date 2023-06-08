@@ -1,6 +1,7 @@
 <svelte:options immutable />
 
 <script>
+	import Modal from '../brackets/AbsoluteBracket/Modal.svelte';
 	import GamePicture from './GamePicture.svelte';
 	import starUrl from './star.svg';
 
@@ -8,94 +9,97 @@
 	export let series;
 
 	$: ({ players, score, games, data } = series);
+	const style = `
+		background-color: rgb(98, 70, 39);
+		border: 4px solid rgb(98, 70, 39);
+		box-shadow: 0px 0px 2px 1px black;
+	`;
 </script>
 
-<card-outer>
-	<card-inner aria-label="Детали серии {players[0].name} vs {players[1].name}.">
+<Modal {style} {...$$restProps}>
+	<card-content aria-label="Детали серии {players[0].name} vs {players[1].name}.">
 		<!-- players and score -->
 		<header>
 			{#each players as { name, url }, i}
-				<a class="player-link" href={url} aria-label="Стрим {name}">
+				<a class="player-link" href={url}>
 					{name}
 				</a>
 				{#if i === 0}<series-score>{score.join('-')}</series-score>{/if}
 			{/each}
 		</header>
 
-		{#if data.start}
-			<div class="games-coming">{data.start}</div>
-		{:else}
-			{#each games as game}
-				{@const {
-					towns: [t1, t2],
-					starters: [s1, s2],
-					blue
-				} = game}
+		<!-- games -->
+		{#each games as game}
+			{@const {
+				towns: [t1, t2],
+				starters: [s1, s2],
+				blue
+			} = game}
 
-				<!-- games -->
-				<article class={blue === null ? undefined : blue === 0 ? 'blueRed' : 'redBlue'}>
-					<!-- 1st player's -->
-					<div class="town-and-starter">
-						<GamePicture name={s1} />
-						<GamePicture name={t1} />
-					</div>
+			<!-- games -->
+			<article class={blue === null ? undefined : blue === 0 ? 'blueRed' : 'redBlue'}>
+				<!-- 1st player's -->
+				<div class="town-and-starter">
+					<GamePicture name={s1} />
+					<GamePicture name={t1} />
+				</div>
 
-					<!-- replay link -->
-					{#if 'replay' in game}
-						<a href={game.replay}>
-							<svg viewBox="0 0 100 100" height="20" width="30" class="play-icon">
-								<polygon points="10,15 10,85 90,50" stroke-width="15" stroke-linejoin="round" />
-							</svg>
-						</a>
-					{:else}<span />{/if}
+				<!-- replay link -->
+				{#if 'replay' in game}
+					<a href={game.replay}>
+						<svg viewBox="0 0 100 100" height="20" width="30" class="play-icon">
+							<polygon points="10,15 10,85 90,50" stroke-width="15" stroke-linejoin="round" />
+						</svg>
+					</a>
+				{:else}<span />{/if}
 
-					<!-- 2nd player's -->
-					<div class="town-and-starter">
-						<GamePicture name={t2} />
-						<GamePicture name={s2} />
-					</div>
+				<!-- 2nd player's -->
+				<div class="town-and-starter">
+					<GamePicture name={t2} />
+					<GamePicture name={s2} />
+				</div>
 
-					<!--  roulette -->
-					<ul aria-label="усложнения">
-						{#each game.roulette as rule}
-							<li aria-label="правило">{rule}</li>
+				<!--  roulette -->
+				<ul aria-label="усложнения">
+					{#each game.roulette as rule}
+						<li>{rule}</li>
+					{/each}
+				</ul>
+
+				<!-- challenges -->
+				{#if game.challenges}
+					<ul
+						class="challenges"
+						aria-label="выполненные челленджи"
+						style="list-style-image: url({starUrl})"
+					>
+						{#each Object.entries(game.challenges) as [name, list]}
+							{#each list as text}
+								<li>{name}: {text}</li>
+							{/each}
 						{/each}
 					</ul>
+				{/if}
+			</article>
+		{/each}
 
-					<!-- challenges -->
-					{#if game.challenges}
-						<ul
-							class="challenges"
-							aria-label="выполненные челленджи"
-							style="list-style-image: url({starUrl})"
-						>
-							{#each Object.entries(game.challenges) as [name, list]}
-								{#each list as text}
-									<li>{name}: {text}</li>
-								{/each}
-							{/each}
-						</ul>
-					{/if}
-				</article>
-			{/each}{/if}
-	</card-inner>
-</card-outer>
+		<!-- date and time of next game -->
+		{#if data.start}
+			<upcoming-game>
+				{#if games.length > 0}Игра {games.length + 1}: {/if}{data.start}
+			</upcoming-game>
+		{/if}
+	</card-content>
+</Modal>
 
 <style>
-	card-outer {
-		border: 4px solid #624627;
-		box-shadow: 0px 0px 2px 1px black;
-		display: flex;
-		overflow: auto;
-	}
-	card-inner {
+	card-content {
 		border: 1px solid black;
 		background-color: #caa677;
-		flex-grow: 1;
 		display: flex;
 		flex-direction: column;
 	}
-	.games-coming {
+	upcoming-game {
 		flex-grow: 1;
 		display: flex;
 		justify-content: center;
@@ -179,6 +183,10 @@
 		grid-column: span 3;
 		padding-inline-start: 25px;
 		margin: 5px 0;
+	}
+
+	li {
+		padding-right: 4px;
 	}
 	.challenges {
 		list-style-image: url(star.svg);

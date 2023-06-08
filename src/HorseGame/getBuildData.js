@@ -3,8 +3,7 @@ import { Tourney } from "../lib/Tourney";
 import { calculateScore } from "../lib/utils";
 import bundleSeries from "../brackets/PowersOf2/bundleSeries";
 
-import staticData from "./staticData.json"
-import processors from "./dataProcessors"
+import processors from "./dataProcessors";
 /** @typedef {import('./types').FrontSeries} FrontSeries */
 
 
@@ -23,7 +22,7 @@ export default async function getBuildData() {
     // fetch data from Fauna
     let playersData, tourneyData
     if (process.env.NODE_ENV === "development") {
-        ({ playersData, ...tourneyData } = staticData)
+        ({ playersData, ...tourneyData } = await import("./staticData.json"))
     }
     else {
         const client = new faunadb.Client({
@@ -41,12 +40,11 @@ export default async function getBuildData() {
     // extract required minimum
     const tourney = new Tourney(tourneyData)
     const seriesByRound = bundleSeries(tourney);
-    processedSeries = seriesByRound.map(rSeries =>
-        rSeries.map(s => {
+    processedSeries = seriesByRound.map((rSeries, round) =>
+        rSeries.map((series, sIndex) => {
 
-            const players = !s.players.some(Boolean)
-                ? null
-                : s.players.map(name => {
+            const players = series.players.some(Boolean)
+                ? series.players.map(name => {
 
                     // not every series has both players defined 
                     if (!name) return null
@@ -64,24 +62,20 @@ export default async function getBuildData() {
 
                     return { name, url }
                 })
+                : null
 
-            const series = {
+            return {
                 players,
-                data: processors.series({ series: s, tourney }),
-                score: calculateScore(s.games, s.players),
-                games: s.games.map(g => {
+                score: calculateScore(series.games, series.players),
+                data: processors.series({ series, tourney, round, sIndex }),
+                games: series.games.map(game => {
 
-                    const game = processors.game({
-                        game: g,
-                        series: s,
-                        tourney
-                    })
-                    if (g.winner) game.winner = s.players.indexOf(g.winner)
-                    return game
-                }),
+                    const g = processors.game({ game, series, tourney, round, sIndex })
+                    if (game.winner) g.winner = series.players.indexOf(game.winner)
+
+                    return g
+                })
             }
-
-            return series
         })
     )
 
@@ -104,7 +98,10 @@ export default async function getBuildData() {
             if (isNaN(time)) return
 
             const players = [...series.players].sort((a, b) => b.name.length - a.name.length)
-            arr.push([time, startString, players])
+            const data = [time, startString, players]
+            if (series.games.length) data.push(series.games.length)
+
+            arr.push(data)
         })
 
         // sort and drop timestamp

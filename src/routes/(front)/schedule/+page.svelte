@@ -1,5 +1,11 @@
 <script>
 	export let data;
+	const rounds = data.scheduleByRound.length;
+	function getTitle(round) {
+		if (round === rounds - 2) return 'Полуфиналы';
+		if (round === rounds - 1) return 'Финалы';
+		return `Этап ${round + 1}`;
+	}
 </script>
 
 <main>
@@ -9,13 +15,18 @@
 		</svg>
 	</h1>
 
-	{#each data.scheduleByRound as list, i}
+	{#each data.scheduleByRound as list, round}
 		{#if list.length}
-			<h2>Этап {i + 1}</h2>
+			<h2>{getTitle(round)}</h2>
 			<ul>
-				{#each list as [date, players]}
+				{#each list as [date, players, gamesPlayed]}
 					<li class="round">
-						<header>{date}</header>
+						<header>
+							{#if gamesPlayed}
+								Игра {gamesPlayed + 1} -
+							{/if}
+							{date}
+						</header>
 						<a href={players[0].url} class="player-link">{players[0].name}</a>
 						<span class="vs">VS.</span>
 						<a href={players[1].url} class="player-link">{players[1].name}</a>
@@ -111,9 +122,6 @@
 	}
 
 	@media (min-width: 400px) {
-		ul {
-			display: inline-block;
-		}
 		main {
 			margin: 0 auto;
 			width: unset;
