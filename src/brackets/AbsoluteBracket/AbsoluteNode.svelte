@@ -18,6 +18,9 @@
 	/** @type {boolean}*/
 	export let disabled;
 
+	/** @type {boolean}*/
+	export let expanded;
+
 	/** @type {string} */
 	export let className;
 
@@ -34,6 +37,8 @@
 	data-s-index={index}
 	aria-haspopup="dialog"
 	aria-labelledby={labelledby}
+	aria-expanded={expanded}
+	aria-description="{expanded ? 'Закрыть' : 'Открыть'} детали серии"
 	class={className}
 	{disabled}
 >

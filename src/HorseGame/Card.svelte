@@ -1,7 +1,7 @@
 <svelte:options immutable />
 
 <script>
-	import Modal from '../brackets/AbsoluteBracket/Modal.svelte';
+	import Dialog from '../brackets/AbsoluteBracket/Dialog.svelte';
 	import GamePicture from './GamePicture.svelte';
 	import starUrl from './star.svg';
 
@@ -16,10 +16,10 @@
 	`;
 </script>
 
-<Modal {style} {...$$restProps}>
-	<card-content aria-label="Детали серии {players[0].name} vs {players[1].name}.">
+<Dialog {...$$restProps} {style} aria-label="Детали серии" aria-describedby="card-header">
+	<card-content>
 		<!-- players and score -->
-		<header>
+		<header id="card-header">
 			{#each players as { name, url }, i}
 				<a class="player-link" href={url}>
 					{name}
@@ -90,7 +90,7 @@
 			</upcoming-game>
 		{/if}
 	</card-content>
-</Modal>
+</Dialog>
 
 <style>
 	card-content {
@@ -121,10 +121,10 @@
 		text-align: center;
 		color: black;
 		font-size: 1.2rem;
-		text-align: start;
+		justify-self: start;
 	}
 	.player-link:first-of-type {
-		text-align: end;
+		justify-self: end;
 	}
 
 	series-score {
@@ -194,8 +194,6 @@
 
 	:global(.town-and-starter img) {
 		margin: 3px;
-		height: 35px;
-		width: unset;
 	}
 
 	.town-and-starter {

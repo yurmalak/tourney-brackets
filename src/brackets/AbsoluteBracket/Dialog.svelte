@@ -14,7 +14,11 @@
 	/** @type {string} */
 	export let style = null;
 
-	let top, left, transX, transY, container, opacity;
+	/** @type {HTMLElement} */
+	let container;
+
+	// styles
+	let top, left, transX, transY, opacity;
 	$: placeModal(root, anchor);
 
 	/**
@@ -84,39 +88,57 @@
 	function setup(el) {
 		container = el;
 		placeModal(root, anchor);
+		container.focus();
 
 		// pass container to parent component
 		if (setRef) setRef(container);
 	}
 
+	/**
+	 * @param {HTMLElement} root
+	 * @param {HTMLElement} anchor
+	 */
 	function placeModal(root, anchor) {
 		const anchorRect = anchor.getBoundingClientRect();
 		const rootRect = root.getBoundingClientRect();
 		adjustHorizontally(anchorRect, rootRect);
 		adjustVertically(anchorRect, rootRect);
+
+		if (container) {
+			anchor.parentNode.insertBefore(container, anchor.nextElementSibling);
+		}
 	}
 </script>
 
-<div
+<dialog
 	use:setup
+	open={true}
 	{style}
 	style:opacity
 	style:top
 	style:left
 	style:width="{width}px"
 	style:transform="translate({transX},{transY})"
+	{...$$restProps}
 >
 	<slot />
-</div>
+</dialog>
 
 <style>
-	div {
+	dialog {
 		position: absolute;
 		max-width: 94vw;
 		max-height: 60vh;
 		overflow: auto;
-		top: 0;
-		left: 50%;
 		z-index: 999;
+		padding: 0;
+		margin: 0;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+	dialog:focus {
+		outline: none;
 	}
 </style>

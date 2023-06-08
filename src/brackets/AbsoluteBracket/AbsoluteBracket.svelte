@@ -43,18 +43,19 @@
 
 		const node = ev.target.closest('.' + nodeClass);
 
-		/** @type {{ round: string, sIndex: string }}*/
-		const { round, sIndex } = node?.dataset || {};
-
-		// treat disabled nodes same as image itself - close current
+		// treat disabled nodes same as background image - close current
 		if (!node || node.disabled) {
 			cardData = null;
 			locked = false;
 			return;
 		}
 
-		// clicked node of currently opened series - toggle lock
-		if (round == cardData?.round && sIndex == cardData?.sIndex) {
+		// clicked node of currently opened series
+		// lock if not locked, close if already locked
+		const round = Number(node.dataset.round);
+		const sIndex = Number(node.dataset.sIndex);
+		if (round === cardData?.round && sIndex === cardData?.sIndex) {
+			if (locked) cardData = null;
 			locked = !locked;
 			return;
 		}
@@ -86,6 +87,7 @@
 	function keyHandler(ev) {
 		switch (ev.code) {
 			case 'Escape':
+				if (cardData?.node) cardData.node.focus();
 				cardData = null;
 				locked = false;
 				break;
@@ -108,6 +110,7 @@
 						labelledby={id}
 						className={nodeClass}
 						disabled={!series.players.every(Boolean)}
+						expanded={cardData?.sIndex === index && cardData.round === round}
 					>
 						<svelte:component this={NodeContent} {series} {id} />
 					</AbsoluteNode>
