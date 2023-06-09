@@ -19,7 +19,7 @@ function populateSeries(series, roundsTotal, seriesByRound) {
     const prevSeriesIndices = isLoserFinals ? [0, 2] : [index * 2, index * 2 + 2];
 
     // check if series leading to this one have been finished
-    const predecessors = seriesByRound[round - 1]?.slice(...prevSeriesIndices);
+    const predecessors = seriesByRound[round - 1].slice(...prevSeriesIndices);
     predecessors.forEach((s, i) => {
         if (s.winner === undefined) return;
 
@@ -29,7 +29,6 @@ function populateSeries(series, roundsTotal, seriesByRound) {
             const lIndex = 1 - wIndex
             series.players[i] = s.players[lIndex]
         }
-
     });
 }
 

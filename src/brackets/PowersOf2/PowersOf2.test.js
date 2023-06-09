@@ -159,13 +159,13 @@ it("writes players to nodes", () => {
     render(PowersOf2)
 
     const dreeg = screen.getByText("Dreeg")
-    expect(dreeg.closest("button")?.textContent).toMatch(/Dreeg.*0.*Solael.*0/)
+    expect(dreeg.closest("button").textContent).toMatch(/Dreeg.*0.*Solael.*0/)
 
     const bysmiel = screen.getByText("Bysmiel")
-    expect(bysmiel.closest("button")?.textContent).toMatch(/0.*Bysmiel.*0/)
+    expect(bysmiel.closest("button").textContent).toMatch(/0.*Bysmiel.*0/)
 
     const attendant = screen.getByText("Attendant")
-    expect(attendant.closest("button")?.textContent).toMatch(/Attendant.*0.*0/)
+    expect(attendant.closest("button").textContent).toMatch(/Attendant.*0.*0/)
 })
 
 it("counts score and promotes winner to next round (including 3rd place)", () => {

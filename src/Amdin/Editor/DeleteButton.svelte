@@ -13,7 +13,7 @@
 				'click',
 				(ev) => {
 					// element will be null if component has been unmounted
-					if (!element?.contains(ev.target)) clicked = false;
+					if (!element.contains(ev.target)) clicked = false;
 				},
 				// capture so bubbling won't trigger it immediately
 				{ capture: true, once: true }

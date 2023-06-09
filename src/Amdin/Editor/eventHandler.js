@@ -71,8 +71,8 @@ export default function eventHandler(editor, changed, closeEditor, animateButton
 
     // focus on close button after opening
     // it's last so, combined with Tab listener, next tab will focus first element
-    // also allows to close immediately
-    const closeButton = editor?.querySelector('button.close');
+    // also allows to close editor immediately
+    const closeButton = editor.querySelector('button.close');
     closeButton?.focus();
 
     document.addEventListener('keydown', keyboardHandler, true);

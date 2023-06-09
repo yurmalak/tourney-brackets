@@ -18,24 +18,36 @@
 	export let NodeContent;
 	export let Card;
 
-	// related to Card
-	let cardData, imgRef, cardRef;
-	let locked = false,
-		hoverBlocked = false;
+	/*	
+		Card stuff
+	*/
+
+	/** @type {HTMLElement}*/
+	let imgRef;
+
+	/** @type {HTMLElement}*/
+	let cardRef;
+
+	/** @type {{ round: number, sIndex: number, node: HTMLElement } | null} */
+	let cardData = null;
+
+	/** @type {boolean} */
+	let locked = false;
+
 	const nodeClass = 'bracket-node';
 	const setRef = (ref) => (cardRef = ref);
+
+	/*
+		Display card on hover
+		Display and lock (don't hide on unhover) on click
+		Hide on Escape
+	*/
 
 	/**
 	 * Toggle modal {@link Card}.
 	 * @param {Event} ev
 	 */
 	function clickHandler(ev) {
-		// disable/enable displaying Card on hover
-		if (ev.ctrlKey) {
-			hoverBlocked = !hoverBlocked;
-			return;
-		}
-
 		// ignore clicks inside opened card
 		if (cardRef?.contains(ev.target)) {
 			return;
@@ -78,7 +90,7 @@
 		const node = ev.target.closest('.' + nodeClass);
 		if (!node || node.disabled) {
 			cardData = null;
-		} else if (!hoverBlocked && cardData?.node !== node) {
+		} else if (cardData?.node !== node) {
 			cardData = { ...node.dataset, node };
 		}
 	}
