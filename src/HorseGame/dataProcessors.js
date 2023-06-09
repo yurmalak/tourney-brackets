@@ -11,7 +11,7 @@ import kvOptions from "./adminParts/kvOptions"
  */
 function series({ series }) {
 
-    const data = { hide: {} }
+    const data = {}
 
     for (const [key, v1, /*v2*/] of series.kvMap) {
         switch (key) {
@@ -31,14 +31,6 @@ function series({ series }) {
                 data.start = `${d}.${m} в ${t}`
                 break
             }
-
-
-            // hide nodes that currently overlap with static text on the image
-            case "hide":
-
-                // hide both if only one of them
-                data.hide = !v1 || v1 === "+" ? true : v1
-                break
         }
     }
 
@@ -50,7 +42,7 @@ function game({ game, series, tourney }) {
     const gameData = { roulette: [] }
 
     // add condition common fo all games in round
-    const rule = tourney.data.commonRules?.[series.round] || []
+    const rule = tourney.data.commonRules?.[series.round]
     if (rule) gameData.roulette.push(rule)
 
     // kvMap

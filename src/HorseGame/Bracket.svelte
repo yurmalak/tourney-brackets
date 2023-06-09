@@ -11,7 +11,7 @@
 
 	// utilize ImageKit transformations
 	const endpoint = 'https://ik.imagekit.io/dobdk1ymwif';
-	const imagePath = 'tourney_brackets/horse_game_bracket_3920.png';
+	const imagePath = 'tourney_brackets/horse_game_v2.png';
 	const imgStats = { width: 1920, height: 1080, widths: [1400, 1920, 3920] };
 	const getImgSrc = (width) => `${endpoint}/tr:w-${width}/${imagePath}`;
 

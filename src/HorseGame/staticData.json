@@ -1,7 +1,5 @@
 {
     "tourney": {
-        "name": "Игра в Коня",
-        "withTop3": true,
         "winsRequired": [
             [
                 1,
@@ -46,6 +44,8 @@
                 2
             ]
         ],
+        "name": "Игра в Коня",
+        "withTop3": true,
         "participants": [
             "Enakkin",
             "Master_of__mind",
@@ -84,18 +84,15 @@
         "playersTotal": 32,
         "commonRules": [
             "Пробить ГО стартовым героем",
-            "Сложность игры 200%"
+            "Сложность игры 200%",
+            "Отстроить грейд т7 в одной из деревушек своего респа до пробития ГО",
+            "Пробить все ГО до выхода в центр"
         ],
         "templateCode": "powersOf2"
     },
     "sList": [
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "Enakkin",
                 "Master_of__mind"
@@ -133,12 +130,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "duszamonaha",
                 "VooDooSh"
@@ -182,12 +174,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "HILTYHA",
                 "Chester_Investor"
@@ -240,12 +227,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "HellLighT111",
                 "maugli35"
@@ -283,12 +265,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "valerie_rayne",
                 "Pereyaslavsky_"
@@ -331,12 +308,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "newb1kk",
                 "yarostnayaKoshka"
@@ -374,12 +346,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "beZZdar_",
                 "Wukosha"
@@ -423,12 +390,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "zhoporez_",
                 "papashkaiz4atika"
@@ -462,12 +424,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "Coach_Jekich",
                 "HotaGirl"
@@ -497,10 +454,6 @@
         },
         {
             "kvMap": [
-                [
-                    "hide",
-                    ""
-                ],
                 [
                     "начало",
                     "2023-05-26T22:00"
@@ -552,12 +505,7 @@
             "round": 1
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "Pavllovich",
                 "heroes3troll"
@@ -586,12 +534,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "2BISHOP",
                 "M_on_t"
@@ -627,10 +570,6 @@
         {
             "kvMap": [
                 [
-                    "hide",
-                    ""
-                ],
-                [
                     "начало",
                     "2023-05-30T22:00"
                 ]
@@ -640,17 +579,35 @@
                 "HotaGirl"
             ],
             "id": "365413043232842957",
-            "games": [],
+            "games": [
+                {
+                    "id": "2751685480023846",
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Всегда качать правый навык, до пробития го"
+                        ]
+                    ],
+                    "data": {
+                        "papashkaiz4atika": {
+                            "town": "Cove",
+                            "starter": "Andal",
+                            "color": "red"
+                        },
+                        "HotaGirl": {
+                            "town": "Fortress",
+                            "starter": "Wystan",
+                            "color": "blue"
+                        }
+                    },
+                    "winner": "papashkaiz4atika"
+                }
+            ],
             "tourneyId": "365310089364504781",
             "round": 1
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "turgeneff",
                 "VovastikMashina"
@@ -688,12 +645,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "amieloo",
                 "pup_ok_"
@@ -735,10 +687,6 @@
                 [
                     "начало",
                     "2023-05-28T22:00"
-                ],
-                [
-                    "hide",
-                    "amieloo"
                 ]
             ],
             "players": [
@@ -778,12 +726,7 @@
             "round": 1
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "DarkPepego",
                 "yama_darma"
@@ -826,12 +769,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "unutcon",
                 "YAR_"
@@ -873,12 +811,7 @@
             "round": 0
         },
         {
-            "kvMap": [
-                [
-                    "hide",
-                    ""
-                ]
-            ],
+            "kvMap": [],
             "players": [
                 "Weronest",
                 "akaStinger"
@@ -905,13 +838,13 @@
                     ],
                     "data": {
                         "akaStinger": {
-                            "town": "Necropolis",
-                            "starter": "Xsi",
+                            "town": "Inferno",
+                            "starter": "Calh",
                             "color": "blue"
                         },
                         "Weronest": {
-                            "town": "Inferno",
-                            "starter": "Calh",
+                            "town": "Necropolis",
+                            "starter": "Xsi",
                             "color": "red"
                         }
                     },
@@ -976,7 +909,30 @@
                 "VovastikMashina"
             ],
             "id": "365658833504174286",
-            "games": [],
+            "games": [
+                {
+                    "id": "3371685734116653",
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Запрещены все модификаторы мувов (кроме  навыка логистики)"
+                        ]
+                    ],
+                    "data": {
+                        "M_on_t": {
+                            "town": "Inferno",
+                            "starter": "Pyre",
+                            "color": "red"
+                        },
+                        "VovastikMashina": {
+                            "town": "Conflux",
+                            "starter": "Inteus",
+                            "color": "blue"
+                        }
+                    },
+                    "winner": "M_on_t"
+                }
+            ],
             "tourneyId": "365310089364504781",
             "round": 1
         },
@@ -992,7 +948,39 @@
                 "YAR_"
             ],
             "id": "365790921597386959",
-            "games": [],
+            "games": [
+                {
+                    "id": "7281685664087971",
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Пробить го, героем своей фракции"
+                        ],
+                        [
+                            "рулетка",
+                            "Запрет на взятие нычек родных существ на респе Tir 1"
+                        ],
+                        [
+                            "челлендж",
+                            "Pavllovich",
+                            "Первый кто пробьет основное го оппу"
+                        ]
+                    ],
+                    "data": {
+                        "Pavllovich": {
+                            "town": "Fortress",
+                            "starter": "Korbac",
+                            "color": "red"
+                        },
+                        "YAR_": {
+                            "town": "Dungeon",
+                            "starter": "Jaegar",
+                            "color": "blue"
+                        }
+                    },
+                    "winner": "Pavllovich"
+                }
+            ],
             "tourneyId": "365310089364504781",
             "round": 1
         },
@@ -1008,7 +996,34 @@
                 "duszamonaha"
             ],
             "id": "365809849527697614",
-            "games": [],
+            "games": [
+                {
+                    "id": "6961685392975616",
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Запрет захватов замков в треже"
+                        ],
+                        [
+                            "рулетка",
+                            "Бонус: Дается по 1 рестарту игрокам"
+                        ]
+                    ],
+                    "data": {
+                        "akaStinger": {
+                            "town": "Inferno",
+                            "starter": "Xyron",
+                            "color": "blue"
+                        },
+                        "duszamonaha": {
+                            "town": "Stronghold",
+                            "starter": "Jabarkas",
+                            "color": "red"
+                        }
+                    },
+                    "winner": "duszamonaha"
+                }
+            ],
             "tourneyId": "365310089364504781",
             "round": 1
         },
@@ -1024,20 +1039,237 @@
                 "Wukosha"
             ],
             "id": "365809859989340367",
-            "games": [],
+            "games": [
+                {
+                    "id": "8581685587034957",
+                    "kvMap": [],
+                    "data": {
+                        "valerie_rayne": {
+                            "town": "Rampart",
+                            "starter": "Malcom",
+                            "color": "blue"
+                        },
+                        "Wukosha": {
+                            "town": "Conflux",
+                            "starter": "Fiur",
+                            "color": "red"
+                        }
+                    },
+                    "winner": "valerie_rayne"
+                }
+            ],
             "tourneyId": "365310089364504781",
             "round": 1
         },
         {
-            "kvMap": [],
+            "kvMap": [
+                [
+                    "начало",
+                    "2023-06-04T22:00"
+                ]
+            ],
             "players": [
-                "HotaGirl",
+                "papashkaiz4atika",
                 "Pavllovich"
             ],
-            "id": "365810498233434321",
-            "games": [],
+            "id": "366632057725518032",
+            "games": [
+                {
+                    "id": "6851685906383645",
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Выход только через альтГО"
+                        ]
+                    ],
+                    "data": {
+                        "papashkaiz4atika": {
+                            "town": "Fortress",
+                            "starter": "Korbac",
+                            "color": "red"
+                        },
+                        "Pavllovich": {
+                            "town": "Fortress",
+                            "starter": "Bron",
+                            "color": "blue"
+                        }
+                    },
+                    "winner": "Pavllovich"
+                }
+            ],
             "tourneyId": "365310089364504781",
             "round": 2
+        },
+        {
+            "kvMap": [
+                [
+                    "начало",
+                    "2023-06-05T22:00"
+                ]
+            ],
+            "players": [
+                "HILTYHA",
+                "newb1kk"
+            ],
+            "id": "366632968886681808",
+            "games": [
+                {
+                    "id": "2911686007430580",
+                    "kvMap": [],
+                    "data": {
+                        "HILTYHA": {
+                            "town": "Cove",
+                            "starter": "Illor",
+                            "color": "red"
+                        },
+                        "newb1kk": {
+                            "town": "Necropolis",
+                            "starter": "Charna",
+                            "color": "blue"
+                        }
+                    },
+                    "winner": "newb1kk"
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 2
+        },
+        {
+            "kvMap": [
+                [
+                    "начало",
+                    "2023-06-06T22:00"
+                ]
+            ],
+            "players": [
+                "duszamonaha",
+                "M_on_t"
+            ],
+            "id": "366633126957416656",
+            "games": [
+                {
+                    "id": "6461686076453291",
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Нельзя посещять объекты \"улики\""
+                        ],
+                        [
+                            "рулетка",
+                            "До нападения на го/альт го, нельзя использовать магию"
+                        ],
+                        [
+                            "челлендж",
+                            "M_on_t",
+                            "Первый кто соберет все 4 книги, разных стихий"
+                        ]
+                    ],
+                    "data": {
+                        "duszamonaha": {
+                            "town": "Conflux",
+                            "starter": "Erdamon",
+                            "color": "blue"
+                        },
+                        "M_on_t": {
+                            "town": "Castle",
+                            "starter": "Caitlin",
+                            "color": "red"
+                        }
+                    },
+                    "winner": "M_on_t"
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 2
+        },
+        {
+            "kvMap": [
+                [
+                    "начало",
+                    "2023-06-07T22:00"
+                ]
+            ],
+            "players": [
+                "amieloo",
+                "valerie_rayne"
+            ],
+            "id": "366633135590342865",
+            "games": [
+                {
+                    "id": "9591686191202323",
+                    "kvMap": [],
+                    "data": {
+                        "amieloo": {
+                            "town": "Castle",
+                            "starter": "Valeska",
+                            "color": "blue"
+                        },
+                        "valerie_rayne": {
+                            "town": "Cove",
+                            "starter": "Cassiopeia",
+                            "color": "red"
+                        }
+                    },
+                    "winner": "valerie_rayne"
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 2
+        },
+        {
+            "kvMap": [
+                [
+                    "начало",
+                    "2023-06-09T22:00"
+                ]
+            ],
+            "players": [
+                "newb1kk",
+                "Pavllovich"
+            ],
+            "id": "366892575764775120",
+            "games": [
+                {
+                    "id": "8951686350664144",
+                    "kvMap": [
+                        [
+                            "рулетка",
+                            "Нельзя использовать артефакты на знание"
+                        ]
+                    ],
+                    "data": {
+                        "newb1kk": {
+                            "town": "Dungeon",
+                            "starter": "Arlach",
+                            "color": "blue"
+                        },
+                        "Pavllovich": {
+                            "town": "Dungeon",
+                            "starter": "Synca",
+                            "color": "red"
+                        }
+                    },
+                    "winner": "Pavllovich"
+                }
+            ],
+            "tourneyId": "365310089364504781",
+            "round": 3
+        },
+        {
+            "kvMap": [
+                [
+                    "начало",
+                    "2023-06-10T22:00"
+                ]
+            ],
+            "players": [
+                "M_on_t",
+                "valerie_rayne"
+            ],
+            "id": "366930916116791505",
+            "games": [],
+            "tourneyId": "365310089364504781",
+            "round": 3
         }
     ],
     "playersData": {
