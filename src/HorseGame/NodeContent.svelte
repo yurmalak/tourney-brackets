@@ -7,7 +7,7 @@
 	/** @type {string} */
 	export let id;
 
-	const { data, players, games } = series;
+	const { data, players, games, winner } = series;
 </script>
 
 <svg viewBox="0 0 100 50" {id}>
@@ -22,18 +22,17 @@
 			{/if}
 
 			<!-- name moved up for 1st and down for second player -->
-			{#if data.hide !== true && data.hide !== name}
-				<text
-					x="50%"
-					y="{55 + (i ? 25 : -25)}%"
-					text-anchor="middle"
-					dominant-baseline="middle"
-					textLength="{length > 10 ? 95 : 20 + length * 5}%"
-					lengthAdjust="spacingAndGlyphs"
-				>
-					{name}
-				</text>
-			{/if}
+			<text
+				x="50%"
+				y="{55 + (i ? 25 : -25)}%"
+				text-anchor="middle"
+				dominant-baseline="middle"
+				textLength="{length > 10 ? 95 : 25 + length * 5}%"
+				lengthAdjust="spacingAndGlyphs"
+				class={Number.isInteger(winner) ? (winner === i ? 'winner' : 'loser') : ''}
+			>
+				{name}
+			</text>
 		{/if}
 	{/each}
 
@@ -48,17 +47,6 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=PT+Sans+Narrow&display=swap');
 
-	@media (hover: hover) {
-		svg:hover {
-			filter: url(#text-shadow);
-		}
-		:global(button:active > svg:hover) {
-			filter: none;
-		}
-		.clock:hover {
-			scale: 0.28;
-		}
-	}
 	.clock {
 		scale: 0.23;
 		translate: 40px -35px;
@@ -70,5 +58,13 @@
 		flex-grow: 1;
 		overflow: visible;
 		font-family: 'PT Sans Narrow', sans-serif;
+	}
+
+	.loser {
+		opacity: 0.7;
+	}
+
+	.winner {
+		filter: url(#text-shadow);
 	}
 </style>

@@ -66,6 +66,7 @@ export default async function getBuildData() {
 
             return {
                 players,
+                winner: series.winner ? series.players.indexOf(series.winner) : "",
                 score: calculateScore(series.games, series.players),
                 data: processors.series({ series, tourney, round, sIndex }),
                 games: series.games.map(game => {

@@ -47,7 +47,6 @@
 
 <style>
 	button {
-		--bg: radial-gradient(#ffffff20, #ffffff15);
 		position: absolute;
 
 		display: inline-flex;
@@ -68,12 +67,12 @@
 	}
 
 	button:active:not(:disabled) {
-		background: var(--bg);
+		background: radial-gradient(hsla(0, 0%, 90%, 0.1), hsla(0, 0%, 90%, 0.04));
 	}
 
 	@media (hover: hover) {
-		button:hover:not(:disabled) {
-			background: var(--bg);
+		button:hover:not(:disabled, :active) {
+			background: radial-gradient(hsla(0, 0%, 100%, 0.135), hsla(0, 0%, 100%, 0.1));
 		}
 	}
 </style>
