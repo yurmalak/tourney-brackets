@@ -1,7 +1,6 @@
 <svelte:options immutable />
 
 <script>
-	import Dialog from '../brackets/AbsoluteBracket/Dialog.svelte';
 	import GamePicture from './GamePicture.svelte';
 	import starUrl from './star.svg';
 
@@ -9,90 +8,88 @@
 	export let series;
 
 	$: ({ players, score, games, data } = series);
-	const style = `
+</script>
+
+<card-content aria-label="Детали серии" aria-describedby="card-header">
+	<!-- players and score -->
+	<header id="card-header">
+		{#each players as { name, url }, i}
+			<a class="player-link" href={url}>
+				{name}
+			</a>
+			{#if i === 0}<series-score>{score.join('-')}</series-score>{/if}
+		{/each}
+	</header>
+
+	<!-- games -->
+	{#each games as game}
+		{@const {
+			towns: [t1, t2],
+			starters: [s1, s2],
+			blue
+		} = game}
+
+		<!-- games -->
+		<article class={blue === null ? undefined : blue === 0 ? 'blueRed' : 'redBlue'}>
+			<!-- 1st player's -->
+			<div class="town-and-starter">
+				<GamePicture name={s1} />
+				<GamePicture name={t1} />
+			</div>
+
+			<!-- replay link -->
+			{#if 'replay' in game}
+				<a href={game.replay}>
+					<svg viewBox="0 0 100 100" height="20" width="30" class="play-icon">
+						<polygon points="10,15 10,85 90,50" stroke-width="15" stroke-linejoin="round" />
+					</svg>
+				</a>
+			{:else}<span />{/if}
+
+			<!-- 2nd player's -->
+			<div class="town-and-starter">
+				<GamePicture name={t2} />
+				<GamePicture name={s2} />
+			</div>
+
+			<!--  roulette -->
+			<ul aria-label="усложнения">
+				{#each game.roulette as rule}
+					<li>{rule}</li>
+				{/each}
+			</ul>
+
+			<!-- challenges -->
+			{#if game.challenges}
+				<ul
+					class="challenges"
+					aria-label="выполненные челленджи"
+					style="list-style-image: url({starUrl})"
+				>
+					{#each Object.entries(game.challenges) as [name, list]}
+						{#each list as text}
+							<li>{name}: {text}</li>
+						{/each}
+					{/each}
+				</ul>
+			{/if}
+		</article>
+	{/each}
+
+	<!-- date and time of next game -->
+	{#if data.start}
+		<upcoming-game>
+			{#if games.length > 0}Игра {games.length + 1}: {/if}{data.start}
+		</upcoming-game>
+	{/if}
+</card-content>
+
+<style>
+	:global(#absolute-bracket-card-wrapper) {
 		background-color: rgb(98, 70, 39);
 		border: 4px solid rgb(98, 70, 39);
 		box-shadow: 0px 0px 2px 1px black;
-	`;
-</script>
-
-<Dialog {...$$restProps} {style} aria-label="Детали серии" aria-describedby="card-header">
-	<card-content>
-		<!-- players and score -->
-		<header id="card-header">
-			{#each players as { name, url }, i}
-				<a class="player-link" href={url}>
-					{name}
-				</a>
-				{#if i === 0}<series-score>{score.join('-')}</series-score>{/if}
-			{/each}
-		</header>
-
-		<!-- games -->
-		{#each games as game}
-			{@const {
-				towns: [t1, t2],
-				starters: [s1, s2],
-				blue
-			} = game}
-
-			<!-- games -->
-			<article class={blue === null ? undefined : blue === 0 ? 'blueRed' : 'redBlue'}>
-				<!-- 1st player's -->
-				<div class="town-and-starter">
-					<GamePicture name={s1} />
-					<GamePicture name={t1} />
-				</div>
-
-				<!-- replay link -->
-				{#if 'replay' in game}
-					<a href={game.replay}>
-						<svg viewBox="0 0 100 100" height="20" width="30" class="play-icon">
-							<polygon points="10,15 10,85 90,50" stroke-width="15" stroke-linejoin="round" />
-						</svg>
-					</a>
-				{:else}<span />{/if}
-
-				<!-- 2nd player's -->
-				<div class="town-and-starter">
-					<GamePicture name={t2} />
-					<GamePicture name={s2} />
-				</div>
-
-				<!--  roulette -->
-				<ul aria-label="усложнения">
-					{#each game.roulette as rule}
-						<li>{rule}</li>
-					{/each}
-				</ul>
-
-				<!-- challenges -->
-				{#if game.challenges}
-					<ul
-						class="challenges"
-						aria-label="выполненные челленджи"
-						style="list-style-image: url({starUrl})"
-					>
-						{#each Object.entries(game.challenges) as [name, list]}
-							{#each list as text}
-								<li>{name}: {text}</li>
-							{/each}
-						{/each}
-					</ul>
-				{/if}
-			</article>
-		{/each}
-
-		<!-- date and time of next game -->
-		{#if data.start}
-			<upcoming-game>
-				{#if games.length > 0}Игра {games.length + 1}: {/if}{data.start}
-			</upcoming-game>
-		{/if}
-	</card-content>
-</Dialog>
-
-<style>
+	}
 	card-content {
 		border: 1px solid black;
 		background-color: #caa677;

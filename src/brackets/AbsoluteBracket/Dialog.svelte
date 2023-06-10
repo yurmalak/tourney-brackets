@@ -11,9 +11,6 @@
 	/** @type {(element: HTMLElement) => void} */
 	export let setRef = null;
 
-	/** @type {string} */
-	export let style = null;
-
 	/** @type {HTMLElement} */
 	let container;
 
@@ -112,14 +109,13 @@
 
 <dialog
 	use:setup
+	id="absolute-bracket-card-wrapper"
 	open={true}
-	{style}
 	style:opacity
 	style:top
 	style:left
 	style:width="{width}px"
 	style:transform="translate({transX},{transY})"
-	{...$$restProps}
 >
 	<slot />
 </dialog>

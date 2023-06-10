@@ -1,6 +1,7 @@
 <script>
 	import WideBgImage from './WideBgImage.svelte';
 	import AbsoluteNode from './AbsoluteNode.svelte';
+	import Dialog from './Dialog.svelte';
 
 	/** @type {(width:number) => string}*/
 	export let getImgSrc;
@@ -16,7 +17,7 @@
 
 	// components
 	export let NodeContent;
-	export let Card;
+	export let CardContent;
 
 	/*	
 		Card stuff
@@ -130,14 +131,12 @@
 			{/each}
 		{/each}
 		{#if cardData}
-			<svelte:component
-				this={Card}
-				series={processedSeries[cardData.round][cardData.sIndex]}
-				root={imgRef}
-				anchor={cardData.node}
-				width={360}
-				{setRef}
-			/>
+			<Dialog root={imgRef} anchor={cardData.node} width={360} {setRef}>
+				<svelte:component
+					this={CardContent}
+					series={processedSeries[cardData.round][cardData.sIndex]}
+				/>
+			</Dialog>
 		{/if}
 	</WideBgImage>
 </main>

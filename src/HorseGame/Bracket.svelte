@@ -3,7 +3,7 @@
 
 	import AbsoluteBracket from '../brackets/AbsoluteBracket/AbsoluteBracket.svelte';
 	import NodeContent from './NodeContent.svelte';
-	import Card from './Card.svelte';
+	import CardContent from './CardContent.svelte';
 	import SvgDefs from './SvgDefs.svelte';
 
 	export let data;
@@ -33,7 +33,14 @@
 <SvgDefs />
 
 <!-- image with absolutely positioned series -->
-<AbsoluteBracket {processedSeries} {anchorsData} {imgStats} {getImgSrc} {NodeContent} {Card} />
+<AbsoluteBracket
+	{processedSeries}
+	{anchorsData}
+	{imgStats}
+	{getImgSrc}
+	{NodeContent}
+	{CardContent}
+/>
 
 {#each imgList as name}
 	<link rel="preload" as="image" href="pictures/{name}.gif" />
