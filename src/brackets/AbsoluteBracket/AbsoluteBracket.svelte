@@ -116,14 +116,17 @@
 			{#each roundSeries as series, index}
 				{#if series.players}
 					{@const id = `node-${round}-${index}`}
+					{@const expanded = cardData?.sIndex === index && cardData.round === round}
+					{@const description = `${expanded ? 'Закрыть' : 'Открыть'} детали серии`}
 					<AbsoluteNode
 						{anchorsData}
 						{round}
 						{index}
+						{expanded}
+						{description}
 						labelledby={id}
 						className={nodeClass}
 						disabled={!series.players.every(Boolean)}
-						expanded={cardData?.sIndex === index && cardData.round === round}
 					>
 						<svelte:component this={NodeContent} {series} {id} />
 					</AbsoluteNode>

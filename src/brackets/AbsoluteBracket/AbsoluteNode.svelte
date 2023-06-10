@@ -15,6 +15,9 @@
 	/** @type {string}*/
 	export let labelledby;
 
+	/** @type {string} */
+	export let className;
+
 	/** @type {boolean}*/
 	export let disabled;
 
@@ -22,7 +25,7 @@
 	export let expanded;
 
 	/** @type {string} */
-	export let className;
+	export let description = null;
 
 	const { width, height, coordinates } = anchorsData;
 	const [left, top] = coordinates[round][index];
@@ -38,7 +41,7 @@
 	aria-haspopup="dialog"
 	aria-labelledby={labelledby}
 	aria-expanded={expanded}
-	aria-description="{expanded ? 'Закрыть' : 'Открыть'} детали серии"
+	aria-description={description}
 	class={className}
 	{disabled}
 >

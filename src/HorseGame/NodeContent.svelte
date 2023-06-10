@@ -7,14 +7,27 @@
 	/** @type {string} */
 	export let id;
 
-	const { data, players, games, winner } = series;
+	const { data, players, games, winner, score } = series;
+	const withScore = games.length > 1 || (!winner && games[0]?.winner);
+	const scoreSpace = withScore ? 8 : 0;
+
+	function getTextLength(name) {
+		const { length } = name;
+		if (length > 10) {
+			return 95 - scoreSpace * 2 + '%';
+		} else {
+			return 15 - scoreSpace + length * 6 + '%';
+		}
+	}
+
+	const getY = (i) => `${55 + (i ? 25 : -25)}%`;
 </script>
 
 <svg viewBox="0 0 100 50" {id}>
 	{#each players as player, i}
 		{#if player}
 			{@const { name } = player}
-			{@const { length } = name}
+			{@const className = Number.isInteger(winner) ? (winner === i ? 'winner' : 'loser') : ''}
 
 			<!-- completed challenges icon -->
 			{#if games.some((g) => g.challenges?.[name])}
@@ -23,16 +36,28 @@
 
 			<!-- name moved up for 1st and down for second player -->
 			<text
-				x="50%"
-				y="{55 + (i ? 25 : -25)}%"
+				x={50 - scoreSpace}
+				y={getY(i)}
 				text-anchor="middle"
 				dominant-baseline="middle"
-				textLength="{length > 10 ? 95 : 25 + length * 5}%"
+				textLength={getTextLength(name)}
 				lengthAdjust="spacingAndGlyphs"
-				class={Number.isInteger(winner) ? (winner === i ? 'winner' : 'loser') : ''}
+				class={className}
 			>
 				{name}
 			</text>
+
+			{#if withScore}
+				<text
+					x={95 - scoreSpace}
+					y={getY(i)}
+					extLength={scoreSpace}
+					dominant-baseline="middle"
+					class={className}
+				>
+					{score[i]}
+				</text>
+			{/if}
 		{/if}
 	{/each}
 
