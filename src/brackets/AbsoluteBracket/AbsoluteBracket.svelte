@@ -15,6 +15,9 @@
 	/** @type {import("../../types").Series[][]} */
 	export let processedSeries;
 
+	/** @type {{ [key:string]: string }}*/
+	export let processedPlayers;
+
 	// components
 	export let NodeContent;
 	export let CardContent;
@@ -138,6 +141,7 @@
 				<svelte:component
 					this={CardContent}
 					series={processedSeries[cardData.round][cardData.sIndex]}
+					{processedPlayers}
 				/>
 			</Dialog>
 		{/if}

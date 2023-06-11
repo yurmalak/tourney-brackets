@@ -7,14 +7,17 @@
 	/** @type {import("./types").FrontSeries} */
 	export let series;
 
+	/** @type {{ [key:string]: string }}*/
+	export let processedPlayers;
+
 	$: ({ players, score, games, data } = series);
 </script>
 
 <card-content aria-label="Детали серии" aria-describedby="card-header">
 	<!-- players and score -->
 	<header id="card-header">
-		{#each players as { name, url }, i}
-			<a class="player-link" href={url}>
+		{#each players as name, i}
+			<a class="player-link" href={processedPlayers[name]}>
 				{name}
 			</a>
 			{#if i === 0}<series-score>{score.join('-')}</series-score>{/if}
@@ -26,8 +29,11 @@
 		{@const {
 			towns: [t1, t2],
 			starters: [s1, s2],
-			blue
-		} = game}
+			blue,
+			replay,
+			roulette,
+			challenges
+		} = game.data}
 
 		<!-- games -->
 		<article class={blue === null ? undefined : blue === 0 ? 'blueRed' : 'redBlue'}>
@@ -38,8 +44,8 @@
 			</div>
 
 			<!-- replay link -->
-			{#if 'replay' in game}
-				<a href={game.replay}>
+			{#if replay}
+				<a href={replay}>
 					<svg viewBox="0 0 100 100" height="20" width="30" class="play-icon">
 						<polygon points="10,15 10,85 90,50" stroke-width="15" stroke-linejoin="round" />
 					</svg>
@@ -54,19 +60,19 @@
 
 			<!--  roulette -->
 			<ul aria-label="усложнения">
-				{#each game.roulette as rule}
+				{#each roulette as rule}
 					<li>{rule}</li>
 				{/each}
 			</ul>
 
 			<!-- challenges -->
-			{#if game.challenges}
+			{#if challenges}
 				<ul
 					class="challenges"
 					aria-label="выполненные челленджи"
 					style="list-style-image: url({starUrl})"
 				>
-					{#each Object.entries(game.challenges) as [name, list]}
+					{#each Object.entries(challenges) as [name, list]}
 						{#each list as text}
 							<li>{name}: {text}</li>
 						{/each}

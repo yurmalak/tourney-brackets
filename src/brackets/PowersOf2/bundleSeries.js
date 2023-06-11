@@ -83,5 +83,5 @@ export default function bundleSeries(tourneyStore) {
         })
     });
 
-    return seriesByRound
+    return { seriesByRound, extras: { withTop3 } }
 }

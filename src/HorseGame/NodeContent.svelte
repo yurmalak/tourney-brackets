@@ -24,13 +24,12 @@
 </script>
 
 <svg viewBox="0 0 100 50" {id}>
-	{#each players as player, i}
-		{#if player}
-			{@const { name } = player}
+	{#each players as name, i}
+		{#if name}
 			{@const className = Number.isInteger(winner) ? (winner === i ? 'winner' : 'loser') : ''}
 
 			<!-- completed challenges icon -->
-			{#if games.some((g) => g.challenges?.[name])}
+			{#if games.some((g) => g.data.challenges?.[name])}
 				<ChallengersStar {series} pIndex={i} />
 			{/if}
 

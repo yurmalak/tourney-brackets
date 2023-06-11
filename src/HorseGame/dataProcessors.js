@@ -1,6 +1,24 @@
 import { validateUrl } from "../lib/utils"
 import kvOptions from "./adminParts/kvOptions"
 
+
+function player(playerData) {
+
+    const [platform, userName] = Object.entries(playerData.media)[0]
+
+    switch (platform) {
+        case "twitch":
+            return `https://www.twitch.tv/${userName}`
+
+        // youtube
+        // someOtherTube
+
+        default:
+            console.error(`Player processor, unknown platform - "${platform}"`)
+            return "/"
+    }
+}
+
 /**
  * @param {{
  *  series: import("../types").Series,
@@ -77,4 +95,4 @@ function game({ game, series, tourney }) {
     return gameData
 }
 
-export default { series, game }
+export default { player, series, game }

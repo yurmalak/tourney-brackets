@@ -7,7 +7,6 @@
 	import SvgDefs from './SvgDefs.svelte';
 
 	export let data;
-	const { processedSeries, anchorsData } = data;
 
 	// utilize ImageKit transformations
 	const endpoint = 'https://ik.imagekit.io/dobdk1ymwif';
@@ -17,14 +16,13 @@
 
 	// prefetch images for towns and heroes
 	let imgList = [];
-
 	onMount(() => {
 		const list = new Set();
-		for (const roundSeries of processedSeries)
+		for (const roundSeries of data.processedSeries)
 			for (const series of roundSeries)
 				for (const game of series.games)
 					for (const key of ['towns', 'starters'])
-						for (const name of game[key]) list.add(name.replace(/ /g, '_'));
+						for (const name of game.data[key]) list.add(name.replace(/ /g, '_'));
 		imgList = [...list];
 	});
 </script>
@@ -33,14 +31,7 @@
 <SvgDefs />
 
 <!-- image with absolutely positioned series -->
-<AbsoluteBracket
-	{processedSeries}
-	{anchorsData}
-	{imgStats}
-	{getImgSrc}
-	{NodeContent}
-	{CardContent}
-/>
+<AbsoluteBracket {...data} {imgStats} {getImgSrc} {NodeContent} {CardContent} />
 
 {#each imgList as name}
 	<link rel="preload" as="image" href="pictures/{name}.gif" />

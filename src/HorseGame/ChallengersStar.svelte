@@ -6,7 +6,7 @@
 	export let series;
 
 	const { games, players } = series;
-	const { name } = players[pIndex];
+	const name = players[pIndex];
 
 	// structure defined in './dataProcessors.js'
 	const cList = [];

@@ -18,7 +18,7 @@
 	let finals;
 
 	$: {
-		seriesByRound = bundleSeries($tourneyStore);
+		({ seriesByRound } = bundleSeries($tourneyStore));
 		finals = seriesByRound.pop(); // finals won't fit general schema
 	}
 </script>
