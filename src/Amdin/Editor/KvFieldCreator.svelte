@@ -80,17 +80,27 @@
 		else element.focus();
 	}
 
-	$: usedKeys = new Set(kvMap.map(([key]) => key));
+	let availableOptions;
+	$: {
+		const usedKeys = new Set(kvMap.map(([key]) => key));
+		availableOptions = Object.entries(options).filter(
+			([key, { unique }]) => !unique || !usedKeys.has(key)
+		);
+	}
 </script>
 
-<select on:change={createField} {style} class={className} aria-label="add data field">
+<select
+	on:change={createField}
+	class={className}
+	aria-label="add data field"
+	style:display={availableOptions.length ? 'initial' : 'none'}
+	{style}
+>
 	<option value="" style:display="none">Add field</option>
-	{#each Object.entries(options) as [value, { label, unique }]}
-		{#if !unique || !usedKeys.has(value)}
-			<option {value}>
-				{label}
-			</option>
-		{/if}
+	{#each availableOptions as [value, { label }]}
+		<option {value}>
+			{label}
+		</option>
 	{/each}
 </select>
 

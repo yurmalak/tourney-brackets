@@ -15,6 +15,7 @@
 	import KvFieldCreator from './KvFieldCreator.svelte';
 	import DeleteButton from './DeleteButton.svelte';
 	import DefaultGameEditor from './GameEditor.svelte';
+	import WinnerSwitcher from './WinnerSwitcher.svelte';
 
 	/** @type {{ series: object, game: object }} */
 	export let kvOptions = { series: {}, game: {} };
@@ -217,7 +218,14 @@
 					{#each seriesData.games as { data, winner, kvMap, id }, i (id)}
 						<li aria-label="game">
 							<!-- Possibly injected component -->
-							<svelte:component this={GameEditor} players={selectedPlayers} bind:data bind:winner>
+							<svelte:component this={GameEditor} players={selectedPlayers} bind:data>
+								<WinnerSwitcher
+									bind:winner
+									players={selectedPlayers}
+									slot="winner-switcher"
+									let:style
+									{style}
+								/>
 								<DataMapper
 									let:style
 									let:className

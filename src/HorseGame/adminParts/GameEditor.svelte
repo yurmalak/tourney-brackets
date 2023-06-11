@@ -1,13 +1,9 @@
 <script>
-	import Switcher from '../../components/Switcher.svelte';
 	import GamePicture from '../GamePicture.svelte';
 	import { heroList } from './h3Data';
 
 	/** @type {object} */
 	export let data;
-
-	/** @type {string?} */
-	export let winner;
 
 	/** @type {string[]} */
 	export let players;
@@ -26,10 +22,6 @@
 		const c1 = data[players[1]].color;
 		data[players[0]].color = c1;
 		data[players[1]].color = c0;
-	}
-
-	function switchWinner() {
-		winner = players.indexOf(winner) === 0 ? players[1] : players[0];
 	}
 </script>
 
@@ -94,16 +86,7 @@
 			<GamePicture name={data[player].starter} style="grid-area:s{i}pic" />
 		{/each}
 
-		<Switcher
-			on:click={switchWinner}
-			label="Winner"
-			style="grid-area:winner"
-			value={winner === '' ? undefined : players.indexOf(winner)}
-			buttonProps={{
-				'aria-label': 'Winner switcher',
-				'aria-description': `Current winner - ${winner ?? 'none'}`
-			}}
-		/>
+		<slot name="winner-switcher" style="grid-area:winner" />
 		<label
 			class="swap-color"
 			style="grid-area:color"
