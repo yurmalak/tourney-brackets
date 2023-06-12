@@ -6,10 +6,12 @@
 	import { onMount } from 'svelte';
 	import { tourneyStore } from './stores';
 	import { setupDbClient } from './setupDbClient';
-	import Bracket from '../brackets/Base.svelte';
 	import Editor from './Editor/Editor.svelte';
 	import LoadingIcon from './LoadingIcon.svelte';
 	import BuildRequester from './BuildRequester.svelte';
+
+	import Bracket from '../brackets/Bracket.svelte';
+	import bundleSeries from '../brackets/bundleSeries';
 
 	// game specific stuff to pass to Editor
 	export let kvOptions;
@@ -30,6 +32,7 @@
 	const dbClient = setupDbClient(setTaskStatus);
 
 	// fetch list of tourneys and data for latest one
+	let seriesByRound, templateCode, extras;
 	onMount(async () => {
 		/**
 		 * @type {{
@@ -52,16 +55,16 @@
 		});
 
 		ready = true;
-		if (!error) tourneyStore.set({ ...data.tourneyData, dbClient });
+		if (!error) {
+			tourneyStore.set({ ...data.tourneyData, dbClient });
+			({ templateCode } = $tourneyStore.data);
+			({ seriesByRound, extras } = bundleSeries($tourneyStore));
+		}
 	});
 
-	// open/close Editor
-	function toggleEditor(ev) {
-		editableSeries = ev?.detail?.series;
-	}
-
-	/** @type {Series | undefined}*/
-	let editableSeries;
+	/** @type {Series}*/
+	let editorData;
+	const toggleEditor = (ev) => (editorData = ev?.detail);
 </script>
 
 <div id="root">
@@ -81,7 +84,7 @@
 				<LoadingIcon {error} {status} side={20} />
 			</div>
 		{:else}
-			<Bracket templateCode={$tourneyStore?.data?.templateCode} on:nodeClick={toggleEditor} />
+			<Bracket {templateCode} {seriesByRound} {extras} on:nodeClick={toggleEditor} />
 		{/if}
 		<LoadingIcon
 			{error}
@@ -97,14 +100,15 @@
 	</div>
 </div>
 
-{#if editableSeries}
+{#if editorData}
 	<Editor
+		bind:seriesByRound
+		on:toggleEditor={toggleEditor}
 		{kvOptions}
 		{GameEditor}
 		{adjustNewGame}
+		series={editorData.series}
 		blocked={status !== 'ok'}
-		series={editableSeries}
-		on:toggleEditor={toggleEditor}
 	/>
 {/if}
 

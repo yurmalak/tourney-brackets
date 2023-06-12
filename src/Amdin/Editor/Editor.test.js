@@ -2,9 +2,12 @@ import clone from "rfdc/default"
 import userEvent from "@testing-library/user-event"
 import EditorAssistant from "./testAssistants/TaEditor.svelte"
 import { render, screen, within, cleanup } from '@testing-library/svelte';
-import { createGame, createSeries } from '$lib/utils';
-import { tourneyStore } from "../stores";
 import { vi } from 'vitest';
+import { get } from "svelte/store"
+
+import Series from "../../lib/Series"
+import { createGame } from '../../lib/utils';
+import { tourneyStore } from "../stores";
 
 
 
@@ -18,14 +21,21 @@ function setupEditor(dbClient) {
         "Kate",
     ]
 
-    const series = createSeries(0, 0)
-    series.players = participants.slice(0, 2)
-    series.id = "1233215674567"
+    const sList = []
+    for (let i = 0; i < playersTotal; i += 2) {
+        sList.push({
+            id: "" + i + Date.now(),
+            players: participants.slice(i, i + 2),
+            round: 0,
+            games: [],
+            kvMap: []
+        })
+    }
 
-    const game = createGame(series)
-    series.games.push(game)
+    const game = createGame()
     game.winner = "Jane"
     game.kvMap.push(["starting gold", "100"])
+    sList[0].games.push(game)
 
     tourneyStore.set({
         tourney: {
@@ -33,10 +43,23 @@ function setupEditor(dbClient) {
             participants: [...participants],
             playersTotal,
             templateCode: "powersOf2",
+            winsRequired: [Array(playersTotal / 2).fill(1)]
         },
-        sList: [clone(series)],
+        sList: clone(sList),
         dbClient
     })
+
+    // not really by round but for Editor it's enought
+    const tourney = get(tourneyStore)
+    const seriesByRound = [
+        clone(sList).map((series, sIndex) => new Series({
+            ...series,
+            sIndex,
+            tourney,
+            ancestors: [],
+            isLoserSeries: false
+        }))
+    ]
 
     const kvOptions = {
         series: {
@@ -47,8 +70,10 @@ function setupEditor(dbClient) {
             "map": { fields: [{ type: "text" }] }
         }
     }
-    const { component } = render(EditorAssistant, { series, kvOptions })
 
+
+    const series = seriesByRound[0][0]
+    const { component } = render(EditorAssistant, { series, kvOptions, seriesByRound })
     const searchArgs = { value: new RegExp(series.players.join("|")), name: /Player [12]/ }
     const playerSelectors = screen.getAllByRole("combobox", searchArgs)
 
@@ -166,7 +191,8 @@ it("saves with correct args", async () => {
     await user.selectOptions(playerSelectors[0], "Jane")
     await user.click(screen.getByRole("button", { name: /save/i }))
     expect(closeEditorSpy).toHaveBeenCalled()
-    expect(updateSpy.mock.lastCall[0].changed).toEqual({ players: true, series: false })
+    expect(updateSpy.mock.lastCall[0]).toHaveProperty("participants")
+    expect(updateSpy.mock.lastCall[0]).not.toHaveProperty("series")
     expect(dbSpy.mock.lastCall[0]).not.toHaveProperty("series")
     expect(dbSpy.mock.lastCall[0]).toHaveProperty("tourney")
     expect(dbSpy.mock.lastCall[0].tourney.participants).toEqual([
@@ -180,7 +206,8 @@ it("saves with correct args", async () => {
     ({ playerSelectors, component } = setupEditor(dbClient))
     await user.click(screen.getByRole("button", { name: /add game/i }))
     await user.click(screen.getByRole("button", { name: /save/i }))
-    expect(updateSpy.mock.lastCall[0].changed).toEqual({ players: false, series: true })
+    expect(updateSpy.mock.lastCall[0]).not.toHaveProperty("participants")
+    expect(updateSpy.mock.lastCall[0]).toHaveProperty("series")
     expect(dbSpy.mock.lastCall[0]).toHaveProperty("series")
     expect(dbSpy.mock.lastCall[0]).not.toHaveProperty("tourney")
     expect(dbSpy.mock.lastCall[0].series.games).toHaveLength(2)
@@ -194,7 +221,8 @@ it("saves with correct args", async () => {
     await user.click(screen.getByRole("button", { name: /add game/i }))
     await user.click(screen.getByRole("button", { name: /winner/i }))
     await user.click(screen.getByRole("button", { name: /save/i }))
-    expect(updateSpy.mock.lastCall[0].changed).toEqual({ players: true, series: true })
+    expect(updateSpy.mock.lastCall[0]).toHaveProperty("participants")
+    expect(updateSpy.mock.lastCall[0]).toHaveProperty("series")
     expect(dbSpy.mock.lastCall[0].series.games[0].winner).toBe("Kate")
 
     const newParticipants = dbSpy.mock.lastCall[0].tourney.participants

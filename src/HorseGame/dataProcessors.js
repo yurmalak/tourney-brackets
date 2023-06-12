@@ -21,10 +21,8 @@ function player(playerData) {
 
 /**
  * @param {{
- *  series: import("../types").Series,
  *  tourney: import("../lib/Tourney").Tourney,
- *  round: number,
- *  sIndex: number
+ *  series: import("../lib/Series").default
  * }} args
  */
 function series({ series }) {
@@ -40,7 +38,7 @@ function series({ series }) {
                 if (!parts) break
 
                 // ignore if series is over
-                if (series.winner) break
+                if (Number.isInteger(series.winner)) break
 
                 // or if game is being played
                 if (series.games.some(g => !g.winner)) break
@@ -55,6 +53,14 @@ function series({ series }) {
     return data
 }
 
+
+/**
+ * @param {{
+ *  tourney: import("../lib/Tourney").Tourney,
+ *  series: import("../lib/Series").default,
+ *  games: import("../types").Game
+ * }} args
+ */
 function game({ game, series, tourney }) {
 
     const gameData = { roulette: [] }

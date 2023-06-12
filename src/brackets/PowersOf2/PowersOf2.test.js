@@ -1,14 +1,15 @@
 import { render, screen } from '@testing-library/svelte';
-import { tourneyStore } from "../../Amdin/stores";
+import { Tourney } from '../../lib/Tourney';
 import PowersOf2 from './PowersOf2.svelte';
+import bundleSeries from "./bundleSeries"
 
 
 /** @param {import("../../types").TourneyData} options */
-function setStore({ tourney = {}, sList = [], ...other } = {}) {
+function setup({ tourney = {}, sList = [], ...other } = {}) {
 
     const { playersTotal = 8, withTop3 = false } = tourney
 
-    tourneyStore.set({
+    return bundleSeries(new Tourney({
         tourney: {
             participants: [],
             templateCode: "powersOf2",
@@ -17,11 +18,9 @@ function setStore({ tourney = {}, sList = [], ...other } = {}) {
             winsRequired: buildWinsRequired(playersTotal, withTop3),
             ...tourney
         },
-        sList: [
-            ...sList
-        ],
+        sList: [...sList],
         ...other
-    })
+    }))
 }
 
 /**
@@ -122,15 +121,13 @@ function setupDwarfTournament() {
 it("renders correct number of buttons", () => {
 
     let expectedNumber = 1 + 2
-    setStore()
-    const { rerender } = render(PowersOf2);
+    const { rerender } = render(PowersOf2, setup());
 
     for (const num of [4, 8, 16, 32, 64]) {
         expectedNumber += num
 
         const playersTotal = num * 2
-        setStore({ tourney: { playersTotal } })
-        rerender({})
+        rerender(setup({ tourney: { playersTotal } }))
         const buttons = screen.getAllByRole("button")
         expect(buttons.length).toBe(expectedNumber)
     }
@@ -138,8 +135,7 @@ it("renders correct number of buttons", () => {
 
 it("renders extra node if 'withTop3 === true'", () => {
 
-    setStore({ tourney: { playersTotal: 32, withTop3: true } })
-    render(PowersOf2)
+    render(PowersOf2, setup({ tourney: { playersTotal: 32, withTop3: true } }))
     const buttons = screen.getAllByRole("button")
     const normal = 1 + 2 + 4 + 8 + 16
     expect(buttons.length).toBe(normal + 1)
@@ -155,8 +151,7 @@ it("writes players to nodes", () => {
         "Attendant",
         ...Array(11).fill("")
     ]
-    setStore({ tourney: { participants, playersTotal: 16 } })
-    render(PowersOf2)
+    render(PowersOf2, setup({ tourney: { participants, playersTotal: 16 } }))
 
     const dreeg = screen.getByText("Dreeg")
     expect(dreeg.closest("button").textContent).toMatch(/Dreeg.*0.*Solael.*0/)
@@ -171,15 +166,15 @@ it("writes players to nodes", () => {
 it("counts score and promotes winner to next round (including 3rd place)", () => {
 
     const { participants, sList, checkNode } = setupDwarfTournament()
-    setStore({
+
+    const { rerender } = render(PowersOf2, setup({
         tourney: {
             participants,
             playersTotal: 8,
             withTop3: true
         },
         sList
-    })
-    const { rerender } = render(PowersOf2)
+    }))
 
     // 2-0
     checkNode(participants[2], 2, participants[5], 0)
@@ -190,7 +185,7 @@ it("counts score and promotes winner to next round (including 3rd place)", () =>
 
     // finals should not happen if some game missing
     sList[0].games.pop()
-    setStore({
+    rerender(setup({
         tourney:
         {
             playersTotal: 8,
@@ -198,8 +193,7 @@ it("counts score and promotes winner to next round (including 3rd place)", () =>
             participants
         },
         sList
-    })
-    rerender({})
+    }))
 
     // Thror and Thrain refuse to play since their game got sliced
     checkNode(participants[0], 0, participants[1], 0)

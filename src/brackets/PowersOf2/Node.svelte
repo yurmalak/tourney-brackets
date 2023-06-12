@@ -1,29 +1,33 @@
-<svelte:options immutable />
-
 <script>
 	import { createEventDispatcher } from 'svelte';
 
-	/** @typedef {import('../../types.ts').Series} Series */
-
-	/** @type {Series} */
+	/** @type {import('../../types.ts').Series} */
 	export let series;
+
+	/** @type {number} */
+	export let round;
+
+	/** @type {number} */
+	export let sIndex;
 
 	/** @type {string} */
 	export let style;
 
 	const dispatch = createEventDispatcher();
-	const handleClick = ({ ctrlKey, shiftKey, altKey }) => {
-		dispatch('nodeClick', { ctrlKey, shiftKey, altKey, series });
-	};
+	const handleClick = () => dispatch('nodeClick', { round, sIndex, series });
 </script>
 
 <bracket-node {style}>
-	<button type="button" on:click={handleClick}>
+	<button
+		type="button"
+		on:click={handleClick}
+		disabled={round !== 0 && series.players.some((p) => !p)}
+	>
 		{#each series.players as name, i}
 			<span
-				class="name r{i} {series.winner === undefined
+				class="name r{i} {!Number.isInteger(series.winner)
 					? ''
-					: series.winner === series.players[i]
+					: series.winner === i
 					? 'winner'
 					: 'loser'}"
 			>
@@ -44,7 +48,7 @@
 		display: flex;
 		background-color: white;
 	}
-	bracket-node > button {
+	button {
 		background-color: transparent;
 		border: none;
 		padding: 0;
@@ -59,15 +63,21 @@
 			'name2  score2' 1fr / 1fr auto;
 	}
 
-	bracket-node > button:active {
+	button:disabled {
+		opacity: 1;
+		color: initial;
+		cursor: default;
+	}
+
+	button:active:not(:disabled) {
 		background-color: hsl(240, 40%, 97%);
 		box-shadow: none;
 	}
 
 	@media (hover: hover) {
-		bracket-node:hover {
+		button:hover:not(:disabled, :active) {
 			background-color: hsl(240, 60%, 99%);
-			box-shadow: 0 0 3px hsl(0, 0%, 70%);
+			box-shadow: 0 0 3px 0 rgb(116, 116, 116);
 		}
 	}
 	.score,

@@ -1,7 +1,5 @@
 import faunadb from "faunadb"
 import { Tourney } from "./Tourney";
-import { calculateScore } from "./utils";
-
 import bundleSeries from "../brackets/bundleSeries"
 
 
@@ -30,24 +28,7 @@ export default async function getBuildData(processors = {}) {
     const { seriesByRound, extras } = bundleSeries(tourney)
 
     // extract required minimum for series
-    const processedSeries = seriesByRound.map((rSeries, round) =>
-        rSeries.map((series, sIndex) => ({
-            players: series.players.some(Boolean) ? series.players : "",
-            winner: series.winner ? series.players.indexOf(series.winner) : "",
-            score: calculateScore(series.games, series.players),
-            data: processors.series?.({ series, tourney, round, sIndex }) || {},
-            games: series.games.map(game => {
-
-                const g = {
-                    data: processors.game?.({ game, series, tourney, round, sIndex }) || {}
-                }
-                if (game.winner) g.winner = series.players.indexOf(game.winner)
-
-                return g
-            })
-        })
-        )
-    )
+    const processedSeries = seriesByRound.map(list => list.map(s => s.toFront(processors)))
 
     // extract required minimum for players
     const processedPlayers = {}

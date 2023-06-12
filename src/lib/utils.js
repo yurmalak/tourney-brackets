@@ -19,24 +19,6 @@ export function createGame() {
 }
 
 /**
- * @param {number} round
- * @param {number} index
- * @returns {Series}
- */
-export function createSeries(round, index) {
-
-    /** @type {Series} */
-    return {
-        round,
-        index,
-        score: [0, 0],
-        players: ["", ""],
-        games: [],
-        kvMap: []
-    };
-}
-
-/**
  * @param {Game[]} games 
  * @param {[string, string]} players
  */

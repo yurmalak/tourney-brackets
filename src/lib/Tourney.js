@@ -24,13 +24,14 @@ export const kvMapSorter = (a, b) => {
 }
 
 
-function Container() {
+/** @param {Series} series */
+function SeriesData({ games = [], kvMap = [], id = null } = {}) {
     /** @type {Game[]} */
-    this.games = []
+    this.games = games
     /** @type {KvMap} */
-    this.kvMap = []
+    this.kvMap = kvMap
     /** @type {string} */
-    this.id = null
+    this.id = id
 }
 
 
@@ -64,21 +65,21 @@ export class Tourney {
         if (!gamesByRound.has(p1)) gamesByRound.set(p1, new Map())
         const firstPlayerGames = gamesByRound.get(p1)
 
-        firstPlayerGames.set(p2, series)
+        firstPlayerGames.set(p2, new SeriesData(series))
     }
 
     /**
      * @param {number} round 
      * @param {string[]} playerKeys 
      */
-    getSeries(round, playerKeys) {
+    getSeriesData(round, playerKeys) {
 
-        if (!playerKeys.every(Boolean)) return new Container()
+        if (!playerKeys.every(Boolean)) return new SeriesData()
 
         const keys = [...playerKeys].sort(playerSorter)
         keys.unshift(round)
 
-        return keys.reduce((map, key) => map?.get(key), this.tree) || new Container()
+        return keys.reduce((map, key) => map?.get(key), this.tree) || new SeriesData()
     }
 
     /**

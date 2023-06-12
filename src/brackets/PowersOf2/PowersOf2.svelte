@@ -1,34 +1,33 @@
 <script>
 	/** @typedef {import("../../types").Series} Series*/
 
-	import Node from '../Node.svelte';
-	import Joiner from '../Joiner.svelte';
-	import { tourneyStore } from '../../Amdin/stores';
-	import bundleSeries from './bundleSeries';
+	import Node from './Node.svelte';
+	import Joiner from './Joiner.svelte';
 
-	const { playersTotal, withTop3 } = $tourneyStore.data;
-	const roundsTotal = Math.log(playersTotal) / Math.log(2);
-	const cols = 2 * (roundsTotal - 1);
-	const rows = playersTotal / 4;
+	/** @type {Series[][]} */
+	export let seriesByRound;
 
-	/** @type {Series[][]},  */
-	let seriesByRound;
+	/** @type {{ withTop3: boolean}} */
+	export let extras;
 
-	/** @type {Series[]},  */
-	let finals;
-
+	// reacts to change in seriesByRound
+	let earlyRounds, finals, roundsTotal, playersTotal, cols, rows;
 	$: {
-		({ seriesByRound } = bundleSeries($tourneyStore));
-		finals = seriesByRound.pop(); // finals won't fit general schema
+		earlyRounds = seriesByRound.slice(0, -1);
+		finals = seriesByRound[seriesByRound.length - 1];
+		roundsTotal = seriesByRound.length;
+		playersTotal = 2 ** roundsTotal;
+		cols = 2 * (roundsTotal - 1);
+		rows = playersTotal / 4;
 	}
 </script>
 
 <bracket-32 style:--cols={cols} style:--rows={rows} role="tree">
-	{#each seriesByRound as roundGames, round}
+	{#each earlyRounds as roundGames, round}
 		{@const span = 2 ** round}
 		{@const limit = roundGames.length / 2}
-		{#each roundGames as series, i (i)}
-			{@const leftSide = i < limit}
+		{#each roundGames as series, sIndex (sIndex)}
+			{@const leftSide = sIndex < limit}
 
 			{@const nCol = leftSide ? 2 * round + 1 : -2 * round - 2}
 			{@const nColStyle = `grid-column:${nCol}`}
@@ -41,23 +40,24 @@
 			{#if round > 0}
 				<Joiner {span} style="{jColStyle};{jTransform}" />
 			{/if}
-			<Node {series} style="{nColStyle};{nRowStyle}" on:nodeClick />
+			<Node {series} {round} {sIndex} style="{nColStyle};{nRowStyle}" on:nodeClick />
 		{/each}
 	{/each}
 
 	<!-- place finals by hand -->
-	{#if withTop3}
+	{#if extras.withTop3}
 		<!-- 2 finals in same column -->
 		{@const style = `grid-column:${cols + 1};grid-row: span ${playersTotal / 8}`}
 		<Joiner span={playersTotal / 2} style="transform:rotateY(180deg)" />
-		{#each finals as series}
-			<Node {series} on:nodeClick {style} />
+		{#each finals as series, sIndex}
+			<Node {series} round={roundsTotal - 1} {sIndex} on:nodeClick {style} />
 		{/each}
 		<Joiner span={playersTotal / 2} />
 	{:else}
+		<!-- single final -->
 		{@const style = `grid-column:${cols + 1};grid-row: span ${playersTotal / 4}`}
 		<Joiner span={playersTotal / 2} horisontal />
-		<Node series={finals[0]} on:nodeClick {style} />
+		<Node series={finals[0]} round={roundsTotal - 1} sIndex={0} on:nodeClick {style} />
 		<Joiner span={playersTotal / 2} horisontal />
 	{/if}
 </bracket-32>
