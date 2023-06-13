@@ -10,8 +10,8 @@
 
 	// structure defined in './dataProcessors.js'
 	const cList = [];
-	for (const { challenges } of games) {
-		for (const completedChallenge of challenges?.[name] || []) {
+	for (const { data } of games) {
+		for (const completedChallenge of data.challenges?.[name] || []) {
 			cList.push(completedChallenge);
 		}
 	}
