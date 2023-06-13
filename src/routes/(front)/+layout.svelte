@@ -35,9 +35,6 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Kelly+Slab&display=swap');
 
-	:global(body) {
-		background-color: hsl(38 26% 20%);
-	}
 	:global(a:active:active:active) {
 		color: red;
 	}
@@ -49,6 +46,7 @@
 		display: grid;
 		grid-template-rows: var(--header-height) 1fr;
 		min-height: 100vh;
+		background-color: hsl(38 26% 20%);
 	}
 
 	nav {

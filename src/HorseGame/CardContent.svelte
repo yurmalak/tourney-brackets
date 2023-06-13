@@ -10,7 +10,7 @@
 	/** @type {{ [key:string]: string }}*/
 	export let processedPlayers;
 
-	$: ({ players, score, games, data } = series);
+	$: ({ players, score, games, data, winner } = series);
 </script>
 
 <card-content aria-label="Детали серии" aria-describedby="card-header">
@@ -26,37 +26,45 @@
 
 	<!-- games -->
 	{#each games as game}
-		{@const {
-			towns: [t1, t2],
-			starters: [s1, s2],
-			blue,
-			replay,
-			roulette,
-			challenges
-		} = game.data}
+		{@const { towns, starters, blue, replay, roulette, challenges } = game.data}
 
 		<!-- games -->
 		<article class={blue === null ? undefined : blue === 0 ? 'blueRed' : 'redBlue'}>
-			<!-- 1st player's -->
-			<div class="town-and-starter">
-				<GamePicture name={s1} />
-				<GamePicture name={t1} />
-			</div>
+			{#each players as player, i}
+				<town-and-starter
+					aria-label="Город и стартер, {player}"
+					style:grid-column={i === 0 ? 1 : 5}
+					style:grid-row="1"
+				>
+					<GamePicture name={towns[i]} />
+					<GamePicture name={starters[i]} />
+				</town-and-starter>
+				{#if game.winner === i}
+					<svg
+						class="winner-medal"
+						height="30"
+						width="20.6"
+						style:grid-row="1"
+						style:grid-column={i === 0 ? 2 : 4}
+						style:justify-self={i === 0 ? 'start' : 'end'}
+						style:transform="{i === 0 ? 'rotateY(180deg) ' : ''} translate(85%, -20%) rotate(10deg)"
+					>
+						<title>Победитель - {player}</title>
+						<use href="#medal" />
+					</svg>
+				{/if}
+			{/each}
 
 			<!-- replay link -->
 			{#if replay}
-				<a href={replay}>
-					<svg viewBox="0 0 100 100" height="20" width="30" class="play-icon">
+				<a href={replay} style:grid-column="3" style:grid-row="1">
+					<svg class="play-icon" viewBox="0 0 100 100" height="20" width="30">
 						<polygon points="10,15 10,85 90,50" stroke-width="15" stroke-linejoin="round" />
 					</svg>
 				</a>
-			{:else}<span />{/if}
-
-			<!-- 2nd player's -->
-			<div class="town-and-starter">
-				<GamePicture name={t2} />
-				<GamePicture name={s2} />
-			</div>
+			{:else}
+				<span style:grid-column="3" style:grid-row="1" />
+			{/if}
 
 			<!--  roulette -->
 			<ul aria-label="усложнения">
@@ -137,10 +145,9 @@
 
 	article {
 		display: grid;
-		grid-template-columns: 1fr auto 1fr;
-		position: relative;
-		overflow: hidden;
+		grid-template-columns: auto 1fr auto 1fr auto;
 		align-items: center;
+		position: relative;
 		margin: 4px 0;
 
 		--red: #ef3123;
@@ -151,24 +158,31 @@
 		content: '';
 		position: absolute;
 		height: 100%;
-		width: 8px;
 		top: 0;
-		left: -4px;
 		border-radius: 4px;
 	}
-	article:after {
-		left: unset;
-		right: -4px;
+
+	article:before {
+		left: 0;
+		border-right: 4px solid transparent;
+		border-radius: 0 8px 8px 0;
 	}
+	article:after {
+		right: 0;
+		border-left: 4px solid transparent;
+		border-radius: 8px 0 0 8px;
+	}
+
 	.redBlue:after,
 	.blueRed:before {
-		background-color: var(--blue);
+		border-color: var(--blue);
 	}
 	.blueRed:after,
 	.redBlue:before {
-		background-color: var(--red);
+		border-color: var(--red);
 	}
 
+	/* replay */
 	.play-icon > polygon {
 		--play-color: hsl(28, 40%, 47%);
 		fill: var(--play-color);
@@ -183,7 +197,7 @@
 	}
 
 	ul {
-		grid-column: span 3;
+		grid-column: span 5;
 		padding-inline-start: 25px;
 		margin: 5px 0;
 	}
@@ -195,15 +209,18 @@
 		list-style-image: url(star.svg);
 	}
 
-	:global(.town-and-starter img) {
+	:global(town-and-starter img) {
 		margin: 3px;
 	}
 
-	.town-and-starter {
+	town-and-starter {
 		display: inline-flex;
 		margin: 0 5px;
+		flex-direction: row-reverse;
+		justify-self: start;
 	}
-	.town-and-starter:nth-of-type(2) {
+	town-and-starter:nth-of-type(2) {
+		flex-direction: row;
 		justify-self: end;
 	}
 </style>

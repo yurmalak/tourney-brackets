@@ -59,25 +59,10 @@
 			{/if}
 		{/if}
 	{/each}
-
-	<!-- defined game date icon -->
-	{#if data.start}
-		<use class="clock" href="#clock">
-			<title>{data.start}</title>
-		</use>
-	{/if}
 </svg>
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=PT+Sans+Narrow&display=swap');
-
-	.clock {
-		scale: 0.23;
-		translate: 40px -35px;
-		transition: 0.3s;
-		transform-origin: center;
-	}
-
 	svg {
 		flex-grow: 1;
 		overflow: visible;
